@@ -1,12 +1,12 @@
 import React from "react";
-import SideBar from "../components/sidebar";
 import TopBar from "../components/topbar";
+import SideBarTeacher from "../components/sidebar_teacher";
 
-export default function MainLayout({ children }) {
+export default function TeacherLayout({ children }) {
   return (
     <div className="flex min-h-screen bg-gray-100">
        {/* Sidebar  */}
-      <SideBar />
+      <SideBarTeacher />
 
       {/* Main Section */}
       <div className="flex flex-col flex-1">

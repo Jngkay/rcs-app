@@ -1,12 +1,12 @@
 import React from "react";
-import SideBar from "../components/sidebar";
+import SideBarAdmin from "../components/sidebar_admin";
 import TopBar from "../components/topbar";
 
-export default function MainLayout({ children }) {
+export default function AdminLayout({ children }) {
   return (
     <div className="flex min-h-screen bg-gray-100">
        {/* Sidebar  */}
-      <SideBar />
+      <SideBarAdmin />
 
       {/* Main Section */}
       <div className="flex flex-col flex-1">
