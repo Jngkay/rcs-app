@@ -30,18 +30,15 @@ function LoginForm() {
       const userSnap = await getDoc(userRef);
 
       let firstName = "";
-      let lastName = ""
+      let lastName = "";
+      let gradeLevel = "";
+      let role = "";
       if (userSnap.exists()) {
         firstName = userSnap.data().first_name || "";
         lastName = userSnap.data().last_name || "";
+        gradeLevel = userSnap.data().grade_level || "";      
+        role = userSnap.data().role || "";    
       }
-
-      // console.log(userRef);
-      // console.log(userSnap);
-      // console.log(firstName);
-      // console.log(lastName);
-
-     
 
 
 
@@ -49,10 +46,17 @@ function LoginForm() {
     localStorage.setItem("uuid", uuid);
     localStorage.setItem("firstName", firstName);
     localStorage.setItem("lastName", lastName);
+    localStorage.setItem("grade_level", gradeLevel);
+    localStorage.setItem("role", role);
     
-      // localStorage.setItem("profilePic", profilePicRef.fullPath);
-
-      navigate("../pages/dashboard");
+      
+      if(role === "admin"){
+        navigate("../pages/admin/account_management");
+      } else if(role === "teacher"){
+        navigate("../pages/teacher/reading_lists");
+      } else if(role === "student"){
+        navigate("../pages/student/dashboard");
+      }
       setError("");
     } catch (err) {
       setError("Incorrect login credentials.");
@@ -220,6 +224,7 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
   const navigate = useNavigate();
   const [first_name, setFirstName] = useState("");
   const [last_name, setLastName] = useState("");
+  const [grade_level, setGradeLevel] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -263,6 +268,7 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
       first_name,
       last_name,
       role: "student",
+      grade_level,
       email,
       classCode,
       createdAt: new Date(),
@@ -307,6 +313,18 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
             value={last_name}
             onChange={(e) => setLastName(e.target.value)}
             placeholder="Enter your last name"
+            required
+          />
+        </div>
+
+        <div className="mb-4 text-left">
+          <label className="block mb-1 text-gray-700 text-sm">Grade Level</label>
+          <input
+            type="text"
+            className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={grade_level}
+            onChange={(e) => setGradeLevel(e.target.value)}
+            placeholder="Enter your grade level"
             required
           />
         </div>
