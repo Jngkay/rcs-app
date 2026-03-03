@@ -3,8 +3,13 @@ import AdminLayout from "../../layout/adminLayout";
 import {
   getFirestore,
   collection,
-  getDocs
+  addDoc,
+  updateDoc,
+  doc,
+  getDocs,
+  deleteDoc
 } from "firebase/firestore";
+import CompreTestModal from "../../components/compre_test_modal";
 
 export default function ComprehensionTest() {
   const db = getFirestore();
@@ -12,6 +17,8 @@ export default function ComprehensionTest() {
   const [grade, setGrade] = useState("grade_4");
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedStory, setSelectedStory] = useState(null);
 
   const fetchStories = async () => {
     setLoading(true);
@@ -57,6 +64,45 @@ export default function ComprehensionTest() {
     setLoading(false);
   };
 
+  const handleDeleteStory = async (storyId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this story?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      // 1️⃣ Delete all questions subcollection
+      const questionsRef = collection(
+        db,
+        "gst_collection",
+        grade,
+        "stories",
+        storyId,
+        "questions"
+      );
+
+      const questionSnapshot = await getDocs(questionsRef);
+
+      for (const qDoc of questionSnapshot.docs) {
+        await deleteDoc(qDoc.ref);
+      }
+
+      // 2️⃣ Delete story document
+      await deleteDoc(
+        doc(db, "gst_collection", grade, "stories", storyId)
+      );
+
+      alert("Story deleted successfully!");
+
+      // 3️⃣ Refresh list
+      fetchStories();
+
+    } catch (error) {
+      console.error("Error deleting story:", error);
+    }
+  };
+
   useEffect(() => {
     fetchStories();
   }, [grade]);
@@ -74,22 +120,46 @@ export default function ComprehensionTest() {
       </div>
 
       {/* Grade Selector */}
-      <div className="mb-4">
-        <label className="font-semibold text-black">Select Grade Level:</label>
-        <select
-          className="border p-2 ml-3 rounded"
-          value={grade}
-          onChange={(e) => setGrade(e.target.value)}
-        >
-          <option value="grade_4">Grade 4</option>
-          <option value="grade_5">Grade 5</option>
-          <option value="grade_6">Grade 6</option>
-        </select>
+      <div class="flex justify-between mb-6">
+        <div className="mb-4">
+            <label className="font-semibold text-black">Select Grade Level:</label>
+            <select
+              className="border p-2 ml-3 rounded"
+              value={grade}
+              onChange={(e) => setGrade(e.target.value)}
+            >
+              <option value="grade_4">Grade 4</option>
+              <option value="grade_5">Grade 5</option>
+              <option value="grade_6">Grade 6</option>
+            </select>
+          </div>
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Add Story
+          </button>
       </div>
 
-      <button>
-        Add Story
-      </button>
+      
+
+      
+
+      {showModal && (
+        <CompreTestModal
+          grade={grade}
+          storyData={selectedStory}   // null if adding
+          onClose={() => {
+            setShowModal(false);
+            setSelectedStory(null);
+          }}
+          onSuccess={() => {
+            fetchStories();
+            setShowModal(false);
+            setSelectedStory(null);
+          }}
+        />
+      )}
 
       {/* Content Section */}
       {loading && <p className="text-black">Loading comprehension tests...</p>}
@@ -100,12 +170,30 @@ export default function ComprehensionTest() {
 
       <div className="space-y-6">
         {stories.map((story) => (
-          <div
-            key={story.id}
-            className="p-5 border rounded-lg shadow-sm bg-white text-black"
-          >
-            <h2 className="text-xl font-bold mb-2">{story.title}</h2>
+          <div key={story.id} className="p-5 border rounded-lg shadow-sm bg-white text-black">
 
+            <div class="flex justify-between mb-6">
+              <h2 className="text-xl font-bold mb-2">{story.title}</h2>
+
+              <div>
+                <button
+                  onClick={() => {
+                    setSelectedStory(story);
+                    setShowModal(true);
+                  }}
+                  className="bg-yellow-400 text-white px-4 py-2 rounded mr-4">
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => handleDeleteStory(story.id)}
+                  className="bg-red-600 text-white px-4 py-2 rounded">
+                  Delete
+                </button>             
+              
+              </div>
+                
+            </div>
             <p className="text-gray-700 mb-3">
               {story.content}
             </p>
