@@ -59,6 +59,21 @@ export default function CompreTestModal({ grade, storyData, onClose, onSuccess }
     setQuestions(updated);
   };
 
+  const deleteQuestion = (qIndex) => {
+    const confirmDelete = window.confirm("Delete this question?");
+    if (!confirmDelete) return;
+
+    const updated = questions.filter((_, index) => index !== qIndex);
+
+    // 🔥 Recalculate order numbers
+    const reordered = updated.map((q, index) => ({
+      ...q,
+      order: index + 1,
+    }));
+
+    setQuestions(reordered);
+  };
+
   const handleSave = async () => {
     try {
         if (storyData) {
@@ -186,7 +201,19 @@ return (
           <h3 className="font-semibold mt-4">Questions</h3>
 
           {questions.map((q, qIndex) => (
-            <div key={qIndex} className="border p-4 mt-3 rounded">
+            <div key={qIndex} className="border p-4 mt-3 rounded relative">
+              <div className="flex justify-between items-center mb-2">
+                <p className="font-semibold">
+                  Question {q.order}
+                </p>
+
+                <button
+                  onClick={() => deleteQuestion(qIndex)}
+                  className="bg-red-500 text-white px-2 py-1 rounded text-sm"
+                >
+                  Delete
+                </button>
+              </div>
               <input
                 type="text"
                 placeholder="Question Text"
