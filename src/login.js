@@ -139,12 +139,6 @@ function LoginForm() {
             "Login"
           )}
         </button>
-
-        {/* <button
-          type="submit"
-          className="w-full py-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 text-white font-medium shadow hover:opacity-90 transition">
-          Login
-        </button> */}
       </form>
     </>
   );
@@ -251,17 +245,6 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
         password
       );
       const user = userCredential.user;
-
-      // Save user in Firestore with classCode
-      // await addDoc(collection(db, "users"), {
-      //   uid: user.uid,
-      //   first_name,
-      //   last_name,
-      //   role: "student",
-      //   email,
-      //   classCode,
-      //   createdAt: new Date(),
-      // });
 
       await setDoc(doc(db, "users", user.uid), {
       uid: user.uid,
