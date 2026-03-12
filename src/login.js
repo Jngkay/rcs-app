@@ -222,6 +222,7 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
   const [error, setError] = useState("");
 
   const handleRegister = async (e) => {
@@ -254,6 +255,13 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
       grade_level,
       email,
       classCode,
+      
+      // Assessment fields
+      gst_score: 0,
+      gst_assessment_attempted: false,
+
+      individualized_score: 0,
+      individualized_assessment_attempted: false,
       createdAt: new Date(),
       });
 
@@ -371,6 +379,170 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
 }
 
 
+
+
+// ----------------- Register Teacher Form -----------------
+function RegisterTeacherForm({ onSwitchToLogin }) {
+  const navigate = useNavigate();
+
+  const [first_name, setFirstName] = useState("");
+  const [last_name, setLastName] = useState("");
+  const [school, setSchool] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleRegisterTeacher = async (e) => {
+    e.preventDefault();
+
+    if (!email || !password || !confirmPassword) {
+      setError("All fields are required.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      const user = userCredential.user;
+
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        first_name,
+        last_name,
+        school,
+        role: "teacher",
+        email,
+        createdAt: new Date(),
+      });
+
+      setError("");
+      onSwitchToLogin();
+
+    } catch (err) {
+      setError(err.message);
+      console.error("Teacher registration error:", err);
+    }
+  };
+
+  return (
+    <>
+      <p className="text-gray-500 mb-6">Register as a teacher:</p>
+
+      {error && (
+        <div className="bg-red-100 text-red-600 p-2 rounded mb-4 text-sm">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleRegisterTeacher}>
+
+        <div className="mb-4 text-left">
+          <label className="block mb-1 text-gray-700 text-sm">First Name</label>
+          <input
+            type="text"
+            className="w-full border border-gray-300 rounded-full px-4 py-2 focus:ring-2 focus:ring-blue-400"
+            value={first_name}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="Enter your first name"
+            required
+          />
+        </div>
+
+        <div className="mb-4 text-left">
+          <label className="block mb-1 text-gray-700 text-sm">Last Name</label>
+          <input
+            type="text"
+            className="w-full border border-gray-300 rounded-full px-4 py-2 focus:ring-2 focus:ring-blue-400"
+            value={last_name}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Enter your last name"
+            required
+          />
+        </div>
+
+        <div className="mb-4 text-left">
+          <label className="block mb-1 text-gray-700 text-sm">School</label>
+          <input
+            type="text"
+            className="w-full border border-gray-300 rounded-full px-4 py-2 focus:ring-2 focus:ring-blue-400"
+            value={school}
+            onChange={(e) => setSchool(e.target.value)}
+            placeholder="Enter your school"
+            required
+          />
+        </div>
+
+        <div className="mb-4 text-left">
+          <label className="block mb-1 text-gray-700 text-sm">Email</label>
+          <input
+            type="email"
+            className="w-full border border-gray-300 rounded-full px-4 py-2 focus:ring-2 focus:ring-blue-400"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your Email"
+            required
+          />
+        </div>
+
+        <div className="mb-4 text-left">
+          <label className="block mb-1 text-gray-700 text-sm">Password</label>
+          <input
+            type="password"
+            className="w-full border border-gray-300 rounded-full px-4 py-2 focus:ring-2 focus:ring-blue-400"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your Password"
+            required
+          />
+        </div>
+
+        <div className="mb-6 text-left">
+          <label className="block mb-1 text-gray-700 text-sm">
+            Confirm Password
+          </label>
+          <input
+            type="password"
+            className="w-full border border-gray-300 rounded-full px-4 py-2 focus:ring-2 focus:ring-blue-400"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm your Password"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full py-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 text-white font-medium shadow hover:opacity-90"
+        >
+          Register Teacher
+        </button>
+      </form>
+
+      <div className="mt-4 text-sm">
+        <span className="text-gray-600">Already have an account? </span>
+        <a
+          href="#"
+          onClick={onSwitchToLogin}
+          className="text-blue-500 hover:underline"
+        >
+          Log-in instead
+        </a>
+      </div>
+    </>
+  );
+}
+
+
 // ----------------- Main App -----------------
 export default function App() {
   const [view, setView] = useState("login");
@@ -387,7 +559,7 @@ export default function App() {
             <div className="flex justify-center space-x-6">
               {/* Teacher */}
               <div
-                onClick={() => setView("login")} // for now
+                onClick={() => setView("registerTeacher")} // for now
                 className="flex flex-col items-center p-6 bg-purple-100 rounded-2xl shadow-md cursor-pointer hover:bg-purple-200 transition-colors"
               >
                 <span className="text-6xl mb-4">👩‍🏫</span>
@@ -422,6 +594,12 @@ export default function App() {
             onSwitchToLogin={() => setView("login")}
           />
         );
+      case "registerTeacher":
+      return (
+        <RegisterTeacherForm
+          onSwitchToLogin={() => setView("login")}
+        />
+      );
       default:
         return <LoginForm />;
     }
