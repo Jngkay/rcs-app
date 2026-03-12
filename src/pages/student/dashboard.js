@@ -1,242 +1,7 @@
-// import React, { useState, useEffect } from "react";
-// import MainLayout from "../../layout/mainLayout";
-// import { getStorage, ref, getDownloadURL } from "firebase/storage";
-// import { getFirestore, doc, getDoc, collection, getDocs } from "firebase/firestore";
-// import { getAuth } from "firebase/auth";
-// import { db } from "../../firebase";
-
-// export default function Dashboard() {
-//   const [step, setStep] = useState("welcome");
-//   const [loading, setLoading] = useState(true);
-//   const [testFlow, setTestFlow] = useState([]);
-//   const [currentIndex, setCurrentIndex] = useState(0);
-
-//   const [firstName, setFirstName] = useState("");
-//   const [lastName, setLastName] = useState("");
-//   const [profilePic, setProfilePic] = useState("");
-
-//   const auth = getAuth();
-
-//   // ===============================
-//   // Load Profile Info
-//   // ===============================
-//   useEffect(() => {
-//     const f_name = localStorage.getItem("firstName");
-//     const l_name = localStorage.getItem("lastName");
-//     const uid = localStorage.getItem("uuid");
-
-//     if (f_name) setFirstName(f_name);
-//     if (l_name) setLastName(l_name);
-
-//     if (uid) {
-//       const storage = getStorage();
-//       const profilePicRef = ref(storage, `userProfile/${uid}.jpg`);
-//       getDownloadURL(profilePicRef)
-//         .then((url) => setProfilePic(url))
-//         .catch(() => {});
-//     }
-//   }, []);
-
-//   // ===============================
-//   // Fetch Stories + Questions
-//   // ===============================
-//   useEffect(() => {
-//     const fetchTest = async () => {
-//       try {
-//         const user = auth.currentUser;
-//         if (!user) return;
-
-//         // Get user's grade level
-//         const userRef = doc(db, "users", user.uid);
-//         const userSnap = await getDoc(userRef);
-//         if (!userSnap.exists()) return;
-
-//         const grade = userSnap.data().grade_level;
-
-//         // Fetch all stories for grade
-//         const storiesRef = collection(db, "gst_collection", `grade_${grade}`, "stories");
-//         const storiesSnap = await getDocs(storiesRef);
-
-//         let flow = [];
-
-//         for (const storyDoc of storiesSnap.docs) {
-//           const storyData = storyDoc.data();
-
-//           // 🔹 Push Title + Content Card
-//           flow.push({
-//             type: "story",
-//             storyId: storyDoc.id,
-//             title: storyData.title,
-//             content: storyData.content,
-//           });
-
-//           // 🔹 Fetch Questions
-//           const qRef = collection(
-//             db,
-//             "gst_collection",
-//             `grade_${grade}`,
-//             "stories",
-//             storyDoc.id,
-//             "questions"
-//           );
-
-//           const qSnap = await getDocs(qRef);
-
-//           const qList = qSnap.docs.map((doc) => ({
-//             id: doc.id,
-//             ...doc.data(),
-//           }));
-
-//           qList.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-//           qList.forEach((q) => {
-//             flow.push({
-//               type: "question",
-//               storyId: storyDoc.id,
-//               question: q,
-//             });
-//           });
-//         }
-
-//         setTestFlow(flow);
-//       } catch (error) {
-//         console.error("Error loading test:", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchTest();
-//   }, []);
-
-//   // ===============================
-//   // Navigation
-//   // ===============================
-//   const handleNext = () => {
-//     if (currentIndex < testFlow.length - 1) {
-//       setCurrentIndex(currentIndex + 1);
-//     } else {
-//       setStep("result");
-//     }
-//   };
-
-//   if (loading) {
-//     return (
-//       <MainLayout>
-//         <div className="flex justify-center items-center h-screen">
-//           <p className="text-2xl font-semibold">Loading test...</p>
-//         </div>
-//       </MainLayout>
-//     );
-//   }
-
-//   return (
-//     <MainLayout>
-
-//       {/* WELCOME */}
-//       {step === "welcome" && (
-//         <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between">
-//           <div>
-//             <h1 className="text-5xl font-bold">
-//               Welcome to HenyoReads, {firstName}!
-//             </h1>
-//             <p className="mt-10 text-xl">
-//               Start your Reading Success Journey here
-//             </p>
-//             <button
-//               onClick={() => setStep("directions")}
-//               className="px-12 py-2 mt-14 mb-10 bg-yellow-500 text-2xl rounded-full font-semibold hover:bg-yellow-600 transition"
-//             >
-//               Take the GST Test
-//             </button>
-//           </div>
-//         </div>
-//       )}
-
-//       {step === "directions" && ( 
-//         <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between"> 
-//           <div> 
-//             <h1 className="text-5xl font-bold">Group Screening Test</h1> 
-//             <p className="mt-10 text-xl">Directions:</p> 
-//             <p className="mt-2 text-lg"> Answer the following questions carefully. Click NEXT to proceed to the next question. </p> 
-//             <button onClick={() => setStep("quiz")} 
-//             className="px-16 py-2 mt-64 mb-10 bg-yellow-500 text-xl rounded-full font-semibold hover:bg-yellow-600 transition" > 
-//             START QUIZ </button> 
-//           </div> 
-//           <img src="/assets/idea1.png" alt="idea" className="w-64 mr-8" /> 
-//         </div> )}
-
-//       {/* QUIZ FLOW */}
-//       {step === "quiz" && testFlow.length > 0 && (
-//         <div className="bg-white text-black p-8 rounded-xl shadow-2xl flex flex-col min-h-screen">
-//           <div className="flex-1">
-
-//             {/* STORY CARD */}
-//             {testFlow[currentIndex].type === "story" && (
-//               <>
-//                 <h1 className="text-4xl font-bold mb-6">
-//                   {testFlow[currentIndex].title}
-//                 </h1>
-//                 <p className="text-2xl leading-relaxed">
-//                   {testFlow[currentIndex].content}
-//                 </p>
-//               </>
-//             )}
-
-//             {/* QUESTION CARD */}
-//             {testFlow[currentIndex].type === "question" && (
-//               <>
-//                 {/* <h2 className="text-2xl font-semibold">
-//                   Question {testFlow[currentIndex].question.order}
-//                 </h2> */}
-
-//                 <p className="mt-6 text-2xl">
-//                   {testFlow[currentIndex].question.question_text}
-//                 </p>
-
-//                 <ul className="mt-6 space-y-3">
-//                   {testFlow[currentIndex].question.choices?.map((choice, idx) => (
-//                     <li
-//                       key={idx}
-//                       className="border p-3 rounded-md cursor-pointer hover:bg-blue-100"
-//                     >
-//                       {choice.text}
-//                     </li>
-//                   ))}
-//                 </ul>
-//               </>
-//             )}
-
-//           </div>
-
-//           <div className="flex justify-between items-center mt-10">
-//             <button
-//               onClick={handleNext}
-//               className="px-16 py-2 text-white bg-blue-500 text-xl rounded-full font-semibold hover:bg-blue-600 transition"
-//             >
-//               {currentIndex < testFlow.length - 1 ? "NEXT" : "SUBMIT"}
-//             </button>
-//           </div>
-//         </div>
-//       )}
-
-//       {/* RESULT */}
-//       {step === "result" && (
-//         <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md">
-//           <h1 className="text-5xl font-bold">
-//             Test Completed!
-//           </h1>
-//         </div>
-//       )}
-
-//     </MainLayout>
-//   );
-// }
-
 import React, { useState, useEffect } from "react";
 import MainLayout from "../../layout/mainLayout";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
-import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "../../firebase";
 
@@ -284,6 +49,16 @@ export default function Dashboard() {
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) return;
+
+        const userData = userSnap.data();
+
+        // 🚫 Block retake of GST
+        if (userData.gst_assessment_attempted === true) {
+          setScore(userData.gst_score || 0); // show previous score
+          setStep("result");
+          setLoading(false);
+          return;
+        }
 
         const grade = userSnap.data().grade_level;
 
@@ -369,7 +144,7 @@ export default function Dashboard() {
   // ===============================
   // Calculate Score
   // ===============================
-  const calculateScore = () => {
+ const calculateScore = async () => {
     let correctCount = 0;
 
     testFlow.forEach((item) => {
@@ -377,7 +152,6 @@ export default function Dashboard() {
         const qId = item.question.id;
         const selectedIndex = answers[qId];
 
-        // Find correct answer index
         const correctIndex = item.question.choices.findIndex(
           (choice) => choice.is_correct === true
         );
@@ -389,18 +163,34 @@ export default function Dashboard() {
     });
 
     setScore(correctCount);
-  };
 
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const userRef = doc(db, "users", user.uid);
+
+      await updateDoc(userRef, {
+        gst_score: correctCount,
+        gst_assessment_attempted: true
+      });
+
+      console.log("GST score saved:", correctCount);
+
+    } catch (error) {
+      console.error("Error saving GST score:", error);
+    }
+  };
   // ===============================
   // Navigation
   // ===============================
-  const handleNext = () => {
+  const handleNext = async () => {
     if (isQuestion && !isAnswered) return;
 
     if (currentIndex < testFlow.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      calculateScore();
+      await calculateScore();
       setStep("result");
     }
   };
@@ -414,6 +204,8 @@ export default function Dashboard() {
       </MainLayout>
     );
   }
+
+  
 
   return (
     <MainLayout>
@@ -450,7 +242,7 @@ export default function Dashboard() {
                 <h1 className="text-4xl font-bold mb-6">
                   {currentCard.title}
                 </h1>
-                <p className="text-2xl whitespace-pre-line leading-relaxed">
+                <p className="text-2xl leading-relaxed">
                   {currentCard.content}
                 </p>
               </>
