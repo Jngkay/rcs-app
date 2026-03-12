@@ -1,74 +1,148 @@
 // import React, { useState, useEffect } from "react";
-// import MainLayout from "../layout/mainLayout";
+// import MainLayout from "../../layout/mainLayout";
 // import { getStorage, ref, getDownloadURL } from "firebase/storage";
+// import { getFirestore, doc, getDoc, collection, getDocs } from "firebase/firestore";
+// import { getAuth } from "firebase/auth";
+// import { db } from "../../firebase";
 
 // export default function Dashboard() {
-//   const [step, setStep] = useState("welcome"); 
-//   const [currentQ, setCurrentQ] = useState(0);
+//   const [step, setStep] = useState("welcome");
+//   const [loading, setLoading] = useState(true);
+//   const [testFlow, setTestFlow] = useState([]);
+//   const [currentIndex, setCurrentIndex] = useState(0);
 
-//   // Sample 5 questions
-//   const questions = [
-//     {
-//       title: "Question 1",
-//       text: "What is the capital of the Philippines?",
-//     },
-//     {
-//       title: "Question 2",
-//       text: "Which planet is known as the Red Planet?",
-//     },
-//     {
-//       title: "Question 3",
-//       text: "Who wrote the novel 'Noli Me Tangere'?",
-//     },
-//     {
-//       title: "Question 4",
-//       text: "What is the largest ocean on Earth?",
-//     },
-//     {
-//       title: "Question 5",
-//       text: "In what year did the first man land on the moon?",
-//     },
-//   ];
+//   const [firstName, setFirstName] = useState("");
+//   const [lastName, setLastName] = useState("");
+//   const [profilePic, setProfilePic] = useState("");
 
+//   const auth = getAuth();
+
+//   // ===============================
+//   // Load Profile Info
+//   // ===============================
+//   useEffect(() => {
+//     const f_name = localStorage.getItem("firstName");
+//     const l_name = localStorage.getItem("lastName");
+//     const uid = localStorage.getItem("uuid");
+
+//     if (f_name) setFirstName(f_name);
+//     if (l_name) setLastName(l_name);
+
+//     if (uid) {
+//       const storage = getStorage();
+//       const profilePicRef = ref(storage, `userProfile/${uid}.jpg`);
+//       getDownloadURL(profilePicRef)
+//         .then((url) => setProfilePic(url))
+//         .catch(() => {});
+//     }
+//   }, []);
+
+//   // ===============================
+//   // Fetch Stories + Questions
+//   // ===============================
+//   useEffect(() => {
+//     const fetchTest = async () => {
+//       try {
+//         const user = auth.currentUser;
+//         if (!user) return;
+
+//         // Get user's grade level
+//         const userRef = doc(db, "users", user.uid);
+//         const userSnap = await getDoc(userRef);
+//         if (!userSnap.exists()) return;
+
+//         const grade = userSnap.data().grade_level;
+
+//         // Fetch all stories for grade
+//         const storiesRef = collection(db, "gst_collection", `grade_${grade}`, "stories");
+//         const storiesSnap = await getDocs(storiesRef);
+
+//         let flow = [];
+
+//         for (const storyDoc of storiesSnap.docs) {
+//           const storyData = storyDoc.data();
+
+//           // 🔹 Push Title + Content Card
+//           flow.push({
+//             type: "story",
+//             storyId: storyDoc.id,
+//             title: storyData.title,
+//             content: storyData.content,
+//           });
+
+//           // 🔹 Fetch Questions
+//           const qRef = collection(
+//             db,
+//             "gst_collection",
+//             `grade_${grade}`,
+//             "stories",
+//             storyDoc.id,
+//             "questions"
+//           );
+
+//           const qSnap = await getDocs(qRef);
+
+//           const qList = qSnap.docs.map((doc) => ({
+//             id: doc.id,
+//             ...doc.data(),
+//           }));
+
+//           qList.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+//           qList.forEach((q) => {
+//             flow.push({
+//               type: "question",
+//               storyId: storyDoc.id,
+//               question: q,
+//             });
+//           });
+//         }
+
+//         setTestFlow(flow);
+//       } catch (error) {
+//         console.error("Error loading test:", error);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchTest();
+//   }, []);
+
+//   // ===============================
+//   // Navigation
+//   // ===============================
 //   const handleNext = () => {
-//     if (currentQ < questions.length - 1) {
-//       setCurrentQ(currentQ + 1);
-
+//     if (currentIndex < testFlow.length - 1) {
+//       setCurrentIndex(currentIndex + 1);
 //     } else {
-//       // 
-//       setStep("result"); // go back or redirect
+//       setStep("result");
 //     }
 //   };
 
-//     const [firstName, setFirstName] = useState("");
-//     const [lastName, setLastName] = useState("");
-//     const [profilePic, setProfilePic] = useState("");
-  
-//     useEffect(() => {
-//       const f_name = localStorage.getItem("firstName");
-//       const l_name = localStorage.getItem("lastName");
-//       const uid = localStorage.getItem("uuid"); // ✅ make sure you save this at login
-  
-//       if (f_name) setFirstName(f_name);
-//       if (l_name) setLastName(l_name);
-  
-//       if (uid) {
-//         const storage = getStorage();
-//         const profilePicRef = ref(storage, `userProfile/${uid}.jpg`);
-//         getDownloadURL(profilePicRef)
-//           .then((url) => setProfilePic(url))
-//           .catch((err) => console.error("Error fetching profile pic:", err));
-//       }
-//     }, []);
-  
+//   if (loading) {
+//     return (
+//       <MainLayout>
+//         <div className="flex justify-center items-center h-screen">
+//           <p className="text-2xl font-semibold">Loading test...</p>
+//         </div>
+//       </MainLayout>
+//     );
+//   }
 
 //   return (
 //     <MainLayout>
+
+//       {/* WELCOME */}
 //       {step === "welcome" && (
 //         <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between">
 //           <div>
-//             <h1 className="text-5xl font-bold">Welcome to HenyoReads, Abby!</h1>
-//             <p className="mt-10 text-xl">Start your Reading Success Journey here</p>
+//             <h1 className="text-5xl font-bold">
+//               Welcome to HenyoReads, {firstName}!
+//             </h1>
+//             <p className="mt-10 text-xl">
+//               Start your Reading Success Journey here
+//             </p>
 //             <button
 //               onClick={() => setStep("directions")}
 //               className="px-12 py-2 mt-14 mb-10 bg-yellow-500 text-2xl rounded-full font-semibold hover:bg-yellow-600 transition"
@@ -76,309 +150,257 @@
 //               Take the GST Test
 //             </button>
 //           </div>
-//           <img src="/assets/books1.png" alt="books" className="w-48 mr-8" />
 //         </div>
 //       )}
 
-//       {step === "directions" && (
-//         <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between">
-//           <div>
-//             <h1 className="text-5xl font-bold">Group Screening Test</h1>
-//             <p className="mt-10 text-xl">Directions:</p>
-//             <p className="mt-2 text-lg">
-//               Answer the following questions carefully. Click NEXT to proceed to the next question.
-//             </p>
-//             <button
-//               onClick={() => setStep("quiz")}
-//               className="px-16 py-2 mt-64 mb-10 bg-yellow-500 text-xl rounded-full font-semibold hover:bg-yellow-600 transition"
-//             >
-//               START QUIZ
-//             </button>
-//           </div>
-//           <img src="/assets/idea1.png" alt="idea" className="w-64 mr-8" />
-//         </div>
-//       )}
+//       {step === "directions" && ( 
+//         <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between"> 
+//           <div> 
+//             <h1 className="text-5xl font-bold">Group Screening Test</h1> 
+//             <p className="mt-10 text-xl">Directions:</p> 
+//             <p className="mt-2 text-lg"> Answer the following questions carefully. Click NEXT to proceed to the next question. </p> 
+//             <button onClick={() => setStep("quiz")} 
+//             className="px-16 py-2 mt-64 mb-10 bg-yellow-500 text-xl rounded-full font-semibold hover:bg-yellow-600 transition" > 
+//             START QUIZ </button> 
+//           </div> 
+//           <img src="/assets/idea1.png" alt="idea" className="w-64 mr-8" /> 
+//         </div> )}
 
-//       {step === "quiz" && (
-//         <div className="bg-white text-black p-6 rounded-xl shadow-2xl flex flex-col min-h-screen">
+//       {/* QUIZ FLOW */}
+//       {step === "quiz" && testFlow.length > 0 && (
+//         <div className="bg-white text-black p-8 rounded-xl shadow-2xl flex flex-col min-h-screen">
 //           <div className="flex-1">
-//             <h1 className="text-5xl font-bold">{questions[currentQ].title}</h1>
-//             <p className="mt-10 text-xl">{questions[currentQ].text}</p>
+
+//             {/* STORY CARD */}
+//             {testFlow[currentIndex].type === "story" && (
+//               <>
+//                 <h1 className="text-4xl font-bold mb-6">
+//                   {testFlow[currentIndex].title}
+//                 </h1>
+//                 <p className="text-2xl leading-relaxed">
+//                   {testFlow[currentIndex].content}
+//                 </p>
+//               </>
+//             )}
+
+//             {/* QUESTION CARD */}
+//             {testFlow[currentIndex].type === "question" && (
+//               <>
+//                 {/* <h2 className="text-2xl font-semibold">
+//                   Question {testFlow[currentIndex].question.order}
+//                 </h2> */}
+
+//                 <p className="mt-6 text-2xl">
+//                   {testFlow[currentIndex].question.question_text}
+//                 </p>
+
+//                 <ul className="mt-6 space-y-3">
+//                   {testFlow[currentIndex].question.choices?.map((choice, idx) => (
+//                     <li
+//                       key={idx}
+//                       className="border p-3 rounded-md cursor-pointer hover:bg-blue-100"
+//                     >
+//                       {choice.text}
+//                     </li>
+//                   ))}
+//                 </ul>
+//               </>
+//             )}
+
 //           </div>
 
-//           <div className="flex justify-end">
+//           <div className="flex justify-between items-center mt-10">
 //             <button
 //               onClick={handleNext}
-//               className="px-16 py-2 shadow-xl mt-10 mb-10 mr-8 text-white bg-blue-500 text-xl rounded-full font-semibold hover:bg-blue-600 transition"
+//               className="px-16 py-2 text-white bg-blue-500 text-xl rounded-full font-semibold hover:bg-blue-600 transition"
 //             >
-//               {currentQ < questions.length - 1 ? "NEXT" : "SUBMIT"}
+//               {currentIndex < testFlow.length - 1 ? "NEXT" : "SUBMIT"}
 //             </button>
 //           </div>
 //         </div>
 //       )}
 
+//       {/* RESULT */}
 //       {step === "result" && (
-//         <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between">
-//           <div>
-//             <h1 className="text-5xl font-bold">Group Screening Test Score</h1>
-//             <p className="text-3xl mt-8">Your GST Score is: <span className="text-5xl font-bold">10</span> </p>
-            
-//             <h1 className="text-3xl font-bold mt-4">I want to learn how you learn best, so we’ll do a special activity together. 
-//             It’s not a test—it’s just to help you get even better. </h1>
-
-//              <button onClick={() => setStep("individualizedAssessment")}
-//                   className="px-16 py-2 shadow-xl mt-14 mb-10 mr-8 text-blue-600 bg-white text-xl rounded-full font-semibold hover:text-white hover:bg-blue-400 transition">Take Individualized Assessment</button>
-//           </div>
+//         <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md">
+//           <h1 className="text-5xl font-bold">
+//             Test Completed!
+//           </h1>
 //         </div>
 //       )}
 
-//       {step === "individualizedAssessment" && (
-//         <div className="bg-white text-black p-6 rounded-xl shadow-md">
-//           <div>
-//             <h1 className="text-5xl font-bold">Read Aloud and Record</h1>
-//             <p className="text-2xl mt-8">Take a moment to read the passage aloud.
-//                <br></br>
-//                 Don’t worry about being perfect—just focus on expressing it in your own way. 
-//                 <br></br>
-//                 You've got this!</p>
-
-//                 <div className="flex justify-end">
-//                   <button
-//                     onClick={() => setStep("individualizedAssessmentInstructions")}
-//                     className="px-16 py-2 shadow-xl mt-10 mb-10 mr-8 text-gray-600 border-2 border-blue-400 bg-white text-xl rounded-full font-semibold transition hover:border-4 hover:bg-blue-400 hover:text-white">
-//                       View Instructions
-//                     </button>
-
-//                     <button onClick=""
-//                   className="px-16 py-2 shadow-xl mt-10 mb-10 mr-8 text-white bg-blue-500 text-xl rounded-full font-semibold hover:bg-blue-600 transition">Start Recording</button>
-//                 </div>
-//           </div>
-
-        
-//         </div>
-//       )}
-
-//       {step === "individualizedAssessmentInstructions" && (
-//         <div className="bg-white text-black rounded-xl shadow-md">
-//           <div className="p-8">
-//               <div className="text-center mt-4 w-lg">
-//               <h1 className="text-4xl font-bold">How It Works</h1>
-//               <p>Follow these simpe steps to get started.</p>
-//               <button className="bg-black  mt-4 px-16 py-2 text-white rounded-md">Learn More</button>
-//             </div>
-//           </div>
-
-//           <div className="grid grid-flow-col gap-4 p-16 mt-12 ">
-//             {/* Step 1 */}
-//             <div className="border rounded-lg p-4 flex items-start gap-4 shadow-sm bg-white">
-//                   {/* Image Placeholder */}
-//                   <div className="w-16 h-16 bg-gray-200 rounded-md flex-shrink-0"></div>
-
-//                   {/* Text Content */}
-//                   <div className="flex-1">
-//                     <h2 className="text-lg font-semibold text-gray-900">Step 1: Select a Passage</h2>
-//                     <p className="mt-2 text-sm text-gray-700">
-//                     Choose a reading passage from the list provided. 
-//                     </p>
-//                   </div>
-//               </div>
-
-//               {/* Step 2 */}
-//                <div className="border rounded-lg p-4 flex items-start gap-4 shadow-sm bg-white">
-//                   {/* Image Placeholder */}
-//                   <div className="w-16 h-16 bg-gray-200 rounded-md flex-shrink-0"></div>
-
-//                   {/* Text Content */}
-//                   <div className="flex-1">
-//                     <h2 className="text-lg font-semibold text-gray-900">Step 2: Record Your Voice</h2>
-//                     <p className="mt-2 text-sm text-gray-700">
-//                     Click on the 'Start Recording' button to begin.  
-//                     </p>
-//                   </div>
-//               </div>
-
-//                {/* Step 3 */}
-//                <div className="border rounded-lg p-4 flex items-start gap-4 shadow-sm bg-white">
-//                   {/* Image Placeholder */}
-//                   <div className="w-16 h-16 bg-gray-200 rounded-md flex-shrink-0"></div>
-
-//                   {/* Text Content */}
-//                   <div className="flex-1">
-//                     <h2 className="text-lg font-semibold text-gray-900">Step 3: Submit for Evaluation</h2>
-//                     <p className="mt-2 text-sm text-gray-700">
-//                     Once you're done, submit your recording for teacher evaluation.  
-//                     </p>
-//                   </div>
-//               </div>
-
-
-//           </div>
-
-//           <hr className="ml-8 mr-8"></hr>
-  
-
-//           <div className="grid grid-cols-2 gap-8 p-16">
-//             <div className="0 p-6 rounded-md">
-//               <h1 className="text-4xl font-bold">Select a Passage</h1>
-//               <p className="mt-6">Choose a passage to read aloud</p>
-//             </div>
-//             <div className="p-6 rounded-md flex flex-col justify-start items-start">
-//               <p>Passage Selection</p>
-//               <button className="bg-black mt-8 px-16 py-2 text-white rounded-md">
-//                 Continue
-//               </button>
-//             </div>
-//           </div>
-
-//            <div className="flex items-center bg-gray-700 p-16 w-full m-0">
-//               {/* Profile image */}
-//               <div className="w-32 h-32 rounded-full bg-gray-400 overflow-hidden flex-shrink-0">
-//                   <img
-//                     src={profilePic || "/assets/default-avatar.png"}
-//                     alt="profile"
-//                     className="w-full h-full object-cover"
-//                   />
-               
-//               </div>
-
-//               {/* Text */}
-//               <div className="ml-24">
-//                 <h2 className="text-white font-bold text-3xl mt-4">{firstName} {lastName}</h2>
-//                 <p className="text-gray-200 text-1xl">Prepare to practice your reading!</p>
-//               </div>
-//             </div>
-//         </div>
-//       )}
 //     </MainLayout>
 //   );
 // }
 
-
 import React, { useState, useEffect } from "react";
 import MainLayout from "../../layout/mainLayout";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
-import { getFirestore, doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { db } from "../../firebase"; // ✅ your Firestore instance
+import { db } from "../../firebase";
 
 export default function Dashboard() {
   const [step, setStep] = useState("welcome");
-  const [currentQ, setCurrentQ] = useState(0);
-  const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [gradeLevel, setGradeLevel] = useState(null);
-  const [storyTitle, setStoryTitle] = useState("");
-  const [storyContent, setStoryContent] = useState("");
+  const [testFlow, setTestFlow] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const [answers, setAnswers] = useState({});
+  const [score, setScore] = useState(0);
+
+  const [firstName, setFirstName] = useState("");
+  const [profilePic, setProfilePic] = useState("");
 
   const auth = getAuth();
 
-  // User info (profile, name)
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [profilePic, setProfilePic] = useState("");
-
+  // ===============================
+  // Load Profile Info
+  // ===============================
   useEffect(() => {
     const f_name = localStorage.getItem("firstName");
-    const l_name = localStorage.getItem("lastName");
     const uid = localStorage.getItem("uuid");
+
     if (f_name) setFirstName(f_name);
-    if (l_name) setLastName(l_name);
 
     if (uid) {
       const storage = getStorage();
       const profilePicRef = ref(storage, `userProfile/${uid}.jpg`);
       getDownloadURL(profilePicRef)
         .then((url) => setProfilePic(url))
-        .catch((err) => console.error("Error fetching profile pic:", err));
+        .catch(() => {});
     }
   }, []);
 
-  // ✅ Fetch dynamic questions from Firestore
+  // ===============================
+  // Fetch Stories + Questions
+  // ===============================
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchTest = async () => {
       try {
-        console.log("✅ Connecting to Firestore...");
-
-        // 1️⃣ Verify DB connection
-        if (!db) {
-          console.error("❌ Firestore not initialized properly!");
-          return;
-        }
-        console.log("✅ Firestore instance found:", db);
-
         const user = auth.currentUser;
-        if (!user) {
-          console.error("❌ No user logged in.");
-          return;
-        }
-        console.log("👤 Current User UID:", user.uid);
+        if (!user) return;
 
-        // 2️⃣ Get user's grade level
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
-
-        if (!userSnap.exists()) {
-          console.error("❌ User document not found in Firestore!");
-          return;
-        }
+        if (!userSnap.exists()) return;
 
         const grade = userSnap.data().grade_level;
-        setGradeLevel(grade);
-        console.log(`🎓 User grade level: ${grade}`);
 
-        // 3️⃣ Fetch stories based on grade level
-        const storyRef = collection(db, "gst_collection", `grade_${grade}`, "stories");
-        console.log("📂 Fetching stories from path:", `gst_collection/grade_${grade}/stories`);
+        const storiesRef = collection(
+          db,
+          "gst_collection",
+          `grade_${grade}`,
+          "stories"
+        );
 
-        const storiesSnap = await getDocs(storyRef);
+        const storiesSnap = await getDocs(storiesRef);
 
-        if (storiesSnap.empty) {
-          console.warn("⚠️ No stories found for this grade.");
-          return;
+        let flow = [];
+
+        for (const storyDoc of storiesSnap.docs) {
+          const storyData = storyDoc.data();
+
+          // Add story card
+          flow.push({
+            type: "story",
+            title: storyData.title,
+            content: storyData.content,
+          });
+
+          // Fetch questions
+          const qRef = collection(
+            db,
+            "gst_collection",
+            `grade_${grade}`,
+            "stories",
+            storyDoc.id,
+            "questions"
+          );
+
+          const qSnap = await getDocs(qRef);
+
+          const qList = qSnap.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          qList.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+          qList.forEach((q) => {
+            flow.push({
+              type: "question",
+              question: q,
+            });
+          });
         }
 
-        // Print all story titles
-        console.log("📚 Stories fetched:");
-        storiesSnap.forEach((doc) => {
-          console.log(`   ➜ ${doc.id}:`, doc.data());
-        });
-
-        // 4️⃣ Pick first story
-        const firstStory = storiesSnap.docs[0];
-        setStoryTitle(firstStory.data().title);
-        setStoryContent(firstStory.data().content);
-        console.log("✅ Selected Story:", firstStory.data().title);
-
-        // 5️⃣ Fetch questions
-        const qRef = collection(db, "gst_collection", `grade_${grade}`, "stories", firstStory.id, "questions");
-        console.log("📄 Fetching questions from:", `gst_collection/grade_${grade}/stories/${firstStory.id}/questions`);
-
-        const qSnap = await getDocs(qRef);
-        console.log(`✅ ${qSnap.docs.length} questions fetched.`);
-
-        const qList = qSnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        qList.sort((a, b) => (a.order || 0) - (b.order || 0));
-        setQuestions(qList);
-
-        console.log("🧠 Questions loaded:", qList);
-      } catch (err) {
-        console.error("❌ Error fetching questions:", err);
+        setTestFlow(flow);
+      } catch (error) {
+        console.error("Error loading test:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchQuestions();
+    fetchTest();
   }, []);
 
+  // ===============================
+  // Helpers
+  // ===============================
+  const currentCard = testFlow[currentIndex];
+  const isQuestion = currentCard?.type === "question";
+
+  const isAnswered =
+    isQuestion &&
+    answers[currentCard?.question?.id] !== undefined;
+
+  // ===============================
+  // Select Answer (only one allowed)
+  // ===============================
+  const handleSelectChoice = (questionId, choiceIndex) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: choiceIndex,
+    }));
+  };
+
+  // ===============================
+  // Calculate Score
+  // ===============================
+  const calculateScore = () => {
+    let correctCount = 0;
+
+    testFlow.forEach((item) => {
+      if (item.type === "question") {
+        const qId = item.question.id;
+        const selectedIndex = answers[qId];
+
+        // Find correct answer index
+        const correctIndex = item.question.choices.findIndex(
+          (choice) => choice.is_correct === true
+        );
+
+        if (selectedIndex === correctIndex) {
+          correctCount++;
+        }
+      }
+    });
+
+    setScore(correctCount);
+  };
+
+  // ===============================
+  // Navigation
+  // ===============================
   const handleNext = () => {
-    if (currentQ < questions.length - 1) {
-      setCurrentQ(currentQ + 1);
+    if (isQuestion && !isAnswered) return;
+
+    if (currentIndex < testFlow.length - 1) {
+      setCurrentIndex(currentIndex + 1);
     } else {
+      calculateScore();
       setStep("result");
     }
   };
@@ -387,7 +409,7 @@ export default function Dashboard() {
     return (
       <MainLayout>
         <div className="flex justify-center items-center h-screen">
-          <p className="text-2xl font-semibold">Loading quiz...</p>
+          <p className="text-2xl font-semibold">Loading test...</p>
         </div>
       </MainLayout>
     );
@@ -395,75 +417,171 @@ export default function Dashboard() {
 
   return (
     <MainLayout>
+
+      {/* ================= WELCOME ================= */}
       {step === "welcome" && (
-        <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between">
-          <div>
-            <h1 className="text-5xl font-bold">Welcome to HenyoReads, {firstName}!</h1>
-            <p className="mt-10 text-xl">Start your Reading Success Journey here</p>
-            <button
-              onClick={() => setStep("directions")}
-              className="px-12 py-2 mt-14 mb-10 bg-yellow-500 text-2xl rounded-full font-semibold hover:bg-yellow-600 transition"
-            >
-              Take the GST Test
-            </button>
-          </div>
-          <img src="/assets/books1.png" alt="books" className="w-48 mr-8" />
+        <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md">
+          <h1 className="text-5xl font-bold">
+            Welcome to HenyoReads, {firstName}!
+          </h1>
+          <br></br>
+          <h1 className="text-3xl font-bold">
+              You are about to take the Phil- IRI Group Test Screening (GST) assessment. 
+          </h1>
+           
+          <button
+            onClick={() => setStep("quiz")}
+            className="px-12 py-2 mt-10 bg-yellow-500 text-2xl rounded-full font-semibold hover:bg-yellow-600 transition"
+          >
+            Take the GST Test
+          </button>
         </div>
       )}
 
-      {step === "directions" && (
-        <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between">
-          <div>
-            <h1 className="text-5xl font-bold">Group Screening Test</h1>
-            <p className="mt-10 text-xl">Directions:</p>
-            <p className="mt-2 text-lg">
-              Answer the following questions carefully. Click NEXT to proceed to the next question.
-            </p>
-            <button
-              onClick={() => setStep("quiz")}
-              className="px-16 py-2 mt-64 mb-10 bg-yellow-500 text-xl rounded-full font-semibold hover:bg-yellow-600 transition"
-            >
-              START QUIZ
-            </button>
-          </div>
-          <img src="/assets/idea1.png" alt="idea" className="w-64 mr-8" />
-        </div>
-      )}
+      {/* ================= QUIZ ================= */}
+      {step === "quiz" && testFlow.length > 0 && (
+        <div className="bg-white text-black p-8 rounded-xl shadow-2xl flex flex-col min-h-screen">
 
-      {step === "quiz" && questions.length > 0 && (
-        <div className="bg-white text-black p-6 rounded-xl shadow-2xl flex flex-col min-h-screen">
           <div className="flex-1">
-            <h1 className="text-4xl font-bold mb-4">{storyTitle}</h1>
-            <h2 className="text-3xl  mb-4">{storyContent}</h2>
 
-            <h2 className="text-2xl font-semibold">
-              {questions[currentQ].order ? `Question ${questions[currentQ].order}` : `Question ${currentQ + 1}`}
-            </h2>
-            <p className="mt-6 text-xl">{questions[currentQ].text}</p>
+            {/* STORY CARD */}
+            {currentCard.type === "story" && (
+              <>
+                <h1 className="text-4xl font-bold mb-6">
+                  {currentCard.title}
+                </h1>
+                <p className="text-2xl whitespace-pre-line leading-relaxed">
+                  {currentCard.content}
+                </p>
+              </>
+            )}
 
-            <ul className="mt-6 space-y-3">
-              {questions[currentQ].choices?.map((choice, idx) => (
-                <li
-                  key={idx}
-                  className="border p-3 rounded-md cursor-pointer hover:bg-blue-100"
-                >
-                  {choice.text}
-                </li>
-              ))}
-            </ul>
+            {/* QUESTION CARD */}
+            {currentCard.type === "question" && (
+              <>
+                <p className="mt-6 text-2xl">
+                  {currentCard.question.question_text}
+                </p>
+
+                <ul className="mt-6 space-y-3">
+                  {currentCard.question.choices?.map((choice, idx) => {
+                    const qId = currentCard.question.id;
+                    const isSelected = answers[qId] === idx;
+
+                    return (
+                      <li
+                        key={idx}
+                        onClick={() => handleSelectChoice(qId, idx)}
+                        className={`border p-3 rounded-md cursor-pointer transition
+                          ${
+                            isSelected
+                              ? "bg-blue-500 text-white border-blue-500"
+                              : "hover:bg-blue-100"
+                          }
+                        `}
+                      >
+                        {choice.text}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
+            )}
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end mt-10">
             <button
               onClick={handleNext}
-              className="px-16 py-2 shadow-xl mt-10 mb-10 mr-8 text-white bg-blue-500 text-xl rounded-full font-semibold hover:bg-blue-600 transition"
+              disabled={isQuestion && !isAnswered}
+              className={`px-16 py-2 text-xl rounded-full font-semibold transition
+                ${
+                  isQuestion && !isAnswered
+                    ? "bg-gray-400 text-white cursor-not-allowed"
+                    : "bg-blue-500 text-white hover:bg-blue-600"
+                }
+              `}
             >
-              {currentQ < questions.length - 1 ? "NEXT" : "SUBMIT"}
+              {currentIndex < testFlow.length - 1 ? "NEXT" : "SUBMIT"}
             </button>
           </div>
         </div>
       )}
+
+      {/* ================= RESULT ================= */}
+      {step === "result" && (
+        <div className="bg-blue-600 text-white p-8 rounded-xl shadow-md">
+
+          <h1 className="text-5xl font-bold">
+            Group Screening Test Completed
+          </h1>
+
+          <p className="text-3xl mt-8">
+            Your Raw Score:
+          </p>
+
+          <p className="text-6xl font-bold mt-4">
+            {score} / {testFlow.filter((item) => item.type === "question").length}
+          </p>
+
+          {/* ================= DECISION LOGIC ================= */}
+
+          {score < 14 ? (
+            <>
+              <div className="mt-10 bg-yellow-400 text-black p-6 rounded-lg shadow-md">
+                <h2 className="text-2xl font-bold">
+                  Further Assessment Required
+                </h2>
+
+                <p className="mt-4 text-lg">
+                  Based on your score, you will undergo an
+                  <span className="font-bold"> Individualized Assessment </span>
+                  to determine your reading level.
+                </p>
+
+                <p className="mt-2 text-lg">
+                  You will be given graded reading passages.
+                  The first passage will depend on your GST raw score.
+                </p>
+              </div>
+
+              <div className="mt-8">
+                <button
+                  onClick={() => setStep("individualizedAssessment")}
+                  className="px-16 py-3 bg-white text-blue-600 text-xl rounded-full font-semibold hover:bg-gray-200 transition"
+                >
+                  Proceed to Individualized Assessment
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="mt-10 bg-green-400 text-black p-6 rounded-lg shadow-md">
+                <h2 className="text-2xl font-bold">
+                  No Further Testing Required
+                </h2>
+
+                <p className="mt-4 text-lg">
+                  You will continue receiving regular classroom instruction.
+                </p>
+
+                <p className="mt-2 text-lg">
+                  No reading remediation is required at this time.
+                </p>
+              </div>
+
+              <div className="mt-8">
+                <button
+                  onClick={() => setStep("dashboardHome")}
+                  className="px-16 py-3 bg-white text-blue-600 text-xl rounded-full font-semibold hover:bg-gray-200 transition"
+                >
+                  Continue to Dashboard
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
     </MainLayout>
   );
 }
-
