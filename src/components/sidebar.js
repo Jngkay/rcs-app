@@ -44,7 +44,7 @@ export default function SideBar() {
       {/* Nav links */}
       <nav className="space-y-4">
         <Link
-          to="/pages/dashboard"
+          to="/pages/student/dashboard"
           className="flex items-center gap-2 p-2 rounded-lg bg-orange-500 font-medium"
         >
           <Home size={18} />
@@ -52,7 +52,7 @@ export default function SideBar() {
         </Link>
 
         <Link
-          to="/pages/lessons"
+          to="/pages/student/lessons"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
           <Book size={18} />
@@ -60,7 +60,7 @@ export default function SideBar() {
         </Link>
 
         <Link
-          to="/pages/scores"
+          to="/pages/student/scores"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
           <BarChart size={18} />
@@ -68,7 +68,7 @@ export default function SideBar() {
         </Link>
 
         <Link
-          to="/pages/progress"
+          to="/pages/student/progress"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
           <Heart size={18} />
@@ -76,7 +76,7 @@ export default function SideBar() {
         </Link>
 
         <Link
-          to="/pages/settings"
+          to="/pages/student/settings"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
           <Settings size={18} />

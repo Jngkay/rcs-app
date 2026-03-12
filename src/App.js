@@ -6,7 +6,7 @@ import Dashboard from "./pages/student/dashboard";
 import Lessons from "./pages/student/lessons";
 import Scores from "./pages/student/scores";
 import Progress from "./pages/student/progress";
-import Settings from "./pages/teacher/settings";
+// import Settings from "./pages/teacher/settings";
 import Profile from "./pages/student/profile";
 import AccountManagement from "./pages/admin/account_management";
 import ComprehensionTest from "./pages/admin/comprehension_test";
@@ -15,6 +15,7 @@ import Classes from "./pages/teacher/classes";
 import Performance from "./pages/teacher/performance";
 import Assignments from "./pages/teacher/assignments";
 import SettingsTeacher from "./pages/teacher/settings";
+import Settings from "./pages/student/settings";
 
 function App() {
   return (
