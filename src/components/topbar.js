@@ -42,14 +42,14 @@ export default function TopBar() {
         <Bell size={20} className="text-gray-600 cursor-pointer" />
         <div className="flex items-center gap-2">
           <img
-            src={profilePic || "/assets/default-avatar.png"} // fallback avatar
+           src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
             alt="profile"
             className="w-10 h-10 rounded-full"
           />
           {/* <span className="font-medium text-gray-700">
            
           </span> */}
-          <Link to="/pages/profile" className="flex items-center gap-2 p-2 rounded-lg bg-orange-500 font-medium"> {firstName} {lastName}</Link>
+          <Link to="/pages/student/profile" className="flex items-center gap-2 p-2 rounded-lg bg-orange-500 font-medium"> {firstName} {lastName}</Link>
         </div>
       </div>
     </header>
