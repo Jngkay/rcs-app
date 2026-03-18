@@ -3,6 +3,7 @@ import MainLayout from "../../layout/mainLayout";
 
 import { db, auth } from "../../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function Profile() {
 
@@ -16,15 +17,17 @@ export default function Profile() {
     school: ""
   });
 
+  const [profileImage, setProfileImage] = useState(null);
+  const [preview, setPreview] = useState("");
+
   const [editing, setEditing] = useState(false);
   const [showUpdateConfirmationModal, setShowUpdateConfirmationModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  
 
   const uid = auth.currentUser?.uid;
 
-  // Load student data
   useEffect(() => {
+
     const fetchStudent = async () => {
 
       if (!uid) return;
@@ -35,12 +38,27 @@ export default function Profile() {
       if (docSnap.exists()) {
         setStudent(docSnap.data());
       }
+
+      try {
+
+        const storage = getStorage();
+        const imageRef = ref(storage, `userProfile/${uid}`);
+        const url = await getDownloadURL(imageRef);
+
+        setPreview(url);
+
+      } catch {
+
+        setPreview("https://cdn-icons-png.flaticon.com/512/3135/3135715.png");
+
+      }
+
     };
 
     fetchStudent();
+
   }, [uid]);
 
-  // Handle input change
   const handleChange = (e) => {
     setStudent({
       ...student,
@@ -48,8 +66,20 @@ export default function Profile() {
     });
   };
 
-  // Save updated data
+  const handleImageChange = (e) => {
+
+    const file = e.target.files[0];
+
+    if (file) {
+      setProfileImage(file);
+      setPreview(URL.createObjectURL(file));
+    }
+
+  };
+
   const handleSave = async () => {
+
+    setLoading(true);
 
     try {
 
@@ -57,14 +87,27 @@ export default function Profile() {
 
       await updateDoc(docRef, student);
 
+      if (profileImage) {
+
+        const storage = getStorage();
+        const storageRef = ref(storage, `userProfile/${uid}`);
+
+        await uploadBytes(storageRef, profileImage);
+
+      }
+
       setEditing(false);
       setShowUpdateConfirmationModal(false);
-      // alert("Profile updated successfully!");
 
     } catch (error) {
+
       console.error(error);
       alert("Error updating profile");
+
     }
+
+    setLoading(false);
+
   };
 
   return (
@@ -72,24 +115,35 @@ export default function Profile() {
 
       <div className="space-y-6">
 
-        {/* Header */}
         <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between">
+
           <h1 className="text-2xl font-bold">Student Profile</h1>
 
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-            alt="profile"
-            className="w-24"
-          />
+          <label className="cursor-pointer flex flex-col items-center">
+
+            <img
+              src={preview || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
+              alt="profile"
+              className="w-24 h-24 rounded-full object-cover border"
+            />
+
+            {editing && (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            )}
+
+          </label>
+
         </div>
 
-
-        {/* Profile Card */}
         <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
 
           <div className="grid grid-cols-2 gap-4">
 
-            {/* First Name */}
             <div>
               <label className="text-sm text-gray-600">First Name</label>
               <input
@@ -102,7 +156,6 @@ export default function Profile() {
               />
             </div>
 
-            {/* Last Name */}
             <div>
               <label className="text-sm text-gray-600">Last Name</label>
               <input
@@ -115,7 +168,6 @@ export default function Profile() {
               />
             </div>
 
-             {/* School */}
             <div>
               <label className="text-sm text-gray-600">Birthdate</label>
               <input
@@ -128,20 +180,16 @@ export default function Profile() {
               />
             </div>
 
-
-            {/* Email */}
             <div>
               <label className="text-sm text-gray-600">Email</label>
               <input
                 name="email"
                 value={student.email}
                 disabled
-                // disabled={!editing}
                 className="w-full border rounded-lg px-3 py-2 bg-gray-100"
               />
             </div>
 
-            {/* Gender */}
             <div>
               <label className="text-sm text-gray-600">Gender</label>
               <select
@@ -157,7 +205,6 @@ export default function Profile() {
               </select>
             </div>
 
-             {/* Adddress */}
             <div>
               <label className="text-sm text-gray-600">Address</label>
               <input
@@ -170,8 +217,6 @@ export default function Profile() {
               />
             </div>
 
-
-            {/* Course */}
             <div>
               <label className="text-sm text-gray-600">Grade Level</label>
               <input
@@ -183,9 +228,6 @@ export default function Profile() {
               />
             </div>
 
-            
-
-            {/* School */}
             <div>
               <label className="text-sm text-gray-600">School</label>
               <input
@@ -200,24 +242,22 @@ export default function Profile() {
 
           </div>
 
-
-          {/* Buttons */}
           <div className="flex gap-3 mt-4">
 
             {!editing ? (
+
               <button
                 onClick={() => setEditing(true)}
                 className="bg-blue-600 text-white px-5 py-2 rounded-lg"
               >
                 Edit Profile
               </button>
+
             ) : (
+
               <>
                 <button
-                  // onClick={handleSave}
-                   onClick={()=>{
-                    setShowUpdateConfirmationModal(true);
-                  }}
+                  onClick={() => setShowUpdateConfirmationModal(true)}
                   className="bg-green-600 text-white px-5 py-2 rounded-lg"
                 >
                   Save Changes
@@ -230,57 +270,54 @@ export default function Profile() {
                   Cancel
                 </button>
               </>
+
             )}
 
           </div>
 
-      </div>
+        </div>
 
       </div>
-         {/* DELETE CONFIRMATION MODAL */}
-          {showUpdateConfirmationModal && (
 
-            <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+      {showUpdateConfirmationModal && (
 
-              <div className="bg-white p-6 rounded-xl shadow-xl w-120">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
 
-                <h2 className="text-xl font-bold mb-2">
-                  Update Profile
-                  
-                </h2>
-                <hr></hr>
+          <div className="bg-white p-6 rounded-xl shadow-xl w-120">
 
-                <p className="mb-2 mt-4">
-                  
-                  You are about to update your profile details.
-                </p>
+            <h2 className="text-xl font-bold mb-2">Update Profile</h2>
+            <hr/>
 
-                <p>Do you want to continue?</p>
+            <p className="mb-2 mt-4">
+              You are about to update your profile details.
+            </p>
 
-                <div className="flex justify-end gap-3">
+            <p>Do you want to continue?</p>
 
-                  <button
-                    onClick={()=>setShowUpdateConfirmationModal(false)}
-                    className="px-4 py-2 bg-gray-300 rounded"
-                  >
-                    Cancel
-                  </button>
+            <div className="flex justify-end gap-3">
 
-                  <button
-                    onClick={handleSave}
-                    disabled={loading}
-                    className="px-4 py-2 bg-red-500 text-white rounded"
-                  >
-                    {loading ? "Updating" : "Update"}
-                  </button>
+              <button
+                onClick={() => setShowUpdateConfirmationModal(false)}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Cancel
+              </button>
 
-                </div>
-
-              </div>
+              <button
+                onClick={handleSave}
+                disabled={loading}
+                className="px-4 py-2 bg-red-500 text-white rounded"
+              >
+                {loading ? "Updating" : "Update"}
+              </button>
 
             </div>
 
-          )}
+          </div>
+
+        </div>
+
+      )}
 
     </MainLayout>
   );
