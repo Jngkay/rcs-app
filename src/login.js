@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { collection, query, where, getDoc, addDoc, doc, getDocs, setDoc } from "firebase/firestore";
+import { collection, query, where, getDoc, doc, getDocs, setDoc } from "firebase/firestore";
 
 import { auth, db } from "./firebase";
+// import { Link } from "lucide-react";
 
 
 // ----------------- Login Form -----------------
@@ -104,9 +105,9 @@ function LoginForm() {
             <input type="checkbox" className="accent-blue-500" />
             <span className="text-gray-600">Remember me</span>
           </label>
-          <a href="#" className="text-blue-500 hover:underline">
+          <button className="text-blue-500 hover:underline">
             Forgot Password?
-          </a>
+          </button>
         </div>
 
          <button
@@ -204,9 +205,9 @@ function ClassCodeForm({ onCodeValidated, onSwitchToLogin }) {
 
       <div className="mt-4 text-sm">
         <span className="text-gray-600">Already have an account? </span>
-        <a href="#" onClick={onSwitchToLogin} className="text-blue-500 hover:underline">
+        <button onClick={onSwitchToLogin} className="text-blue-500 hover:underline">
           Log-in instead
-        </a>
+        </button>
       </div>
     </>
   );
@@ -215,7 +216,7 @@ function ClassCodeForm({ onCodeValidated, onSwitchToLogin }) {
 
 // ----------------- Register Form -----------------
 function RegisterForm({ classCode, onSwitchToLogin }) {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [first_name, setFirstName] = useState("");
   const [last_name, setLastName] = useState("");
   const [gender, setGender] = useState("");
@@ -434,13 +435,12 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
 
       <div className="mt-4 text-sm">
         <span className="text-gray-600">Already have an account? </span>
-        <a
-          href="#"
+        <button
           onClick={onSwitchToLogin}
           className="text-blue-500 hover:underline"
         >
           Log-in instead
-        </a>
+        </button>
       </div>
     </>
   );
@@ -451,7 +451,7 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
 
 // ----------------- Register Teacher Form -----------------
 function RegisterTeacherForm({ onSwitchToLogin }) {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [first_name, setFirstName] = useState("");
   const [last_name, setLastName] = useState("");
@@ -598,13 +598,11 @@ function RegisterTeacherForm({ onSwitchToLogin }) {
 
       <div className="mt-4 text-sm">
         <span className="text-gray-600">Already have an account? </span>
-        <a
-          href="#"
+        <button>
           onClick={onSwitchToLogin}
           className="text-blue-500 hover:underline"
-        >
           Log-in instead
-        </a>
+        </button>
       </div>
     </>
   );

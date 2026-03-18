@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import { Home, Book, BarChart, Settings, LogOut, Heart, Menu } from "lucide-react";
+import { Home, Book, LogOut, Menu } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
@@ -8,7 +8,7 @@ export default function SideBarTeacher() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(true);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   const handleLogout = async () => {
     try {
