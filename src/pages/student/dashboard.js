@@ -4,6 +4,7 @@ import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { doc, getDoc, collection, getDocs, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "../../firebase";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const [step, setStep] = useState("welcome");
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const [profilePic, setProfilePic] = useState("");
 
   const auth = getAuth();
+  const navigate = useNavigate();
 
   // ===============================
   // Load Profile Info
@@ -336,9 +338,9 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              <div className="mt-8">
+             <div className="mt-8">
                 <button
-                  onClick={() => setStep("individualizedAssessment")}
+                  onClick={() => navigate("/pages/student/assessment")}
                   className="px-16 py-3 bg-white text-blue-600 text-xl rounded-full font-semibold hover:bg-gray-200 transition"
                 >
                   Proceed to Individualized Assessment

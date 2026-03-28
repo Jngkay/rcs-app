@@ -16,6 +16,7 @@ import Performance from "./pages/teacher/performance";
 import Assignments from "./pages/teacher/assignments";
 import SettingsTeacher from "./pages/teacher/settings";
 import Settings from "./pages/student/settings";
+import Assessment from "./pages/student/assessment";
 
 function App() {
   return (
@@ -39,7 +40,7 @@ function App() {
         <Route path="/pages/student/progress" element={<Progress />} />
         <Route path="/pages/student/profile" element={<Profile />} />
         <Route path="/pages/student/settings" element={<Settings />} />
-
+        <Route path="/pages/student/assessment" element={<Assessment />} />
 
 
         {/* Routes for Teacher */}

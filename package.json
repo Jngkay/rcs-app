@@ -7,6 +7,8 @@
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.14.0",
+    "diff": "^8.0.4",
     "dotenv": "^17.3.1",
     "firebase": "^12.2.1",
     "lucide-react": "^0.542.0",
