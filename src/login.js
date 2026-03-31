@@ -596,11 +596,12 @@ function RegisterTeacherForm({ onSwitchToLogin }) {
         </button>
       </form>
 
-      <div className="mt-4 text-sm">
+         <div className="mt-4 text-sm">
         <span className="text-gray-600">Already have an account? </span>
-        <button>
+        <button
           onClick={onSwitchToLogin}
           className="text-blue-500 hover:underline"
+        >
           Log-in instead
         </button>
       </div>
