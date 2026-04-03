@@ -6,13 +6,16 @@ export default function useRecorder() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState("");
   const [error, setError] = useState(null);
+  const [duration, setDuration] = useState(0);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const startTimeRef = useRef(null);
 
   const startRecording = async () => {
     try {
       setError(null);
+      setDuration(0);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
       const mediaRecorder = new MediaRecorder(stream);
@@ -26,6 +29,7 @@ export default function useRecorder() {
       };
 
       mediaRecorder.start();
+      startTimeRef.current = Date.now();
       setIsRecording(true);
       setResult("");
     } catch (err) {
@@ -38,6 +42,10 @@ export default function useRecorder() {
     try {
       setIsProcessing(true);
       setIsRecording(false);
+
+      if (startTimeRef.current) {
+        setDuration((Date.now() - startTimeRef.current) / 1000);
+      }
 
       const mediaRecorder = mediaRecorderRef.current;
       if (!mediaRecorder) return;
@@ -85,12 +93,20 @@ export default function useRecorder() {
     }
   };
 
+  const resetRecording = () => {
+    setResult("");
+    setError(null);
+    setDuration(0);
+  };
+
   return {
     isRecording,
     isProcessing,
     result,
     error,
+    duration,
     startRecording,
     stopRecording,
+    resetRecording,
   };
 }

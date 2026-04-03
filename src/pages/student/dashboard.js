@@ -265,6 +265,7 @@ export default function Dashboard() {
 
                 <ul className="mt-6 space-y-3">
                   {currentCard.question.choices?.map((choice, idx) => {
+                    if (!choice || !choice.text || choice.text.trim() === "") return null;
                     const qId = currentCard.question.id;
                     const isSelected = answers[qId] === idx;
 

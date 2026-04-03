@@ -1,0 +1,241 @@
+import React, { useEffect, useState } from "react";
+import AdminLayout from "../../layout/adminLayout";
+import {
+    getFirestore,
+    collection,
+    doc,
+    getDocs,
+    deleteDoc
+} from "firebase/firestore";
+import CompreTestModal from "../../components/compre_test_modal";
+
+export default function IndividualizedAssessmentAdmin() {
+    const db = getFirestore();
+
+    const [grade, setGrade] = useState("2");
+    const [stories, setStories] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [selectedStory, setSelectedStory] = useState(null);
+
+    const fetchStories = async () => {
+        setLoading(true);
+        setStories([]);
+
+        try {
+            const storiesRef = collection(db, "individualized_assessment", grade, "stories");
+            const storySnapshot = await getDocs(storiesRef);
+
+            const storyList = [];
+
+            for (const storyDoc of storySnapshot.docs) {
+                const storyData = storyDoc.data();
+
+                // Fetch questions
+                const questionsRef = collection(
+                    db,
+                    "individualized_assessment",
+                    grade,
+                    "stories",
+                    storyDoc.id,
+                    "questions"
+                );
+
+                const qSnapshot = await getDocs(questionsRef);
+                const questions = qSnapshot.docs.map((q) => ({
+                    id: q.id,
+                    ...q.data(),
+                }));
+
+                storyList.push({
+                    id: storyDoc.id,
+                    ...storyData,
+                    questions: questions,
+                });
+            }
+
+            setStories(storyList);
+        } catch (error) {
+            console.error("Error fetching individualized assessments:", error);
+        }
+
+        setLoading(false);
+    };
+
+    const handleDeleteStory = async (storyId) => {
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this story?"
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+            // 1️⃣ Delete all questions subcollection
+            const questionsRef = collection(
+                db,
+                "individualized_assessment",
+                grade,
+                "stories",
+                storyId,
+                "questions"
+            );
+
+            const questionSnapshot = await getDocs(questionsRef);
+
+            for (const qDoc of questionSnapshot.docs) {
+                await deleteDoc(qDoc.ref);
+            }
+
+            // 2️⃣ Delete story document
+            await deleteDoc(
+                doc(db, "individualized_assessment", grade, "stories", storyId)
+            );
+
+            alert("Story deleted successfully!");
+
+            // 3️⃣ Refresh list
+            fetchStories();
+
+        } catch (error) {
+            console.error("Error deleting story:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchStories();
+    }, [grade]);
+
+    return (
+        <AdminLayout>
+            {/* Header Section */}
+            <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-8">
+                <h1 className="text-2xl font-bold">Individualized Assessment</h1>
+                <img
+                    src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                    alt="books"
+                    className="w-32"
+                />
+            </div>
+
+            {/* Grade Selector */}
+            <div className="flex justify-between mb-6">
+                <div className="mb-4">
+                    <label className="font-semibold text-black">Select Grade Level:</label>
+                    <select
+                        className="border p-2 ml-3 rounded"
+                        value={grade}
+                        onChange={(e) => setGrade(e.target.value)}
+                    >
+                        <option value="2">Grade 2</option>
+                        <option value="3">Grade 3</option>
+                        <option value="4">Grade 4</option>
+                        <option value="5">Grade 5</option>
+                        <option value="6">Grade 6</option>
+                    </select>
+                </div>
+                <button
+                    onClick={() => setShowModal(true)}
+                    className="bg-green-600 text-white px-4 py-2 rounded"
+                >
+                    Add Story
+                </button>
+            </div>
+
+            {showModal && (
+                <CompreTestModal
+                    grade={grade}
+                    storyData={selectedStory}
+                    collectionName="individualized_assessment"
+                    onClose={() => {
+                        setShowModal(false);
+                        setSelectedStory(null);
+                    }}
+                    onSuccess={() => {
+                        fetchStories();
+                        setShowModal(false);
+                        setSelectedStory(null);
+                    }}
+                />
+            )}
+
+            {/* Content Section */}
+            {loading && <p className="text-black">Loading individualized assessments...</p>}
+
+            {!loading && stories.length === 0 && (
+                <p className="text-gray-600">No tests found for this grade.</p>
+            )}
+
+            <div className="space-y-6">
+                {stories.map((story) => (
+                    <div key={story.id} className="p-5 border rounded-lg shadow-sm bg-white text-black">
+
+                        <div className="flex justify-between mb-6">
+                            <h2 className="text-xl font-bold mb-2">{story.title}</h2>
+
+                            <div>
+                                <button
+                                    onClick={() => {
+                                        setSelectedStory(story);
+                                        setShowModal(true);
+                                    }}
+                                    className="bg-yellow-400 text-white px-4 py-2 rounded mr-4">
+                                    Edit
+                                </button>
+
+                                <button
+                                    onClick={() => handleDeleteStory(story.id)}
+                                    className="bg-red-600 text-white px-4 py-2 rounded">
+                                    Delete
+                                </button>
+
+                            </div>
+
+                        </div>
+                        <p className="text-gray-700 mb-3">
+                            {story.content}
+                        </p>
+
+                        {/* <p className="mb-2">
+                            <strong>Word Count:</strong> {story.word_count}
+                        </p> */}
+
+                        <h3 className="font-semibold mt-4">Questions</h3>
+
+                        <div className="mt-2 space-y-3">
+                            {story.questions && story.questions.map((q) => (
+                                <div key={q.id} className="border p-3 rounded">
+                                    <p className="font-semibold text-lg">
+                                        {q.order}. {q.question_text}
+                                    </p>
+
+                                    <ul className="mt-2 space-y-1">
+                                        {[0, 1, 2, 3].map((i) => {
+                                            const choice = q.choices ? q.choices[i] : null;
+                                            if (!choice || !choice.text || choice.text.trim() === "") return null;
+
+                                            return (
+                                                <li
+                                                    key={i}
+                                                    className={`p-2 rounded border ${choice.is_correct
+                                                        ? "bg-green-100 border-green-500 font-semibold"
+                                                        : "bg-gray-100"
+                                                        }`}
+                                                >
+                                                    {String.fromCharCode(65 + i)}. {choice.text}
+
+                                                    {choice.is_correct && (
+                                                        <span className="ml-2 text-green-700 font-bold">(Correct Answer)</span>
+                                                    )}
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </AdminLayout>
+    );
+}

@@ -9,7 +9,7 @@ import {
    deleteDoc
 } from "firebase/firestore";
 
-export default function CompreTestModal({ grade, storyData, onClose, onSuccess }) {
+export default function CompreTestModal({ grade, storyData, onClose, onSuccess, collectionName = "gst_collection" }) {
   const db = getFirestore();
 
   const [story, setStory] = useState(
@@ -81,10 +81,10 @@ export default function CompreTestModal({ grade, storyData, onClose, onSuccess }
 
         const storyRef = doc(
             db,
-            "gst_collection",
-            grade,
+            String(collectionName),
+            String(grade),
             "stories",
-            storyData.id
+            String(storyData.id)
         );
 
         // 1️⃣ Update story document
@@ -93,10 +93,10 @@ export default function CompreTestModal({ grade, storyData, onClose, onSuccess }
         // 2️⃣ Delete old questions
         const questionsRef = collection(
             db,
-            "gst_collection",
-            grade,
+            String(collectionName),
+            String(grade),
             "stories",
-            storyData.id,
+            String(storyData.id),
             "questions"
         );
 
@@ -116,7 +116,7 @@ export default function CompreTestModal({ grade, storyData, onClose, onSuccess }
         // ➕ ADD MODE
 
         const storyRef = await addDoc(
-            collection(db, "gst_collection", grade, "stories"),
+            collection(db, String(collectionName), String(grade), "stories"),
             story
         );
 
@@ -124,10 +124,10 @@ export default function CompreTestModal({ grade, storyData, onClose, onSuccess }
             await addDoc(
             collection(
                 db,
-                "gst_collection",
-                grade,
+                String(collectionName),
+                String(grade),
                 "stories",
-                storyRef.id,
+                String(storyRef.id),
                 "questions"
             ),
             q
@@ -141,6 +141,7 @@ export default function CompreTestModal({ grade, storyData, onClose, onSuccess }
 
     } catch (error) {
         console.error("Error saving story:", error);
+        alert("Failed to save story. Error: " + error.message + "\n\n(If it says 'Missing Permissions', please update your Firestore Rules to allow writing to the individualized_assessment collection!)");
     }
 }
 

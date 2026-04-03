@@ -1,7 +1,7 @@
 import React from 'react';
 import { compareSpeech } from './compare_text';
 
-export default function SpeechResult({ originalText, spokenText }) {
+export default function SpeechResult({ originalText, spokenText, duration, onSave, onRetry }) {
     if (!spokenText) return null;
 
     const diffResult = compareSpeech(originalText, spokenText);
@@ -14,6 +14,11 @@ export default function SpeechResult({ originalText, spokenText }) {
     const miscuesCount = missingWordsCount + extraOrMispronouncedCount;
     const oralReadingScoreRaw = ((totalOriginalWords - miscuesCount) / totalOriginalWords) * 100;
     const oralReadingScore = Math.max(0, oralReadingScoreRaw).toFixed(1);
+
+    // Calculate Reading Speed (Words Per Minute)
+    const safeDuration = duration || 1; // avoid division by zero
+    const wordsPerMinuteRaw = (totalOriginalWords / safeDuration) * 60;
+    const readingSpeed = Math.round(wordsPerMinuteRaw);
 
     return (
         <div className="speech-result-container">
@@ -28,15 +33,15 @@ export default function SpeechResult({ originalText, spokenText }) {
                 <div className="border-t mb-6"></div>
 
                 {/* Stats Box */}
-                <div className="grid grid-cols-4 gap-4 bg-gray-50 border rounded-md p-6 text-center mb-6">
+                <div className="grid grid-cols-5 gap-4 bg-gray-50 border rounded-md p-6 text-center mb-6">
                     <div>
-                        <p className="text-xs text-gray-500 tracking-wide">MISSING WORDS:</p>
+                        <p className="text-xs text-gray-500 tracking-wide">MISSING:</p>
                         <p className="text-2xl font-bold text-blue-700">{missingWordsCount}</p>
                     </div>
 
                     <div>
                         <p className="text-xs text-gray-500 tracking-wide">
-                            EXTRA WORDS:
+                            EXTRA:
                         </p>
                         <p className="text-2xl font-bold text-blue-700">
                             {extraOrMispronouncedCount}
@@ -44,14 +49,21 @@ export default function SpeechResult({ originalText, spokenText }) {
                     </div>
 
                     <div>
-                        <p className="text-xs text-gray-500 tracking-wide">TOTAL MISCUES:</p>
+                        <p className="text-xs text-gray-500 tracking-wide">MISCUES:</p>
                         <p className="text-2xl font-bold text-blue-700">{miscuesCount}</p>
                     </div>
 
                     <div>
-                        <p className="text-xs text-gray-500 tracking-wide">ORAL READING SCORE:</p>
+                        <p className="text-xs text-gray-500 tracking-wide">SCORE:</p>
                         <p className="text-2xl font-bold text-blue-700">
                             {oralReadingScore}%
+                        </p>
+                    </div>
+
+                    <div>
+                        <p className="text-xs text-gray-500 tracking-wide">SPEED:</p>
+                        <p className="text-2xl font-bold text-blue-700">
+                            {readingSpeed} WPM
                         </p>
                     </div>
                 </div>
@@ -127,6 +139,22 @@ export default function SpeechResult({ originalText, spokenText }) {
                         Raw Transcript:
                     </h4>
                     <p className="text-gray-700">{spokenText}</p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex justify-between items-center mt-8">
+                    <button 
+                        onClick={onRetry} 
+                        className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-8 rounded-full transition"
+                    >
+                        ⟳ RETRY
+                    </button>
+                    <button 
+                        onClick={() => onSave(oralReadingScore, readingSpeed)} 
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-full transition shadow-lg"
+                    >
+                        💾 SAVE & PROCEED TO QUESTIONS
+                    </button>
                 </div>
 
             </div>

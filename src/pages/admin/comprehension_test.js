@@ -214,7 +214,7 @@ export default function ComprehensionTest() {
                 <ul className="mt-2 space-y-1">
                   {[0, 1, 2, 3].map((i) => {
                     const choice = q.choices[i];
-                    if (!choice) return null;
+                    if (!choice || !choice.text || choice.text.trim() === "") return null;
 
                     return (
                       <li

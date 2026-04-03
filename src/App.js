@@ -17,6 +17,7 @@ import Assignments from "./pages/teacher/assignments";
 import SettingsTeacher from "./pages/teacher/settings";
 import Settings from "./pages/student/settings";
 import Assessment from "./pages/student/assessment";
+import IndividualizedAssessmentAdmin from "./pages/admin/individualized_assessment";
 
 function App() {
   return (
@@ -24,13 +25,14 @@ function App() {
       <Routes>
         {/* Login Page */}
         <Route path="/" element={<Navigate to="/login" replace />} />
-        
+
         <Route path="/login" element={<Login />} />
 
         {/* Dashboard (after login) */}
         {/* Routes for Admin */}
         <Route path="/pages/admin/account_management" element={<AccountManagement />} />
         <Route path="/pages/admin/comprehension_test" element={<ComprehensionTest />} />
+        <Route path="/pages/admin/individualized_assessment" element={<IndividualizedAssessmentAdmin />} />
 
 
         {/* Routes for Student  */}
@@ -49,7 +51,7 @@ function App() {
         <Route path="/pages/teacher/performance" element={<Performance />} />
         <Route path="/pages/teacher/assignments" element={<Assignments />} />
         <Route path="/pages/teacher/settings" element={<SettingsTeacher />} />
-       
+
       </Routes>
     </BrowserRouter>
   );
