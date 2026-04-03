@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import MainLayout from "../../layout/mainLayout";
 import useRecorder from "./use_recorder";
 import SpeechResult from "./assessment_result";
+import { db } from "../../firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function Assessment() {
      const {
@@ -12,7 +14,35 @@ export default function Assessment() {
         startRecording,
         stopRecording,
     } = useRecorder();
-    const PARAGRAPH = "Artificial intelligence is transforming the way people interact with technology.";
+    
+    const [paragraph, setParagraph] = useState("Loading...");
+
+    useEffect(() => {
+        const fetchParagraph = async () => {
+            try {
+                // Try fetching from the exact spelling first
+                let querySnapshot = await getDocs(collection(db, "individualized assemssment"));
+                
+                if (querySnapshot.empty) {
+                    // Fallback to underscore version if empty
+                    querySnapshot = await getDocs(collection(db, "individualized_assessment"));
+                }
+
+                if (!querySnapshot.empty) {
+                    const docData = querySnapshot.docs[0].data();
+                    // Support common field names for paragraph content
+                    setParagraph(docData.paragraph || docData.content || docData.text || "No content found in document.");
+                } else {
+                    setParagraph("Artificial intelligence is transforming the way people interact with technology.");
+                }
+            } catch (error) {
+                console.error("Error fetching paragraph:", error);
+                setParagraph("Artificial intelligence is transforming the way people interact with technology.");
+            }
+        };
+
+        fetchParagraph();
+    }, []);
 
   return (
     <MainLayout>
@@ -50,7 +80,7 @@ export default function Assessment() {
 
                 {/* Paragraph */}
                 <div className="bg-gray-100 border rounded-md p-4 text-gray-700 text-sm mb-6">
-                    {PARAGRAPH}
+                    {paragraph}
                 </div>
 
                 {/* Button */}
@@ -82,9 +112,9 @@ export default function Assessment() {
                 </div>
 
                 {/* Result Section */}
-                {result && (
+                {result && paragraph !== "Loading..." && (
                 <div className="mt-6">
-                    <SpeechResult originalText={PARAGRAPH} spokenText={result} />
+                    <SpeechResult originalText={paragraph} spokenText={result} />
                 </div>
                 )}
 
