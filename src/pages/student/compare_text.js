@@ -11,8 +11,8 @@ export function compareSpeech(original, spoken) {
     if (!spoken) return [];
 
     // Clean up punctuation and case for better comparison, but keep original for display later
-    const cleanOriginal = original.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").toLowerCase();
-    const cleanSpoken = spoken.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").toLowerCase();
+    const cleanOriginal = original.replace(/[.,/#!$%^&*;:{}=\-_`~()"'?“”‘’]/g, "").toLowerCase();
+    const cleanSpoken = spoken.replace(/[.,/#!$%^&*;:{}=\-_`~()"'?“”‘’]/g, "").toLowerCase();
 
     // We use diffWords to compare. It returns an array showing additions, deletions, 
     // and parts that are the same.

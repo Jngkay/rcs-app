@@ -3,7 +3,7 @@ import MainLayout from "../../layout/mainLayout";
 import useRecorder from "./use_recorder";
 import SpeechResult from "./assessment_result";
 import { db } from "../../firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 
 export default function Assessment() {
   const {
@@ -20,23 +20,51 @@ export default function Assessment() {
   useEffect(() => {
     const fetchParagraph = async () => {
       try {
-        // Try fetching from the exact spelling first
-        let querySnapshot = await getDocs(collection(db, "individualized_assessment"));
-
-        if (querySnapshot.empty) {
-          // Fallback to underscore version if empty
-          querySnapshot = await getDocs(collection(db, "individualized_assessment"));
+        const uid = localStorage.getItem("uuid");
+        if (!uid) {
+          setParagraph("User not found.");
+          return;
         }
 
-        if (!querySnapshot.empty) {
-          const docData = querySnapshot.docs[0].data();
-          // Support common field names for paragraph content
-          setParagraph(docData.paragraph || docData.content || docData.text || "No content found in document.");
+        const userRef = doc(db, "users", uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          const gstScore = userData.gst_score || 0;
+          
+          // Parse grade level safely
+          const currentGrade = parseInt((userData.grade_level || "4").toString().replace(/[^0-9]/g, '')) || 4;
+
+          let targetGrade = currentGrade;
+
+          // Logic for individualized assessment based on GST raw score
+          if (gstScore >= 0 && gstScore <= 7) {
+            targetGrade = currentGrade - 3;
+          } else if (gstScore >= 8 && gstScore <= 13) {
+            targetGrade = currentGrade - 2;
+          }
+
+          // Bound the target grade to a minimum of 2 based on the initial Firestore snapshot lowest passage
+          if (targetGrade < 2) {
+            targetGrade = 2;
+          }
+
+          // Fetch the document matching the target grade ID
+          const passageRef = doc(db, "individualized_assessment", targetGrade.toString());
+          const passageSnap = await getDoc(passageRef);
+
+          if (passageSnap.exists()) {
+            const docData = passageSnap.data();
+            setParagraph(docData.passage || docData.content || docData.text || "No passage content found in document.");
+          } else {
+            setParagraph(`Passage not found for calculated target grade level ${targetGrade}.`);
+          }
         } else {
-          setParagraph("Artificial intelligence is transforming the way people interact with technology.");
+          setParagraph("User data could not be loaded.");
         }
       } catch (error) {
-        console.error("Error fetching paragraph:", error);
+        console.error("Error fetching individualized passage:", error);
         setParagraph("Artificial intelligence is transforming the way people interact with technology.");
       }
     };
