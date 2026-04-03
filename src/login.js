@@ -267,6 +267,7 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
       
       // Assessment fields
       gst_score: 0,
+      gst_total_questions: 0,
       gst_assessment_attempted: false,
 
       individualized_score: 0,

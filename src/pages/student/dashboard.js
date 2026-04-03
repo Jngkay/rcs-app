@@ -14,6 +14,7 @@ export default function Dashboard() {
 
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(0);
+  const [totalQuestions, setTotalQuestions] = useState(0);
 
   const [firstName, setFirstName] = useState("");
   const [profilePic, setProfilePic] = useState("");
@@ -35,7 +36,7 @@ export default function Dashboard() {
       const profilePicRef = ref(storage, `userProfile/${uid}.jpg`);
       getDownloadURL(profilePicRef)
         .then((url) => setProfilePic(url))
-        .catch(() => {});
+        .catch(() => { });
     }
   }, []);
 
@@ -57,6 +58,7 @@ export default function Dashboard() {
         // 🚫 Block retake of GST
         if (userData.gst_assessment_attempted === true) {
           setScore(userData.gst_score || 0); // show previous score
+          setTotalQuestions(userData.gst_total_questions || 0);
           setStep("result");
           setLoading(false);
           return;
@@ -146,11 +148,13 @@ export default function Dashboard() {
   // ===============================
   // Calculate Score
   // ===============================
- const calculateScore = async () => {
+  const calculateScore = async () => {
     let correctCount = 0;
+    let totalQs = 0;
 
     testFlow.forEach((item) => {
       if (item.type === "question") {
+        totalQs++;
         const qId = item.question.id;
         const selectedIndex = answers[qId];
 
@@ -165,6 +169,7 @@ export default function Dashboard() {
     });
 
     setScore(correctCount);
+    setTotalQuestions(totalQs);
 
     try {
       const user = auth.currentUser;
@@ -174,6 +179,7 @@ export default function Dashboard() {
 
       await updateDoc(userRef, {
         gst_score: correctCount,
+        gst_total_questions: totalQs,
         gst_assessment_attempted: true
       });
 
@@ -207,7 +213,7 @@ export default function Dashboard() {
     );
   }
 
-  
+
 
   return (
     <MainLayout>
@@ -220,9 +226,9 @@ export default function Dashboard() {
           </h1>
           <br></br>
           <h1 className="text-3xl font-bold">
-              You are about to take the Phil- IRI Group Test Screening (GST) assessment. 
+            You are about to take the Phil- IRI Group Test Screening (GST) assessment.
           </h1>
-           
+
           <button
             onClick={() => setStep("quiz")}
             className="px-12 py-2 mt-10 bg-yellow-500 text-2xl rounded-full font-semibold hover:bg-yellow-600 transition"
@@ -267,10 +273,9 @@ export default function Dashboard() {
                         key={idx}
                         onClick={() => handleSelectChoice(qId, idx)}
                         className={`border p-3 rounded-md cursor-pointer transition
-                          ${
-                            isSelected
-                              ? "bg-blue-500 text-white border-blue-500"
-                              : "hover:bg-blue-100"
+                          ${isSelected
+                            ? "bg-blue-500 text-white border-blue-500"
+                            : "hover:bg-blue-100"
                           }
                         `}
                       >
@@ -288,10 +293,9 @@ export default function Dashboard() {
               onClick={handleNext}
               disabled={isQuestion && !isAnswered}
               className={`px-16 py-2 text-xl rounded-full font-semibold transition
-                ${
-                  isQuestion && !isAnswered
-                    ? "bg-gray-400 text-white cursor-not-allowed"
-                    : "bg-blue-500 text-white hover:bg-blue-600"
+                ${isQuestion && !isAnswered
+                  ? "bg-gray-400 text-white cursor-not-allowed"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
                 }
               `}
             >
@@ -314,7 +318,7 @@ export default function Dashboard() {
           </p>
 
           <p className="text-6xl font-bold mt-4">
-            {score} / {testFlow.filter((item) => item.type === "question").length}
+            {score} / {totalQuestions || testFlow.filter((item) => item.type === "question").length}
           </p>
 
           {/* ================= DECISION LOGIC ================= */}
@@ -338,7 +342,7 @@ export default function Dashboard() {
                 </p>
               </div>
 
-             <div className="mt-8">
+              <div className="mt-8">
                 <button
                   onClick={() => navigate("/pages/student/assessment")}
                   className="px-16 py-3 bg-white text-blue-600 text-xl rounded-full font-semibold hover:bg-gray-200 transition"
