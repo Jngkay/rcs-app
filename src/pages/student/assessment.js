@@ -18,12 +18,17 @@ export default function Assessment() {
     resetRecording,
   } = useRecorder();
 
-  const [testStep, setTestStep] = useState("reading"); // "reading" | "questions" | "result"
+  const [testStep, setTestStep] = useState("reading"); // "reading" | "questions" | "analysis"
   const [paragraph, setParagraph] = useState("Loading...");
   const [questions, setQuestions] = useState([]);
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [comprehensionScore, setComprehensionScore] = useState(0);
+  
+  const [oralReadingScore, setOralReadingScore] = useState(0);
+  const [readingRate, setReadingRate] = useState(0);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [profileData, setProfileData] = useState({});
 
   const navigate = useNavigate();
 
@@ -91,6 +96,9 @@ export default function Assessment() {
   };
 
   const handleSaveResult = async (oralScore, wpm) => {
+    setOralReadingScore(parseFloat(oralScore) || 0);
+    setReadingRate(wpm || 0);
+
     try {
       const uid = localStorage.getItem("uuid");
       if (!uid) return;
@@ -105,7 +113,7 @@ export default function Assessment() {
       if (questions.length > 0) {
         setTestStep("questions");
       } else {
-        setTestStep("result");
+        setTestStep("analysis"); // Auto-bypass if no questions exist
       }
     } catch (err) {
       console.error("Error saving result:", err);
@@ -120,6 +128,27 @@ export default function Assessment() {
     setAnswers((prev) => ({ ...prev, [qId]: choiceIndex }));
   };
 
+  const getWordReadingLevel = (score) => {
+    if (score >= 97) return "Independent";
+    if (score >= 90) return "Instructional";
+    return "Frustration";
+  };
+
+  const getComprehensionLevel = (score) => {
+    if (score >= 80) return "Independent";
+    if (score >= 59) return "Instructional";
+    return "Frustration";
+  };
+
+  const getOverallProfile = (wordLevel, compLevel) => {
+    // Taking the lowest bound constraint automatically
+    const levels = { "Independent": 3, "Instructional": 2, "Frustration": 1 };
+    const minVal = Math.min(levels[wordLevel] || 1, levels[compLevel] || 1);
+    if (minVal === 3) return "Independent";
+    if (minVal === 2) return "Instructional";
+    return "Frustration";
+  };
+
   const calculateComprehensionScore = async () => {
     let correctCount = 0;
     questions.forEach((q) => {
@@ -131,6 +160,20 @@ export default function Assessment() {
     });
     setComprehensionScore(correctCount);
 
+    const percentage = questions.length > 0 
+      ? Math.round((correctCount / questions.length) * 100) 
+      : 0;
+
+    const wordLevel = getWordReadingLevel(oralReadingScore);
+    const compLevel = getComprehensionLevel(percentage);
+    const overall = getOverallProfile(wordLevel, compLevel);
+
+    setProfileData({
+      wordReadingLevel: wordLevel,
+      comprehensionLevel: compLevel,
+      overallProfile: overall,
+    });
+
     try {
       const uid = localStorage.getItem("uuid");
       if (!uid) return;
@@ -138,6 +181,10 @@ export default function Assessment() {
       const userRef = doc(db, "users", uid);
       await updateDoc(userRef, {
         individualized_comprehension_score: correctCount,
+        individualized_comprehension_percentage: percentage,
+        word_reading_level: wordLevel,
+        comprehension_level: compLevel,
+        oral_reading_profile: overall
       });
     } catch (err) {
       console.error("Error saving comprehension score:", err);
@@ -150,7 +197,9 @@ export default function Assessment() {
       setCurrentQIndex(currentQIndex + 1);
     } else {
       await calculateComprehensionScore();
-      setTestStep("result");
+      setTestStep("analysis");
+      setIsAnalyzing(true);
+      setTimeout(() => setIsAnalyzing(false), 3000);
     }
   };
 
@@ -262,25 +311,69 @@ export default function Assessment() {
           </div>
         )}
 
-        {testStep === "result" && (
-           <div className="text-center p-12 flex-1 flex flex-col items-center justify-center animate-fadeIn">
-             <h2 className="text-5xl font-bold text-blue-700 mb-8">Assessment Completed!</h2>
+        {testStep === "analysis" && (
+           <div className="p-8 flex-1 flex flex-col items-center justify-center animate-fadeIn w-full">
              
-             {questions.length > 0 && (
-               <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-10 max-w-md mx-auto shadow-lg">
-                 <p className="text-2xl text-yellow-700 font-semibold mb-4">Comprehension Score</p>
-                 <p className="text-7xl font-black text-yellow-500">
-                   {comprehensionScore} / {questions.length}
-                 </p>
-               </div>
+             {isAnalyzing ? (
+                 <div className="flex flex-col items-center justify-center animate-pulse">
+                     <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+                     <h2 className="text-3xl font-bold text-gray-700">Analyzing Performance...</h2>
+                     <p className="text-gray-500 mt-2">Correlating Word Reading and Comprehension metrics...</p>
+                 </div>
+             ) : (
+                 <div className="w-full max-w-2xl bg-white border border-gray-100 shadow-2xl rounded-2xl p-8 transform transition-all duration-700 ease-out">
+                    <h2 className="text-3xl font-bold text-center text-blue-800 mb-8 pb-4 border-b">
+                        Oral Reading Profile
+                    </h2>
+
+                    <div className="space-y-6 text-xl">
+                        <div className="flex justify-between items-center bg-gray-50 p-5 rounded-xl border border-gray-100">
+                            <span className="font-semibold text-gray-700">Word reading score:</span>
+                            <div className="text-right">
+                                <span className="font-medium mr-4">{oralReadingScore}%</span>
+                                <span className="text-blue-700 font-bold">{profileData.wordReadingLevel}</span>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-between items-center bg-gray-50 p-5 rounded-xl border border-gray-100">
+                            <span className="font-semibold text-gray-700">Comprehension score:</span>
+                            <div className="text-right">
+                                <span className="font-medium mr-4">
+                                  {questions.length > 0 ? Math.round((comprehensionScore / questions.length) * 100) : 0}%
+                                </span>
+                                <span className="text-blue-700 font-bold">{profileData.comprehensionLevel}</span>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-between items-center bg-gray-50 p-5 rounded-xl border border-gray-100">
+                            <span className="font-semibold text-gray-700">Reading Rate:</span>
+                            <span className="font-medium text-gray-800">{readingRate} words per minute</span>
+                        </div>
+                    </div>
+
+                    <div className="mt-10 pt-6 border-t border-gray-200">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-2xl font-bold text-gray-800">Overall Profile:</h3>
+                            <span className={`text-4xl font-black ${
+                                profileData.overallProfile === 'Independent' ? 'text-green-600' :
+                                profileData.overallProfile === 'Instructional' ? 'text-blue-600' : 'text-red-500'
+                            }`}>
+                                {profileData.overallProfile}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="mt-12 text-center">
+                        <button
+                            onClick={() => navigate("../pages/student/dashboard")}
+                            className="w-full sm:w-auto px-12 py-4 bg-green-600 text-white text-xl rounded-full font-bold hover:bg-green-700 transition shadow-xl"
+                        >
+                            Return to Dashboard
+                        </button>
+                    </div>
+                 </div>
              )}
 
-             <button
-                onClick={() => navigate("../pages/student/dashboard")}
-                className="mt-12 px-14 py-4 bg-green-600 text-white text-2xl rounded-full font-bold hover:bg-green-700 transition shadow-xl"
-              >
-                Return to Dashboard
-              </button>
            </div>
         )}
       </div>
