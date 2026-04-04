@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MainLayout from "../../layout/mainLayout";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
-import { doc, getDoc, collection, getDocs, updateDoc } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, updateDoc, setDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
@@ -110,6 +110,8 @@ export default function Dashboard() {
             flow.push({
               type: "question",
               question: q,
+              storyTitle: storyData.title,
+              storyId: storyDoc.id,
             });
           });
         }
@@ -151,6 +153,7 @@ export default function Dashboard() {
   const calculateScore = async () => {
     let correctCount = 0;
     let totalQs = 0;
+    const userAnswers = [];
 
     testFlow.forEach((item) => {
       if (item.type === "question") {
@@ -162,9 +165,22 @@ export default function Dashboard() {
           (choice) => choice.is_correct === true
         );
 
-        if (selectedIndex === correctIndex) {
+        const isCorrect = selectedIndex === correctIndex;
+        if (isCorrect) {
           correctCount++;
         }
+
+        userAnswers.push({
+          question_id: qId,
+          question_text: item.question.question_text || "",
+          story_id: item.storyId || null,
+          story_title: item.storyTitle || "Unknown Story",
+          selected_index: selectedIndex !== undefined ? selectedIndex : null,
+          selected_text: selectedIndex !== undefined && item.question.choices[selectedIndex] ? item.question.choices[selectedIndex].text : null,
+          is_correct: isCorrect,
+          correct_index: correctIndex,
+          correct_text: correctIndex !== -1 && item.question.choices[correctIndex] ? item.question.choices[correctIndex].text : null,
+        });
       }
     });
 
@@ -185,8 +201,19 @@ export default function Dashboard() {
 
       console.log("GST score saved:", correctCount);
 
+      // Save detailed answers to user_gst
+      await setDoc(doc(db, "user_gst", user.uid), {
+        student_id: user.uid,
+        student_name: firstName || "Unknown Student",
+        score: correctCount,
+        total_questions: totalQs,
+        answers: userAnswers,
+        timestamp: new Date()
+      });
+      console.log("Detailed GST answers saved to user_gst.");
+
     } catch (error) {
-      console.error("Error saving GST score:", error);
+      console.error("Error saving GST score or detailed answers:", error);
     }
   };
   // ===============================

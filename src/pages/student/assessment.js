@@ -3,7 +3,7 @@ import MainLayout from "../../layout/mainLayout";
 import useRecorder from "./use_recorder";
 import SpeechResult from "./assessment_result";
 import { db } from "../../firebase";
-import { collection, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, updateDoc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 export default function Assessment() {
@@ -20,11 +20,13 @@ export default function Assessment() {
 
   const [testStep, setTestStep] = useState("reading"); // "reading" | "questions" | "analysis"
   const [paragraph, setParagraph] = useState("Loading...");
+  const [storyTitle, setStoryTitle] = useState("");
+  const [storyId, setStoryId] = useState("");
   const [questions, setQuestions] = useState([]);
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [comprehensionScore, setComprehensionScore] = useState(0);
-  
+
   const [oralReadingScore, setOralReadingScore] = useState(0);
   const [readingRate, setReadingRate] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -47,7 +49,7 @@ export default function Assessment() {
         if (userSnap.exists()) {
           const userData = userSnap.data();
           const gstScore = userData.gst_score || 0;
-          
+
           const currentGrade = parseInt((userData.grade_level || "4").toString().replace(/[^0-9]/g, '')) || 4;
           let targetGrade = currentGrade;
 
@@ -69,6 +71,8 @@ export default function Assessment() {
             const storyDoc = storiesSnap.docs[0];
             const docData = storyDoc.data();
             setParagraph(docData.passage || docData.content || docData.text || docData.paragraph || "No passage content found in document.");
+            setStoryTitle(docData.title || "Unknown Story");
+            setStoryId(storyDoc.id);
 
             // Fetch questions from that specific story's subcollection
             const qRef = collection(db, "individualized_assessment", targetGrade.toString(), "stories", storyDoc.id, "questions");
@@ -151,17 +155,33 @@ export default function Assessment() {
 
   const calculateComprehensionScore = async () => {
     let correctCount = 0;
+    const userAnswers = [];
+
     questions.forEach((q) => {
       const selectedIndex = answers[q.id];
       const correctIndex = q.choices?.findIndex((choice) => choice.is_correct === true);
-      if (selectedIndex === correctIndex) {
+      const isCorrect = selectedIndex === correctIndex;
+
+      if (isCorrect) {
         correctCount++;
       }
+
+      userAnswers.push({
+        question_id: q.id,
+        question_text: q.question_text || "",
+        story_id: storyId || null,
+        story_title: storyTitle || "Unknown Story",
+        selected_index: selectedIndex !== undefined ? selectedIndex : null,
+        selected_text: selectedIndex !== undefined && q.choices[selectedIndex] ? q.choices[selectedIndex].text : null,
+        is_correct: isCorrect,
+        correct_index: correctIndex,
+        correct_text: correctIndex !== -1 && q.choices[correctIndex] ? q.choices[correctIndex].text : null,
+      });
     });
     setComprehensionScore(correctCount);
 
-    const percentage = questions.length > 0 
-      ? Math.round((correctCount / questions.length) * 100) 
+    const percentage = questions.length > 0
+      ? Math.round((correctCount / questions.length) * 100)
       : 0;
 
     const wordLevel = getWordReadingLevel(oralReadingScore);
@@ -176,8 +196,9 @@ export default function Assessment() {
 
     try {
       const uid = localStorage.getItem("uuid");
+      const firstName = localStorage.getItem("firstName") || "Unknown Student";
       if (!uid) return;
-      
+
       const userRef = doc(db, "users", uid);
       await updateDoc(userRef, {
         individualized_comprehension_score: correctCount,
@@ -186,6 +207,21 @@ export default function Assessment() {
         comprehension_level: compLevel,
         oral_reading_profile: overall
       });
+
+      await setDoc(doc(db, "user_individual_assessment", uid), {
+        student_id: uid,
+        student_name: firstName,
+        timestamp: new Date(),
+        // word_reading_score: oralReadingScore,
+        // word_reading_level: wordLevel,
+        // comprehension_score: correctCount,
+        // comprehension_level: compLevel,
+        // reading_rate: readingRate,
+        // overall_profile: overall,
+        answers: userAnswers
+      });
+      console.log("Detailed individual assessment stored.");
+
     } catch (err) {
       console.error("Error saving comprehension score:", err);
     }
@@ -254,9 +290,9 @@ export default function Assessment() {
 
             {result && paragraph !== "Loading..." && (
               <div className="mt-8">
-                <SpeechResult 
-                  originalText={paragraph} 
-                  spokenText={result} 
+                <SpeechResult
+                  originalText={paragraph}
+                  spokenText={result}
                   duration={duration}
                   onSave={handleSaveResult}
                   onRetry={handleRetry}
@@ -283,11 +319,10 @@ export default function Assessment() {
                   <li
                     key={idx}
                     onClick={() => handleSelectChoice(currentQuestion.id, idx)}
-                    className={`border-2 p-5 rounded-lg cursor-pointer transition text-xl shadow-sm ${
-                      isSelected
+                    className={`border-2 p-5 rounded-lg cursor-pointer transition text-xl shadow-sm ${isSelected
                         ? "bg-blue-500 text-white border-blue-500 shadow-md"
                         : "hover:bg-blue-50 bg-gray-50 border-gray-200"
-                    }`}
+                      }`}
                   >
                     {choice.text}
                   </li>
@@ -299,11 +334,10 @@ export default function Assessment() {
               <button
                 onClick={handleNextQuestion}
                 disabled={!isAnswered}
-                className={`px-12 py-4 text-xl rounded-full font-semibold transition shadow-md ${
-                  !isAnswered
+                className={`px-12 py-4 text-xl rounded-full font-semibold transition shadow-md ${!isAnswered
                     ? "bg-gray-300 text-white cursor-not-allowed"
                     : "bg-blue-600 text-white hover:bg-blue-700"
-                }`}
+                  }`}
               >
                 {currentQIndex < questions.length - 1 ? "NEXT QUESTION" : "SUBMIT ANSWERS"}
               </button>
@@ -312,69 +346,68 @@ export default function Assessment() {
         )}
 
         {testStep === "analysis" && (
-           <div className="p-8 flex-1 flex flex-col items-center justify-center animate-fadeIn w-full">
-             
-             {isAnalyzing ? (
-                 <div className="flex flex-col items-center justify-center animate-pulse">
-                     <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
-                     <h2 className="text-3xl font-bold text-gray-700">Analyzing Performance...</h2>
-                     <p className="text-gray-500 mt-2">Correlating Word Reading and Comprehension metrics...</p>
-                 </div>
-             ) : (
-                 <div className="w-full max-w-2xl bg-white border border-gray-100 shadow-2xl rounded-2xl p-8 transform transition-all duration-700 ease-out">
-                    <h2 className="text-3xl font-bold text-center text-blue-800 mb-8 pb-4 border-b">
-                        Oral Reading Profile
-                    </h2>
+          <div className="p-8 flex-1 flex flex-col items-center justify-center animate-fadeIn w-full">
 
-                    <div className="space-y-6 text-xl">
-                        <div className="flex justify-between items-center bg-gray-50 p-5 rounded-xl border border-gray-100">
-                            <span className="font-semibold text-gray-700">Word reading score:</span>
-                            <div className="text-right">
-                                <span className="font-medium mr-4">{oralReadingScore}%</span>
-                                <span className="text-blue-700 font-bold">{profileData.wordReadingLevel}</span>
-                            </div>
-                        </div>
+            {isAnalyzing ? (
+              <div className="flex flex-col items-center justify-center animate-pulse">
+                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+                <h2 className="text-3xl font-bold text-gray-700">Analyzing Performance...</h2>
+                <p className="text-gray-500 mt-2">Correlating Word Reading and Comprehension metrics...</p>
+              </div>
+            ) : (
+              <div className="w-full max-w-2xl bg-white border border-gray-100 shadow-2xl rounded-2xl p-8 transform transition-all duration-700 ease-out">
+                <h2 className="text-3xl font-bold text-center text-blue-800 mb-8 pb-4 border-b">
+                  Oral Reading Profile
+                </h2>
 
-                        <div className="flex justify-between items-center bg-gray-50 p-5 rounded-xl border border-gray-100">
-                            <span className="font-semibold text-gray-700">Comprehension score:</span>
-                            <div className="text-right">
-                                <span className="font-medium mr-4">
-                                  {questions.length > 0 ? Math.round((comprehensionScore / questions.length) * 100) : 0}%
-                                </span>
-                                <span className="text-blue-700 font-bold">{profileData.comprehensionLevel}</span>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-between items-center bg-gray-50 p-5 rounded-xl border border-gray-100">
-                            <span className="font-semibold text-gray-700">Reading Rate:</span>
-                            <span className="font-medium text-gray-800">{readingRate} words per minute</span>
-                        </div>
+                <div className="space-y-6 text-xl">
+                  <div className="flex justify-between items-center bg-gray-50 p-5 rounded-xl border border-gray-100">
+                    <span className="font-semibold text-gray-700">Word reading score:</span>
+                    <div className="text-right">
+                      <span className="font-medium mr-4">{oralReadingScore}%</span>
+                      <span className="text-blue-700 font-bold">{profileData.wordReadingLevel}</span>
                     </div>
+                  </div>
 
-                    <div className="mt-10 pt-6 border-t border-gray-200">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-2xl font-bold text-gray-800">Overall Profile:</h3>
-                            <span className={`text-4xl font-black ${
-                                profileData.overallProfile === 'Independent' ? 'text-green-600' :
-                                profileData.overallProfile === 'Instructional' ? 'text-blue-600' : 'text-red-500'
-                            }`}>
-                                {profileData.overallProfile}
-                            </span>
-                        </div>
+                  <div className="flex justify-between items-center bg-gray-50 p-5 rounded-xl border border-gray-100">
+                    <span className="font-semibold text-gray-700">Comprehension score:</span>
+                    <div className="text-right">
+                      <span className="font-medium mr-4">
+                        {questions.length > 0 ? Math.round((comprehensionScore / questions.length) * 100) : 0}%
+                      </span>
+                      <span className="text-blue-700 font-bold">{profileData.comprehensionLevel}</span>
                     </div>
+                  </div>
 
-                    <div className="mt-12 text-center">
-                        <button
-                            onClick={() => navigate("../pages/student/dashboard")}
-                            className="w-full sm:w-auto px-12 py-4 bg-green-600 text-white text-xl rounded-full font-bold hover:bg-green-700 transition shadow-xl"
-                        >
-                            Return to Dashboard
-                        </button>
-                    </div>
-                 </div>
-             )}
+                  <div className="flex justify-between items-center bg-gray-50 p-5 rounded-xl border border-gray-100">
+                    <span className="font-semibold text-gray-700">Reading Rate:</span>
+                    <span className="font-medium text-gray-800">{readingRate} words per minute</span>
+                  </div>
+                </div>
 
-           </div>
+                <div className="mt-10 pt-6 border-t border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-2xl font-bold text-gray-800">Overall Profile:</h3>
+                    <span className={`text-4xl font-black ${profileData.overallProfile === 'Independent' ? 'text-green-600' :
+                        profileData.overallProfile === 'Instructional' ? 'text-blue-600' : 'text-red-500'
+                      }`}>
+                      {profileData.overallProfile}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-12 text-center">
+                  <button
+                    onClick={() => navigate("../pages/student/dashboard")}
+                    className="w-full sm:w-auto px-12 py-4 bg-green-600 text-white text-xl rounded-full font-bold hover:bg-green-700 transition shadow-xl"
+                  >
+                    Return to Dashboard
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
         )}
       </div>
     </MainLayout>
