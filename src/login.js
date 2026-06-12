@@ -13,8 +13,8 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-   const [loading, setLoading] = useState(false); 
- 
+  const [loading, setLoading] = useState(false);
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -26,7 +26,7 @@ function LoginForm() {
       const uuid = user.uid;
       // console.log(user.uid);
 
-       // Fetch user data from Firestore
+      // Fetch user data from Firestore
       const userRef = doc(db, "users", uuid);
       const userSnap = await getDoc(userRef);
 
@@ -37,31 +37,31 @@ function LoginForm() {
       if (userSnap.exists()) {
         firstName = userSnap.data().first_name || "";
         lastName = userSnap.data().last_name || "";
-        gradeLevel = userSnap.data().grade_level || "";      
-        role = userSnap.data().role || "";    
+        gradeLevel = userSnap.data().grade_level || "";
+        role = userSnap.data().role || "";
       }
 
 
 
-    // Save to localStorage
-    localStorage.setItem("uuid", uuid);
-    localStorage.setItem("firstName", firstName);
-    localStorage.setItem("lastName", lastName);
-    localStorage.setItem("grade_level", gradeLevel);
-    localStorage.setItem("role", role);
-    
-      
-      if(role === "admin"){
+      // Save to localStorage
+      localStorage.setItem("uuid", uuid);
+      localStorage.setItem("firstName", firstName);
+      localStorage.setItem("lastName", lastName);
+      localStorage.setItem("grade_level", gradeLevel);
+      localStorage.setItem("role", role);
+
+
+      if (role === "admin") {
         navigate("../pages/admin/account_management");
-      } else if(role === "teacher"){
-        navigate("../pages/teacher/reading_lists");
-      } else if(role === "student"){
+      } else if (role === "teacher") {
+        navigate("../pages/teacher/students");
+      } else if (role === "student") {
         navigate("../pages/student/dashboard");
       }
       setError("");
     } catch (err) {
       setError("Incorrect login credentials.");
-    } finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -110,7 +110,7 @@ function LoginForm() {
           </button>
         </div>
 
-         <button
+        <button
           type="submit"
           disabled={loading}
           className="w-full py-4 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 text-white text-xl shadow hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center"
@@ -253,26 +253,26 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
       const user = userCredential.user;
 
       await setDoc(doc(db, "users", user.uid), {
-      uid: user.uid,
-      first_name,
-      last_name,
-      gender,
-      birthdate,
-      address,
-      school,
-      role: "student",
-      grade_level,
-      email,
-      classCode,
-      
-      // Assessment fields
-      gst_score: 0,
-      gst_total_questions: 0,
-      gst_assessment_attempted: false,
+        uid: user.uid,
+        first_name,
+        last_name,
+        gender,
+        birthdate,
+        address,
+        school,
+        role: "student",
+        grade_level,
+        email,
+        classCode,
 
-      individualized_score: 0,
-      individualized_assessment_attempted: false,
-      createdAt: new Date(),
+        // Assessment fields
+        gst_score: 0,
+        gst_total_questions: 0,
+        gst_assessment_attempted: false,
+
+        individualized_score: 0,
+        individualized_assessment_attempted: false,
+        createdAt: new Date(),
       });
 
       setError("");
@@ -298,140 +298,140 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
 
 
         <div className="flex w-full">
-             <div className="m-1 w-1/2">
-                   <div className="mb-4 text-left">
-                    <label className="block mb-1 text-gray-700 text-sm">First Name</label>
-                    <input
-                      type="text"
-                      className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      value={first_name}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      placeholder="Enter your first name"
-                      required
-                    />
-                  </div>
-                
-
-                  <div className="mb-4 text-left">
-                    <label className="block mb-1 text-gray-700 text-sm">Gender</label>
-                      <select className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                          value={gender}
-                          onChange={(e) => setGender(e.target.value)}
-                      >
-                          <option>Select</option>
-                          <option value="male">Male</option>
-                          <option value="female">Female</option>
-                      </select>
-                  </div>
-                  <div className="mb-4 text-left">
-                      <label className="block mb-1 text-gray-700 text-sm">Grade Level</label>
-                      <input
-                        type="number"
-                        className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        value={grade_level}
-                        onChange={(e) => setGradeLevel(e.target.value)}
-                        placeholder="Enter your grade level"
-                        required
-                      />
-                  </div>
-
-                  <div className="mb-4 text-left">
-                      <label className="block mb-1 text-gray-700 text-sm">Email</label>
-                      <input
-                        type="email"
-                        className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter your email"
-                        required
-                      />
-                  </div>
-
-                  
-                <div className="mb-4 text-left">
-                  <label className="block mb-1 text-gray-700 text-sm">Password</label>
-                  <input
-                    type="password"
-                    className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your Password"
-                    required
-                  />
-                </div>
-
-           
-
+          <div className="m-1 w-1/2">
+            <div className="mb-4 text-left">
+              <label className="block mb-1 text-gray-700 text-sm">First Name</label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={first_name}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Enter your first name"
+                required
+              />
             </div>
-                
-            <div className="w-10"></div>    
-            <div className="m-1 w-1/2">
-                <div className="mb-4 text-left">
-                    <label className="block mb-1 text-gray-700 text-sm">Last Name</label>
-                    <input
-                      type="text"
-                      className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      value={last_name}
-                      onChange={(e) => setLastName(e.target.value)}
-                      placeholder="Enter your last name"
-                      required
-                    />
-                </div>
-                            <div className="mb-4 text-left">
-                    <label className="block mb-1 text-gray-700 text-sm">Birthdate</label>
-                    <input
-                      type="date"
-                      className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      value={birthdate}
-                      onChange={(e) => setBirthDate(e.target.value)}
-                      placeholder="Enter your date of birth"
-                      required
-                    />
-                  </div>
-                  
-                <div className="mb-4 text-left">
-                  <label className="block mb-1 text-gray-700 text-sm">School</label>
-                  <input
-                    type="text"
-                    className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    value={school}
-                    onChange={(e) => setSchool(e.target.value)}
-                    placeholder="Enter your school"
-                    required
-                  />
-                </div>
 
-                <div className="mb-4 text-left">
-                    <label className="block mb-1 text-gray-700 text-sm">Address</label>
-                    <input
-                      type="text"
-                      className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      placeholder="Enter your address"
-                      required
-                    />
-                 </div>
-          
-                <div className="mb-6 text-left">
-                  <label className="block mb-1 text-gray-700 text-sm">Confirm Password</label>
-                  <input
-                    type="password"
-                    className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm your Password"
-                    required
-                  />
-                </div>
-              </div>
-          
-        </div>    
-          <button
-              type="submit"
-              className="w-full py-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 text-white font-medium shadow hover:opacity-90 transition">
-                  Register
-            </button> 
+
+            <div className="mb-4 text-left">
+              <label className="block mb-1 text-gray-700 text-sm">Gender</label>
+              <select className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+              >
+                <option>Select</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+            <div className="mb-4 text-left">
+              <label className="block mb-1 text-gray-700 text-sm">Grade Level</label>
+              <input
+                type="number"
+                className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={grade_level}
+                onChange={(e) => setGradeLevel(e.target.value)}
+                placeholder="Enter your grade level"
+                required
+              />
+            </div>
+
+            <div className="mb-4 text-left">
+              <label className="block mb-1 text-gray-700 text-sm">Email</label>
+              <input
+                type="email"
+                className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+
+
+            <div className="mb-4 text-left">
+              <label className="block mb-1 text-gray-700 text-sm">Password</label>
+              <input
+                type="password"
+                className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your Password"
+                required
+              />
+            </div>
+
+
+
+          </div>
+
+          <div className="w-10"></div>
+          <div className="m-1 w-1/2">
+            <div className="mb-4 text-left">
+              <label className="block mb-1 text-gray-700 text-sm">Last Name</label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={last_name}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Enter your last name"
+                required
+              />
+            </div>
+            <div className="mb-4 text-left">
+              <label className="block mb-1 text-gray-700 text-sm">Birthdate</label>
+              <input
+                type="date"
+                className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={birthdate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                placeholder="Enter your date of birth"
+                required
+              />
+            </div>
+
+            <div className="mb-4 text-left">
+              <label className="block mb-1 text-gray-700 text-sm">School</label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={school}
+                onChange={(e) => setSchool(e.target.value)}
+                placeholder="Enter your school"
+                required
+              />
+            </div>
+
+            <div className="mb-4 text-left">
+              <label className="block mb-1 text-gray-700 text-sm">Address</label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Enter your address"
+                required
+              />
+            </div>
+
+            <div className="mb-6 text-left">
+              <label className="block mb-1 text-gray-700 text-sm">Confirm Password</label>
+              <input
+                type="password"
+                className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your Password"
+                required
+              />
+            </div>
+          </div>
+
+        </div>
+        <button
+          type="submit"
+          className="w-full py-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 text-white font-medium shadow hover:opacity-90 transition">
+          Register
+        </button>
       </form>
 
       <div className="mt-4 text-sm">
@@ -597,7 +597,7 @@ function RegisterTeacherForm({ onSwitchToLogin }) {
         </button>
       </form>
 
-         <div className="mt-4 text-sm">
+      <div className="mt-4 text-sm">
         <span className="text-gray-600">Already have an account? </span>
         <button
           onClick={onSwitchToLogin}
@@ -663,11 +663,11 @@ export default function App() {
           />
         );
       case "registerTeacher":
-      return (
-        <RegisterTeacherForm
-          onSwitchToLogin={() => setView("login")}
-        />
-      );
+        return (
+          <RegisterTeacherForm
+            onSwitchToLogin={() => setView("login")}
+          />
+        );
       default:
         return <LoginForm />;
     }
@@ -681,22 +681,20 @@ export default function App() {
           <button
             type="button"
             onClick={() => setView("login")}
-            className={`px-6 py-2 rounded-full ${
-              view === "login"
+            className={`px-6 py-2 rounded-full ${view === "login"
                 ? "text-white bg-gradient-to-r from-blue-400 to-blue-600 shadow"
                 : "text-blue-600 border border-blue-400 hover:bg-blue-50"
-            }`}
+              }`}
           >
             Login
           </button>
           <button
             type="button"
             onClick={() => setView("registerUserType")}
-            className={`px-6 py-2 rounded-full ${
-              view !== "login"
+            className={`px-6 py-2 rounded-full ${view !== "login"
                 ? "text-white bg-gradient-to-r from-blue-400 to-blue-600 shadow"
                 : "text-blue-600 border border-blue-400 hover:bg-blue-50"
-            }`}
+              }`}
           >
             Register
           </button>
