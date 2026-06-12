@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [testFlow, setTestFlow] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [profileData, setProfileData] = useState(null);
 
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(0);
@@ -55,6 +56,18 @@ export default function Dashboard() {
 
         const userData = userSnap.data();
 
+        // 🚫 Block returning if already took Individualized Assessment
+        if (userData.individualized_assessment_attempted === true) {
+          setProfileData({
+            wordLevel: userData.individualized_score,
+            compLevel: userData.individualized_comprehension_percentage,
+            overall: userData.oral_reading_profile
+          });
+          setStep("finalResult");
+          setLoading(false);
+          return;
+        }
+
         // 🚫 Block retake of GST
         if (userData.gst_assessment_attempted === true) {
           setScore(userData.gst_score || 0); // show previous score
@@ -64,7 +77,8 @@ export default function Dashboard() {
           return;
         }
 
-        const grade = userSnap.data().grade_level;
+        const gradeStr = userSnap.data().grade_level || "4";
+        const grade = parseInt(String(gradeStr).replace(/[^0-9]/g, '')) || 4;
 
         const storiesRef = collection(
           db,
@@ -266,71 +280,81 @@ export default function Dashboard() {
       )}
 
       {/* ================= QUIZ ================= */}
-      {step === "quiz" && testFlow.length > 0 && (
-        <div className="bg-white text-black p-8 rounded-xl shadow-2xl flex flex-col min-h-screen">
+      {step === "quiz" && (
+        <>
+          {testFlow.length > 0 ? (
+            <div className="bg-white text-black p-8 rounded-xl shadow-2xl flex flex-col min-h-screen">
+              <div className="flex-1">
+                {/* STORY CARD */}
+                {currentCard.type === "story" && (
+                  <div className="text-center">
+                    <h1 className="text-4xl font-bold mb-6">
+                      {currentCard.title}
+                    </h1>
+                    <div className="text-2xl leading-relaxed space-y-4">
+                      {(currentCard.content || "").split(/(?<=\.)\s+/).filter(s => s.trim() !== "").map((sentence, idx) => (
+                        <p key={idx}>{sentence}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-          <div className="flex-1">
+                {/* QUESTION CARD */}
+                {currentCard.type === "question" && (
+                  <>
+                    <p className="mt-6 text-2xl">
+                      {currentCard.question.question_text}
+                    </p>
 
-            {/* STORY CARD */}
-            {currentCard.type === "story" && (
-              <>
-                <h1 className="text-4xl font-bold mb-6">
-                  {currentCard.title}
-                </h1>
-                <p className="text-2xl leading-relaxed">
-                  {currentCard.content}
-                </p>
-              </>
-            )}
+                    <ul className="mt-6 space-y-3">
+                      {currentCard.question.choices?.map((choice, idx) => {
+                        if (!choice || !choice.text || choice.text.trim() === "") return null;
+                        const qId = currentCard.question.id;
+                        const isSelected = answers[qId] === idx;
 
-            {/* QUESTION CARD */}
-            {currentCard.type === "question" && (
-              <>
-                <p className="mt-6 text-2xl">
-                  {currentCard.question.question_text}
-                </p>
+                        return (
+                          <li
+                            key={idx}
+                            onClick={() => handleSelectChoice(qId, idx)}
+                            className={`border p-3 rounded-md cursor-pointer transition
+                              ${isSelected
+                                ? "bg-blue-500 text-white border-blue-500"
+                                : "hover:bg-blue-100"
+                              }
+                            `}
+                          >
+                            {choice.text}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </>
+                )}
+              </div>
 
-                <ul className="mt-6 space-y-3">
-                  {currentCard.question.choices?.map((choice, idx) => {
-                    if (!choice || !choice.text || choice.text.trim() === "") return null;
-                    const qId = currentCard.question.id;
-                    const isSelected = answers[qId] === idx;
-
-                    return (
-                      <li
-                        key={idx}
-                        onClick={() => handleSelectChoice(qId, idx)}
-                        className={`border p-3 rounded-md cursor-pointer transition
-                          ${isSelected
-                            ? "bg-blue-500 text-white border-blue-500"
-                            : "hover:bg-blue-100"
-                          }
-                        `}
-                      >
-                        {choice.text}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </>
-            )}
-          </div>
-
-          <div className="flex justify-end mt-10">
-            <button
-              onClick={handleNext}
-              disabled={isQuestion && !isAnswered}
-              className={`px-16 py-2 text-xl rounded-full font-semibold transition
-                ${isQuestion && !isAnswered
-                  ? "bg-gray-400 text-white cursor-not-allowed"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
-                }
-              `}
-            >
-              {currentIndex < testFlow.length - 1 ? "NEXT" : "SUBMIT"}
-            </button>
-          </div>
-        </div>
+              <div className="flex justify-end mt-10">
+                <button
+                  onClick={handleNext}
+                  disabled={isQuestion && !isAnswered}
+                  className={`px-16 py-2 text-xl rounded-full font-semibold transition
+                    ${isQuestion && !isAnswered
+                      ? "bg-gray-400 text-white cursor-not-allowed"
+                      : "bg-blue-500 text-white hover:bg-blue-600"
+                    }
+                  `}
+                >
+                  {currentIndex < testFlow.length - 1 ? "NEXT" : "SUBMIT"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white text-black p-8 rounded-xl shadow-2xl flex flex-col items-center justify-center min-h-[40vh]">
+              <h2 className="text-3xl font-bold text-red-600 mb-4">No Assessment Available</h2>
+              <p className="text-xl text-gray-700">There are currently no GST questions configured for your grade level.</p>
+              <button onClick={() => setStep("welcome")} className="mt-8 px-8 py-3 bg-blue-600 text-white rounded-full font-semibold">Go Back</button>
+            </div>
+          )}
+        </>
       )}
 
       {/* ================= RESULT ================= */}
@@ -397,15 +421,39 @@ export default function Dashboard() {
 
               <div className="mt-8">
                 <button
-                  onClick={() => setStep("dashboardHome")}
+                  onClick={() => navigate("/pages/student/lessons")}
                   className="px-16 py-3 bg-white text-blue-600 text-xl rounded-full font-semibold hover:bg-gray-200 transition"
                 >
-                  Continue to Dashboard
+                  Continue to Lessons
                 </button>
               </div>
             </>
           )}
         </div>
+      )}
+
+      {/* ================= FINAL RESULT ================= */}
+      {step === "finalResult" && (
+        <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between">
+          <div className="pb-15">
+            <h1 className="text-4xl font-bold">Assessment Completed</h1>
+            <p className="pt-4">
+              You have completely finished all necessary parts of the reading assessment.
+              Your teacher now has your results on file! You can check your detailed breakdown at any time by visiting the <strong>Scores</strong> tab on the sidebar.
+            </p>
+
+            <div className="mt-12">
+              <button
+                onClick={() => navigate("/pages/student/lessons")}
+                className="px-8 py-4 bg-yellow-400 text-gray-900 rounded-full text-md font-bold hover:bg-yellow-300"
+              >
+                View Recommended Modules
+              </button>
+            </div>
+          </div>
+        </div>
+
+
       )}
 
     </MainLayout>
