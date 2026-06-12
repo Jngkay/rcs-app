@@ -17,6 +17,13 @@ export default function IndividualizedAssessmentAdmin() {
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [selectedStory, setSelectedStory] = useState(null);
+    const [feedbackModal, setFeedbackModal] = useState({
+        show: false,
+        title: "",
+        message: "",
+        isError: false,
+        onConfirm: null
+    });
 
     const fetchStories = async () => {
         setLoading(true);
@@ -62,13 +69,17 @@ export default function IndividualizedAssessmentAdmin() {
         setLoading(false);
     };
 
-    const handleDeleteStory = async (storyId) => {
-        const confirmDelete = window.confirm(
-            "Are you sure you want to delete this story?"
-        );
+    const handleDeleteStory = (storyId) => {
+        setFeedbackModal({
+            show: true,
+            title: "Confirm Delete",
+            message: "Are you sure you want to delete this story?",
+            isError: false,
+            onConfirm: () => executeDeleteStory(storyId)
+        });
+    };
 
-        if (!confirmDelete) return;
-
+    const executeDeleteStory = async (storyId) => {
         try {
             // 1️⃣ Delete all questions subcollection
             const questionsRef = collection(
@@ -91,13 +102,26 @@ export default function IndividualizedAssessmentAdmin() {
                 doc(db, "individualized_assessment", grade, "stories", storyId)
             );
 
-            alert("Story deleted successfully!");
+            setFeedbackModal({
+                show: true,
+                title: "Success",
+                message: "Story deleted successfully!",
+                isError: false,
+                onConfirm: null
+            });
 
             // 3️⃣ Refresh list
             fetchStories();
 
         } catch (error) {
             console.error("Error deleting story:", error);
+            setFeedbackModal({
+                show: true,
+                title: "Error",
+                message: "Failed to delete story: " + error.message,
+                isError: true,
+                onConfirm: null
+            });
         }
     };
 
@@ -236,6 +260,59 @@ export default function IndividualizedAssessmentAdmin() {
                     </div>
                 ))}
             </div>
+
+            {/* Feedback / Confirmation Modal */}
+            {feedbackModal.show && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 animate-fadeIn" style={{ zIndex: 9999 }}>
+                    <div className="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full text-center text-black">
+                        {feedbackModal.isError ? (
+                            <div className="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-xl">
+                                !
+                            </div>
+                        ) : feedbackModal.onConfirm ? (
+                            <div className="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-xl">
+                                ?
+                            </div>
+                        ) : (
+                            <div className="w-12 h-12 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                        )}
+                        <h2 className="text-xl font-bold mb-2">{feedbackModal.title}</h2>
+                        <p className="text-gray-600 mb-6">{feedbackModal.message}</p>
+                        <div className="flex justify-center gap-3">
+                            {feedbackModal.onConfirm ? (
+                                <>
+                                    <button
+                                        onClick={() => setFeedbackModal({ show: false, title: "", message: "", isError: false, onConfirm: null })}
+                                        className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded font-semibold transition"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            feedbackModal.onConfirm();
+                                            setFeedbackModal({ show: false, title: "", message: "", isError: false, onConfirm: null });
+                                        }}
+                                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-semibold transition"
+                                    >
+                                        Delete
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    onClick={() => setFeedbackModal({ show: false, title: "", message: "", isError: false, onConfirm: null })}
+                                    className={`px-6 py-2 rounded font-semibold text-white transition ${feedbackModal.isError ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}`}
+                                >
+                                    Okay
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </AdminLayout>
     );
 }

@@ -26,6 +26,7 @@ export default function Assessment() {
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [comprehensionScore, setComprehensionScore] = useState(0);
+  const [hasStories, setHasStories] = useState(false);
 
   const [oralReadingScore, setOralReadingScore] = useState(0);
   const [readingRate, setReadingRate] = useState(0);
@@ -73,6 +74,7 @@ export default function Assessment() {
             setParagraph(docData.passage || docData.content || docData.text || docData.paragraph || "No passage content found in document.");
             setStoryTitle(docData.title || "Unknown Story");
             setStoryId(storyDoc.id);
+            setHasStories(true);
 
             // Fetch questions from that specific story's subcollection
             const qRef = collection(db, "individualized_assessment", targetGrade.toString(), "stories", storyDoc.id, "questions");
@@ -82,13 +84,16 @@ export default function Assessment() {
             setQuestions(qList);
           } else {
             setParagraph(`No stories found for calculated target grade level ${targetGrade}.`);
+            setHasStories(false);
           }
         } else {
           setParagraph("User data could not be loaded.");
+          setHasStories(false);
         }
       } catch (error) {
         console.error("Error fetching individualized passage:", error);
         setParagraph("Artificial intelligence is transforming the way people interact with technology.");
+        setHasStories(true);
       }
     };
 
@@ -262,16 +267,22 @@ export default function Assessment() {
                 Read the paragraph below
               </h2>
 
-              <div className="bg-white shadow-inner border rounded-md p-6 text-gray-800 text-lg md:text-xl leading-relaxed mb-8">
-                {paragraph}
+              <div className="bg-white shadow-inner border rounded-md p-6 text-gray-800 text-lg md:text-xl leading-relaxed mb-8 text-center space-y-4">
+                {(paragraph || "").split(/(?<=\.)\s+/).filter(s => s.trim() !== "").map((sentence, idx) => (
+                  <p key={idx}>{sentence}</p>
+                ))}
               </div>
 
               <div className="flex justify-center mt-4">
                 {!isRecording ? (
                   <button
                     onClick={startRecording}
-                    disabled={isProcessing}
-                    className="bg-blue-700 hover:bg-blue-800 text-white px-10 py-4 text-lg rounded-full font-semibold transition shadow-md"
+                    disabled={isProcessing || !hasStories}
+                    className={`px-10 py-4 text-lg rounded-full font-semibold transition shadow-md ${
+                      isProcessing || !hasStories
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-blue-700 hover:bg-blue-800 text-white"
+                    }`}
                   >
                     {isProcessing ? 'Processing Speech...' : 'START READING'}
                   </button>
@@ -398,10 +409,10 @@ export default function Assessment() {
 
                 <div className="mt-12 text-center">
                   <button
-                    onClick={() => navigate("../pages/student/dashboard")}
+                    onClick={() => navigate("/pages/student/lessons")}
                     className="w-full sm:w-auto px-12 py-4 bg-green-600 text-white text-xl rounded-full font-bold hover:bg-green-700 transition shadow-xl"
                   >
-                    Return to Dashboard
+                    View Recommended Modules
                   </button>
                 </div>
               </div>
