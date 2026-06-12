@@ -6,19 +6,15 @@ import Dashboard from "./pages/student/dashboard";
 import Lessons from "./pages/student/lessons";
 import Scores from "./pages/student/scores";
 import Progress from "./pages/student/progress";
-// import Settings from "./pages/teacher/settings";
 import Profile from "./pages/student/profile";
 import AccountManagement from "./pages/admin/account_management";
 import ComprehensionTest from "./pages/admin/comprehension_test";
-import ReadingLists from "./pages/teacher/reading_lists";
 import Classes from "./pages/teacher/classes";
-import Performance from "./pages/teacher/performance";
-import Assignments from "./pages/teacher/assignments";
-import SettingsTeacher from "./pages/teacher/settings";
 import Settings from "./pages/student/settings";
 import Assessment from "./pages/student/assessment";
 import IndividualizedAssessmentAdmin from "./pages/admin/individualized_assessment";
 import Student from "./pages/teacher/students";
+import TeacherProfile from "./pages/teacher/profile";
 
 function App() {
   return (
@@ -43,16 +39,13 @@ function App() {
         <Route path="/pages/student/scores" element={<Scores />} />
         <Route path="/pages/student/progress" element={<Progress />} />
         <Route path="/pages/student/profile" element={<Profile />} />
-        <Route path="/pages/student/settings" element={<Settings />} />
+        <Route path="/pages/student/profile" element={<Settings />} />
         <Route path="/pages/student/assessment" element={<Assessment />} />
 
 
         {/* Routes for Teacher */}
-        <Route path="/pages/teacher/reading_lists" element={<ReadingLists />} />
         <Route path="/pages/teacher/classes" element={<Classes />} />
-        <Route path="/pages/teacher/performance" element={<Performance />} />
-        <Route path="/pages/teacher/assignments" element={<Assignments />} />
-        <Route path="/pages/teacher/settings" element={<SettingsTeacher />} />
+        <Route path="/pages/teacher/profile" element={<TeacherProfile />} />
         <Route path="/pages/teacher/students" element={<Student />} />
 
       </Routes>
