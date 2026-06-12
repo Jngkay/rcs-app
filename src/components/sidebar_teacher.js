@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Home, Book, LogOut, Menu } from "lucide-react";
+import { Book, LogOut, Menu } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
@@ -45,12 +45,13 @@ export default function SideBarTeacher() {
 
       {/* Nav links */}
       <nav className="space-y-4">
+
         <Link
-          to="/pages/teacher/reading_lists"
-          className="flex items-center gap-2 p-2 rounded-lg bg-orange-500 font-medium"
+          to="/pages/teacher/students"
+          className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
-          <Home size={18} />
-          {isOpen && <spasn>Reading Lists</spasn>}
+          <Book size={18} />
+          {isOpen && <span>My Students</span>}
         </Link>
 
         <Link
@@ -62,33 +63,7 @@ export default function SideBarTeacher() {
         </Link>
 
         <Link
-          to="/pages/teacher/students"
-          className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
-        >
-          <Book size={18} />
-          {isOpen && <span>My Students</span>}
-        </Link>
-
-
-
-        <Link
-          to="/pages/teacher/performance"
-          className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
-        >
-          <Book size={18} />
-          {isOpen && <span>Performance</span>}
-        </Link>
-
-        <Link
-          to="/pages/teacher/assignments"
-          className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
-        >
-          <Book size={18} />
-          {isOpen && <span>Assignments</span>}
-        </Link>
-
-        <Link
-          to="/pages/teacher/settings"
+          to="/pages/teacher/profile"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
           <Book size={18} />
@@ -111,7 +86,7 @@ export default function SideBarTeacher() {
       {/* DELETE CONFIRMATION MODAL */}
       {showLogoutConfirmation && (
 
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center" style={{ zIndex: 9999 }}>
 
           <div className="bg-white p-6 rounded-xl shadow-xl w-120">
 

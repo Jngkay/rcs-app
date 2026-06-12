@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { Home, Book, BarChart, Settings, LogOut, Heart, Menu } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { signOut } from "firebase/auth";
@@ -69,16 +69,16 @@ export default function SideBar() {
           {isOpen && <span>Scores</span>}
         </Link>
 
-        <Link
+        {/* <Link
           to="/pages/student/progress"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
           <Heart size={18} />
           {isOpen && <span>Your Progress</span>}
-        </Link>
+        </Link> */}
 
         <Link
-          to="/pages/student/settings"
+          to="/pages/student/profile"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
           <Settings size={18} />
@@ -87,7 +87,7 @@ export default function SideBar() {
 
         <button
           disabled={loading}
-          onClick={()=>{
+          onClick={() => {
             setShowLogoutConfirmation(true);
           }}
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100 text-red-500 w-full text-left"
@@ -97,51 +97,51 @@ export default function SideBar() {
         </button>
       </nav>
 
-          {/* DELETE CONFIRMATION MODAL */}
-          {showLogoutConfirmation && (
+      {/* DELETE CONFIRMATION MODAL */}
+      {showLogoutConfirmation && (
 
-            <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center" style={{ zIndex: 9999 }}>
 
-              <div className="bg-white p-6 rounded-xl shadow-xl w-120">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-120">
 
-                <h2 className="text-xl font-bold mb-2">
-                  Confirm Logout
-                  
-                </h2>
-                <hr></hr>
+            <h2 className="text-xl font-bold mb-2">
+              Confirm Logout
 
-                <p className="mb-2 mt-4">
-                  You are about to log out of your session. Any unsaved changes may be lost. 
-                
-                </p>
+            </h2>
+            <hr></hr>
 
-                <p>Do you want to continue?</p>
+            <p className="mb-2 mt-4">
+              You are about to log out of your session. Any unsaved changes may be lost.
 
-                <div className="flex justify-end gap-3">
+            </p>
 
-                  <button
-                    onClick={()=>setShowLogoutConfirmation(false)}
-                    className="px-4 py-2 bg-gray-300 rounded"
-                  >
-                    Cancel
-                  </button>
+            <p>Do you want to continue?</p>
 
-                  <button
-                    onClick={handleLogout}
-                    disabled={loading}
-                    className="px-4 py-2 bg-red-500 text-white rounded"
-                  >
-                    {loading ? "Logging out..." : "Log out"}
-                  </button>
+            <div className="flex justify-end gap-3">
 
-                </div>
+              <button
+                onClick={() => setShowLogoutConfirmation(false)}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Cancel
+              </button>
 
-              </div>
+              <button
+                onClick={handleLogout}
+                disabled={loading}
+                className="px-4 py-2 bg-red-500 text-white rounded"
+              >
+                {loading ? "Logging out..." : "Log out"}
+              </button>
 
             </div>
 
-          )}
+          </div>
+
+        </div>
+
+      )}
     </aside>
-    
+
   );
 }

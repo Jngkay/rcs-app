@@ -85,7 +85,7 @@ export default function SideBarAdmin() {
       {/* DELETE CONFIRMATION MODAL */}
       {showLogoutConfirmation && (
 
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center" style={{ zIndex: 9999 }}>
 
           <div className="bg-white p-6 rounded-xl shadow-xl w-120">
 
