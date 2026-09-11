@@ -146,28 +146,28 @@ export default function ComprehensionTest() {
       {/* Grade Selector */}
       <div class="flex justify-between mb-6">
         <div className="mb-4">
-            <label className="font-semibold text-black">Select Grade Level:</label>
-            <select
-              className="border p-2 ml-3 rounded"
-              value={grade}
-              onChange={(e) => setGrade(e.target.value)}
-            >
-              <option value="grade_4">Grade 4</option>
-              <option value="grade_5">Grade 5</option>
-              <option value="grade_6">Grade 6</option>
-            </select>
-          </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded"
+          <label className="font-semibold text-black">Select Grade Level:</label>
+          <select
+            className="border p-2 ml-3 rounded"
+            value={grade}
+            onChange={(e) => setGrade(e.target.value)}
           >
-            Add Story
-          </button>
+            <option value="grade_4">Grade 4</option>
+            <option value="grade_5">Grade 5</option>
+            <option value="grade_6">Grade 6</option>
+          </select>
+        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-green-600 text-white px-4 py-2 rounded"
+        >
+          Add Story
+        </button>
       </div>
 
-      
 
-      
+
+
 
       {showModal && (
         <CompreTestModal
@@ -185,81 +185,50 @@ export default function ComprehensionTest() {
         />
       )}
 
-      {/* Content Section */}
-      {loading && <p className="text-black">Loading comprehension tests...</p>}
+      {/* Organized Story Cards Grid */}
+      {loading && <p className="text-slate-600 font-medium">Loading comprehension tests...</p>}
 
       {!loading && stories.length === 0 && (
-        <p className="text-gray-600">No tests found for this grade.</p>
+        <div className="bg-white p-8 rounded-2xl border border-slate-100 text-center text-slate-500 shadow-sm">
+          No story tests found for this grade. Click "+ Add Story" to create one.
+        </div>
       )}
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {stories.map((story) => (
-          <div key={story.id} className="p-5 border rounded-lg shadow-sm bg-white text-black">
-
-            <div class="flex justify-between mb-6">
-              <h2 className="text-xl font-bold mb-2">{story.title}</h2>
-
-              <div>
-                <button
-                  onClick={() => {
-                    setSelectedStory(story);
-                    setShowModal(true);
-                  }}
-                  className="bg-yellow-400 text-white px-4 py-2 rounded mr-4">
-                  Edit
-                </button>
-
-                <button
-                  onClick={() => handleDeleteStory(story.id)}
-                  className="bg-red-600 text-white px-4 py-2 rounded">
-                  Delete
-                </button>             
-              
-              </div>
-                
+          <div
+            key={story.id}
+            className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between"
+          >
+            <div>
+              {/* Passage Title */}
+              <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 leading-snug mb-3">
+                {story.title}
+              </h3>
+              {/* Word Count */}
+              <p className="text-sm text-slate-600 mb-6">
+                <span className="font-semibold text-slate-800">Word Count:</span> {story.word_count || 0}
+              </p>
             </div>
-            <p className="text-gray-700 mb-3">
-              {story.content}
-            </p>
 
-            <p className="mb-2">
-              <strong>Word Count:</strong> {story.word_count}
-            </p>
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+              <button
+                onClick={() => {
+                  setSelectedStory(story);
+                  setShowModal(true);
+                }}
+                className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded transition-all"
+              >
+                Edit
+              </button>
 
-            <h3 className="font-semibold mt-4">Questions</h3>
-
-            <div className="mt-2 space-y-3">
-              {story.questions.map((q) => (
-             <div key={q.id} className="border p-3 rounded">
-                <p className="font-semibold text-lg">
-                  {q.order}. {q.question_text}
-                </p>
-
-                <ul className="mt-2 space-y-1">
-                  {[0, 1, 2, 3].map((i) => {
-                    const choice = q.choices[i];
-                    if (!choice || !choice.text || choice.text.trim() === "") return null;
-
-                    return (
-                      <li
-                        key={i}
-                        className={`p-2 rounded border ${
-                          choice.is_correct
-                            ? "bg-green-100 border-green-500 font-semibold"
-                            : "bg-gray-100"
-                        }`}
-                      >
-                        {String.fromCharCode(65 + i)}. {choice.text}
-
-                        {choice.is_correct && (
-                          <span className="ml-2 text-green-700 font-bold">(Correct Answer)</span>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-              ))}
+              <button
+                onClick={() => handleDeleteStory(story.id)}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-all"
+              >
+                Delete
+              </button>
             </div>
           </div>
         ))}
