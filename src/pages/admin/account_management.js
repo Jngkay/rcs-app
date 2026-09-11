@@ -87,22 +87,20 @@ export default function AccountManagement() {
           <div className="flex gap-4">
             <button
               onClick={() => setSelectedRole("students")}
-              className={`px-4 py-2 rounded font-semibold transition ${
-                selectedRole === "students"
+              className={`px-4 py-2 rounded font-semibold transition ${selectedRole === "students"
                   ? "bg-white text-blue-600 shadow"
                   : "bg-blue-500 hover:bg-blue-400"
-              }`}
+                }`}
             >
               Students ({filteredStudents.length})
             </button>
 
             <button
               onClick={() => setSelectedRole("teachers")}
-              className={`px-4 py-2 rounded font-semibold transition ${
-                selectedRole === "teachers"
+              className={`px-4 py-2 rounded font-semibold transition ${selectedRole === "teachers"
                   ? "bg-white text-blue-600 shadow"
                   : "bg-blue-500 hover:bg-blue-400"
-              }`}
+                }`}
             >
               Teachers ({filteredTeachers.length})
             </button>
@@ -167,7 +165,7 @@ export default function AccountManagement() {
                       <td className="p-3">{s.email}</td>
                       <td className="p-3">{s.grade_level}</td>
                       <td className="p-3">
-                        <button className="px-3 py-1 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded mr-2 transition">
+                        <button className="px-3 py-1 bg-blue-600 text-white rounded mr-2 hover:bg-blue-700">
                           Edit
                         </button>
                         <button className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
@@ -228,11 +226,10 @@ export default function AccountManagement() {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`px-3 py-1 rounded font-medium transition ${
-                          currentPage === page
+                        className={`px-3 py-1 rounded font-medium transition ${currentPage === page
                             ? "bg-white text-blue-600 font-bold shadow-sm"
                             : "border border-white/40 hover:bg-white/20 text-white"
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
@@ -274,7 +271,7 @@ export default function AccountManagement() {
                       <td className="p-3">{t.email}</td>
                       <td className="p-3">{t.employee_id}</td>
                       <td className="p-3">
-                        <button className="px-3 py-1 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded mr-2 transition">
+                        <button className="px-3 py-1 bg-blue-600 text-white rounded mr-2 hover:bg-blue-700">
                           Edit
                         </button>
                         <button className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
@@ -335,11 +332,10 @@ export default function AccountManagement() {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`px-3 py-1 rounded font-medium transition ${
-                          currentPage === page
+                        className={`px-3 py-1 rounded font-medium transition ${currentPage === page
                             ? "bg-white text-blue-600 font-bold shadow-sm"
                             : "border border-white/40 hover:bg-white/20 text-white"
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
