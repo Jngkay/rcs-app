@@ -75,7 +75,9 @@ export default function Students() {
         return "NEEDS_IND";
     };
 
-    // Filter students based on dropdown selections
+    const [searchTerm, setSearchTerm] = useState("");
+
+    // Filter students based on dropdown selections and search term
     let displayedStudents = selectedClassCode === "ALL"
         ? students
         : students.filter(s => s.classCode === selectedClassCode);
@@ -83,6 +85,29 @@ export default function Students() {
     if (selectedStatus !== "ALL") {
         displayedStudents = displayedStudents.filter(s => getStudentStatus(s) === selectedStatus);
     }
+
+    if (searchTerm.trim() !== "") {
+        const queryStr = searchTerm.toLowerCase();
+        displayedStudents = displayedStudents.filter(s => {
+            const name = `${s.first_name || ""} ${s.last_name || ""}`.toLowerCase();
+            const email = (s.email || "").toLowerCase();
+            const classCode = (s.classCode || "").toLowerCase();
+            return name.includes(queryStr) || email.includes(queryStr) || classCode.includes(queryStr);
+        });
+    }
+
+    // Pagination state (default 10 rows)
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedClassCode, selectedStatus, searchTerm]);
+
+    const totalStudents = displayedStudents.length;
+    const totalPages = Math.ceil(totalStudents / rowsPerPage) || 1;
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const paginatedStudents = displayedStudents.slice(startIndex, startIndex + rowsPerPage);
 
     const getStatusBadge = (status) => {
         switch (status) {
@@ -168,39 +193,66 @@ export default function Students() {
             </div>
 
             <div className="bg-white p-6 rounded-xl shadow-md">
-                <div className="flex flex-col md:flex-row justify-end items-start md:items-center mb-6 gap-6">
-
-                    {/* Status Filter */}
-                    <div className="flex items-center gap-3">
-                        <label className="font-semibold text-gray-700">Status:</label>
-                        <select
-                            className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            value={selectedStatus}
-                            onChange={(e) => setSelectedStatus(e.target.value)}
-                        >
-                            <option value="ALL">All</option>
-                            <option value="PENDING_GST">Pending</option>
-                            <option value="INDEPENDENT">Independent</option>
-                            <option value="NEEDS_IND">To Assess</option>
-                            <option value="COMPLETED_IND">Completed</option>
-                        </select>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    {/* Search Input */}
+                    <div className="relative flex items-center w-full md:w-72">
+                        <input
+                            type="text"
+                            placeholder="Search students..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                        {searchTerm ? (
+                            <button
+                                onClick={() => setSearchTerm("")}
+                                className="absolute right-3 text-gray-400 hover:text-gray-600 font-bold text-sm"
+                                title="Clear search"
+                            >
+                                ✕
+                            </button>
+                        ) : (
+                            <button className="absolute right-2.5 text-gray-400 p-1">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </button>
+                        )}
                     </div>
 
-                    {/* Class Filter */}
-                    <div className="flex items-center gap-3">
-                        <label className="font-semibold text-gray-700">Class:</label>
-                        <select
-                            className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            value={selectedClassCode}
-                            onChange={(e) => setSelectedClassCode(e.target.value)}
-                        >
-                            <option value="ALL">All Classes</option>
-                            {classes.map(cls => (
-                                <option key={cls.class_code} value={cls.class_code}>
-                                    {cls.subject_name} ({cls.class_code})
-                                </option>
-                            ))}
-                        </select>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        {/* Status Filter */}
+                        <div className="flex items-center gap-3">
+                            <label className="font-semibold text-gray-700 text-sm">Status:</label>
+                            <select
+                                className="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                                value={selectedStatus}
+                                onChange={(e) => setSelectedStatus(e.target.value)}
+                            >
+                                <option value="ALL">All</option>
+                                <option value="PENDING_GST">Pending</option>
+                                <option value="INDEPENDENT">Independent</option>
+                                <option value="NEEDS_IND">To Assess</option>
+                                <option value="COMPLETED_IND">Completed</option>
+                            </select>
+                        </div>
+
+                        {/* Class Filter */}
+                        <div className="flex items-center gap-3">
+                            <label className="font-semibold text-gray-700 text-sm">Class:</label>
+                            <select
+                                className="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                                value={selectedClassCode}
+                                onChange={(e) => setSelectedClassCode(e.target.value)}
+                            >
+                                <option value="ALL">All Classes</option>
+                                {classes.map(cls => (
+                                    <option key={cls.class_code} value={cls.class_code}>
+                                        {cls.subject_name} ({cls.class_code})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -220,8 +272,8 @@ export default function Students() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {displayedStudents.length > 0 ? (
-                                    displayedStudents.map(student => (
+                                {paginatedStudents.length > 0 ? (
+                                    paginatedStudents.map(student => (
                                         <tr key={student.id} className="hover:bg-gray-50 border-b">
                                             <td className="p-3 font-medium">{student.first_name} {student.last_name}</td>
                                             <td className="p-3">{student.grade_level}</td>
@@ -250,6 +302,70 @@ export default function Students() {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+                )}
+
+                {/* Pagination Controls */}
+                {!loading && displayedStudents.length > 0 && (
+                    <div className="flex flex-col sm:flex-row justify-between items-center mt-4 pt-4 border-t border-gray-200 gap-4 text-sm text-gray-600">
+                        <div>
+                            Showing <span className="font-semibold text-gray-800">{startIndex + 1}</span> to{" "}
+                            <span className="font-semibold text-gray-800">
+                                {Math.min(startIndex + rowsPerPage, totalStudents)}
+                            </span>{" "}
+                            of <span className="font-semibold text-gray-800">{totalStudents}</span> entries
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1.5">
+                                <label className="text-gray-600 text-xs font-semibold">Rows per page:</label>
+                                <select
+                                    value={rowsPerPage}
+                                    onChange={(e) => {
+                                        setRowsPerPage(Number(e.target.value));
+                                        setCurrentPage(1);
+                                    }}
+                                    className="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                                >
+                                    <option value={5}>5</option>
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={50}>50</option>
+                                </select>
+                            </div>
+
+                            <div className="flex items-center space-x-1">
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent font-medium transition"
+                                >
+                                    Previous
+                                </button>
+
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                    <button
+                                        key={page}
+                                        onClick={() => setCurrentPage(page)}
+                                        className={`px-3 py-1 rounded font-medium transition ${
+                                            currentPage === page
+                                                ? "bg-blue-600 text-white border border-blue-600 shadow-sm"
+                                                : "border border-gray-300 hover:bg-gray-100 text-gray-700 bg-white"
+                                        }`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent font-medium transition"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

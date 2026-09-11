@@ -30,6 +30,15 @@ export default function Classes() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [classToDelete, setClassToDelete] = useState(null);
 
+  // Pagination state (default 10 rows)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const totalClasses = classes.length;
+  const totalPages = Math.ceil(totalClasses / rowsPerPage) || 1;
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const paginatedClasses = classes.slice(startIndex, startIndex + rowsPerPage);
+
   // =========================
   // FETCH CLASSES
   // =========================
@@ -264,7 +273,7 @@ export default function Classes() {
       {/* GOOGLE CLASSROOM STYLE CARDS */}
       <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6">
 
-        {classes.map(cls => (
+        {paginatedClasses.map(cls => (
 
           <div
             key={cls.id}
@@ -333,6 +342,70 @@ export default function Classes() {
         ))}
 
       </div>
+
+      {/* Pagination Controls */}
+      {classes.length > 0 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t border-gray-200 gap-4 text-sm text-gray-600 bg-white p-4 rounded-xl shadow-sm">
+          <div>
+            Showing <span className="font-semibold text-gray-800">{startIndex + 1}</span> to{" "}
+            <span className="font-semibold text-gray-800">
+              {Math.min(startIndex + rowsPerPage, totalClasses)}
+            </span>{" "}
+            of <span className="font-semibold text-gray-800">{totalClasses}</span> classes
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <label className="text-gray-600 text-xs font-semibold">Classes per page:</label>
+              <select
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
+
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent font-medium transition"
+              >
+                Previous
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1 rounded font-medium transition ${
+                    currentPage === page
+                      ? "bg-blue-600 text-white border border-blue-600 shadow-sm"
+                      : "border border-gray-300 hover:bg-gray-100 text-gray-700 bg-white"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent font-medium transition"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* DELETE CONFIRMATION MODAL */}
       {showDeleteModal && (
