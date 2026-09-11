@@ -72,19 +72,19 @@ export default function TopBar() {
           {role === "teacher" ? (
             <Link
               to="/pages/teacher/profile"
-              className="flex items-center gap-2 p-2 rounded-lg bg-orange-500 font-medium text-white shadow-sm hover:opacity-95 transition-all"
+              className="flex items-center gap-2 p-2 rounded-lg bg-blue-500 font-medium text-white shadow-sm hover:opacity-95 transition-all"
             >
               {firstName} {lastName}
             </Link>
           ) : role === "student" ? (
             <Link
               to="/pages/student/profile"
-              className="flex items-center gap-2 p-2 rounded-lg bg-orange-500 font-medium text-white shadow-sm hover:opacity-95 transition-all"
+              className="flex items-center gap-2 p-2 rounded-lg bg-blue-500 font-medium text-white shadow-sm hover:opacity-95 transition-all"
             >
               {firstName} {lastName}
             </Link>
           ) : (
-            <span className="flex items-center gap-2 p-2 rounded-lg bg-orange-500 font-medium text-white cursor-default select-none">
+            <span className="flex items-center gap-2 p-2 rounded-lg bg-blue-500 font-medium text-white cursor-default select-none">
               {firstName || "Admin"} {lastName}
             </span>
           )}
