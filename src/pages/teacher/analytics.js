@@ -34,6 +34,10 @@ export default function TeacherAnalytics() {
   const [selectedStudentDetail, setSelectedStudentDetail] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
+  // Distribution Filters
+  const [distributionGradeFilter, setDistributionGradeFilter] = useState("ALL");
+  const [distributionClassFilter, setDistributionClassFilter] = useState("ALL");
+
   // Analytics Metrics State
   const [metrics, setMetrics] = useState({
     totalStudents: 0,
@@ -404,79 +408,126 @@ export default function TeacherAnalytics() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Distribution Progress Bars */}
               <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                   <div>
                     <h3 className="text-lg font-bold text-slate-900">Comprehension Level Distribution</h3>
-                    <p className="text-xs text-slate-500">Overall status breakdown across all students</p>
+                    <p className="text-xs text-slate-500">Filter distribution by grade level or class</p>
                   </div>
-                  <BarChart className="text-slate-400" size={20} />
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Grade Filter */}
+                    <select
+                      value={distributionGradeFilter}
+                      onChange={(e) => setDistributionGradeFilter(e.target.value)}
+                      className="border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#0580b2]"
+                    >
+                      <option value="ALL">All Grades</option>
+                      {Array.from(new Set(students.map(s => (s.grade_level || s.grade || "4").toString().replace(/[^0-9]/g, '') || "4"))).sort().map(g => (
+                        <option key={g} value={g}>Grade {g}</option>
+                      ))}
+                    </select>
+
+                    {/* Class Filter */}
+                    <select
+                      value={distributionClassFilter}
+                      onChange={(e) => setDistributionClassFilter(e.target.value)}
+                      className="border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#0580b2]"
+                    >
+                      <option value="ALL">All Classes</option>
+                      {classes.map(c => (
+                        <option key={c.class_code} value={c.class_code}>
+                          {c.subject_name || c.class_name || c.class_code} ({c.class_code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
-                <div className="space-y-5">
-                  {/* Passed GST (No Remediation Required) */}
-                  <div>
-                    <div className="flex justify-between text-xs font-semibold mb-1.5">
-                      <span className="text-slate-700">Passed GST - Exempt from Remediation</span>
-                      <span className="text-green-700 font-bold">{metrics.passedGstCount} Students</span>
-                    </div>
-                    <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-                      <div
-                        className="bg-green-500 h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${metrics.totalStudents > 0 ? (metrics.passedGstCount / metrics.totalStudents) * 100 : 0}%`
-                        }}
-                      ></div>
-                    </div>
-                  </div>
+                {(() => {
+                  // Calculate distribution subset based on filters
+                  const subset = students.filter(student => {
+                    const gradeNum = (student.grade_level || student.grade || "4").toString().replace(/[^0-9]/g, '') || "4";
+                    const matchesGrade = distributionGradeFilter === "ALL" || gradeNum === distributionGradeFilter;
+                    const matchesClass = distributionClassFilter === "ALL" || student.classCode === distributionClassFilter;
+                    return matchesGrade && matchesClass;
+                  });
 
-                  {/* Independent Tier Bar */}
-                  <div>
-                    <div className="flex justify-between text-xs font-semibold mb-1.5">
-                      <span className="text-slate-700">Individualized: Independent (80% - 100%)</span>
-                      <span className="text-emerald-700 font-bold">{metrics.independentCount} Students</span>
-                    </div>
-                    <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-                      <div
-                        className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${metrics.totalStudents > 0 ? (metrics.independentCount / metrics.totalStudents) * 100 : 0}%`
-                        }}
-                      ></div>
-                    </div>
-                  </div>
+                  const totalInSubset = subset.length;
+                  const passedGstCount = subset.filter(s => s.levelStatus === "PASSED_GST").length;
+                  const independentCount = subset.filter(s => s.levelStatus === "INDEPENDENT").length;
+                  const instructionalCount = subset.filter(s => s.levelStatus === "INSTRUCTIONAL").length;
+                  const frustrationCount = subset.filter(s => s.levelStatus === "FRUSTRATION").length;
 
-                  {/* Instructional Tier Bar */}
-                  <div>
-                    <div className="flex justify-between text-xs font-semibold mb-1.5">
-                      <span className="text-slate-700">Individualized: Instructional (60% - 79%)</span>
-                      <span className="text-[#0580b2] font-bold">{metrics.instructionalCount} Students</span>
-                    </div>
-                    <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-                      <div
-                        className="bg-[#0580b2] h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${metrics.totalStudents > 0 ? (metrics.instructionalCount / metrics.totalStudents) * 100 : 0}%`
-                        }}
-                      ></div>
-                    </div>
-                  </div>
+                  const getPct = (cnt) => totalInSubset > 0 ? Math.round((cnt / totalInSubset) * 100) : 0;
 
-                  {/* Frustration Tier Bar */}
-                  <div>
-                    <div className="flex justify-between text-xs font-semibold mb-1.5">
-                      <span className="text-slate-700">Individualized: Frustration (&lt; 60%)</span>
-                      <span className="text-red-600 font-bold">{metrics.frustrationCount} Students</span>
+                  return (
+                    <div className="space-y-5">
+                      {/* Passed GST (No Remediation Required) */}
+                      <div>
+                        <div className="flex justify-between text-xs font-semibold mb-1.5">
+                          <span className="text-slate-700">Passed GST - Exempt from Remediation</span>
+                          <span className="text-green-700 font-bold">
+                            {passedGstCount} / {totalInSubset} Students <span className="text-green-600 font-medium">({getPct(passedGstCount)}%)</span>
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                          <div
+                            className="bg-green-500 h-full rounded-full transition-all duration-500"
+                            style={{ width: `${getPct(passedGstCount)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Independent Tier Bar */}
+                      <div>
+                        <div className="flex justify-between text-xs font-semibold mb-1.5">
+                          <span className="text-slate-700">Individualized: Independent (80% - 100%)</span>
+                          <span className="text-emerald-700 font-bold">
+                            {independentCount} / {totalInSubset} Students <span className="text-emerald-600 font-medium">({getPct(independentCount)}%)</span>
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                          <div
+                            className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                            style={{ width: `${getPct(independentCount)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Instructional Tier Bar */}
+                      <div>
+                        <div className="flex justify-between text-xs font-semibold mb-1.5">
+                          <span className="text-slate-700">Individualized: Instructional (60% - 79%)</span>
+                          <span className="text-[#0580b2] font-bold">
+                            {instructionalCount} / {totalInSubset} Students <span className="text-blue-500 font-medium">({getPct(instructionalCount)}%)</span>
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                          <div
+                            className="bg-[#0580b2] h-full rounded-full transition-all duration-500"
+                            style={{ width: `${getPct(instructionalCount)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Frustration Tier Bar */}
+                      <div>
+                        <div className="flex justify-between text-xs font-semibold mb-1.5">
+                          <span className="text-slate-700">Individualized: Frustration (&lt; 60%)</span>
+                          <span className="text-red-600 font-bold">
+                            {frustrationCount} / {totalInSubset} Students <span className="text-red-500 font-medium">({getPct(frustrationCount)}%)</span>
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                          <div
+                            className="bg-red-500 h-full rounded-full transition-all duration-500"
+                            style={{ width: `${getPct(frustrationCount)}%` }}
+                          ></div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-                      <div
-                        className="bg-red-500 h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${metrics.totalStudents > 0 ? (metrics.frustrationCount / metrics.totalStudents) * 100 : 0}%`
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
+                  );
+                })()}
               </div>
 
               {/* Class Summary Info */}
