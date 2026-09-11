@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Home, Book, BarChart, Settings, LogOut, Heart, Menu } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Book, LogOut, Menu } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
@@ -16,7 +17,6 @@ export default function SideBar() {
       localStorage.clear();
       sessionStorage.clear();
 
-
       navigate("/login", { replace: true });
     } catch (error) {
       console.error("Logout error:", error.message);
@@ -25,7 +25,7 @@ export default function SideBar() {
 
   return (
     <aside
-      className={`sticky top-0 h-screen flex-shrink-0 overflow-y-auto bg-blue-50 p-4 shadow-md transition-all duration-300
+      className={`sticky top-0 h-screen flex-shrink-0 overflow-y-auto bg-blue-50 p-4 shadow-md transition-all duration-300 z-30
       ${isOpen ? "w-64" : "w-20"}`}
     >
       {/* Top section with logo + hamburger */}
@@ -45,10 +45,10 @@ export default function SideBar() {
       <nav className="space-y-4">
         <Link
           to="/pages/student/dashboard"
-          className="flex items-center gap-2 p-2 rounded-lg bg-orange-500 font-medium"
+          className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
-          <Home size={18} />
-          {isOpen && <span>Home</span>}
+          <Book size={18} />
+          {isOpen && <span>Dashboard</span>}
         </Link>
 
         <Link
@@ -56,31 +56,23 @@ export default function SideBar() {
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
           <Book size={18} />
-          {isOpen && <span>Lessons</span>}
+          {isOpen && <span>Learning Modules</span>}
         </Link>
 
         <Link
           to="/pages/student/scores"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
-          <BarChart size={18} />
+          <Book size={18} />
           {isOpen && <span>Scores</span>}
         </Link>
 
-        {/* <Link
+        <Link
           to="/pages/student/progress"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
-          <Heart size={18} />
-          {isOpen && <span>Your Progress</span>}
-        </Link> */}
-
-        <Link
-          to="/pages/student/profile"
-          className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
-        >
-          <Settings size={18} />
-          {isOpen && <span>Settings</span>}
+          <Book size={18} />
+          {isOpen && <span>Reading Progress</span>}
         </Link>
 
         <button
@@ -95,51 +87,36 @@ export default function SideBar() {
         </button>
       </nav>
 
-      {/* CONFIRM LOGOUT MODAL */}
-      {showLogoutConfirmation && (
-
-        <div className="fixed inset-0 z-[9999] bg-black bg-opacity-40 flex items-center justify-center" style={{ zIndex: 9999 }}>
-
-          <div className="bg-white p-6 rounded-xl shadow-xl w-120">
-
-            <h2 className="text-xl font-bold mb-2">
-              Confirm Logout
-
-            </h2>
-            <hr></hr>
-
-            <p className="mb-2 mt-4">
+      {/* CONFIRM LOGOUT MODAL (Portaled to document.body for top-level stacking) */}
+      {showLogoutConfirmation && createPortal(
+        <div className="fixed inset-0 z-[99999] bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 99999 }}>
+          <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md text-slate-800 animate-fadeIn">
+            <h2 className="text-xl font-bold mb-2">Confirm Logout</h2>
+            <hr className="mb-4 border-slate-200" />
+            <p className="mb-2 text-slate-700">
               You are about to log out of your session. Any unsaved changes may be lost.
-
             </p>
-
-            <p>Do you want to continue?</p>
+            <p className="mb-6 font-medium text-slate-600">Do you want to continue?</p>
 
             <div className="flex justify-end gap-3">
-
               <button
                 onClick={() => setShowLogoutConfirmation(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
+                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg font-semibold text-sm transition"
               >
                 Cancel
               </button>
-
               <button
                 onClick={handleLogout}
                 disabled={loading}
-                className="px-4 py-2 bg-red-500 text-white rounded"
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold text-sm transition shadow"
               >
                 {loading ? "Logging out..." : "Log out"}
               </button>
-
             </div>
-
           </div>
-
-        </div>
-
+        </div>,
+        document.body
       )}
     </aside>
-
   );
 }
