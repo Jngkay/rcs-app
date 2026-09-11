@@ -47,7 +47,7 @@ export default function TopBar() {
   }, []);
 
   return (
-    <header className="flex justify-between items-center bg-white shadow px-6 py-4">
+    <header className="sticky top-0 z-20 flex justify-between items-center bg-white shadow px-6 py-4">
 
       {/* System Tagline */}
       <div className="flex items-center">
