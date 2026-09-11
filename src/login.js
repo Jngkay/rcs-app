@@ -68,7 +68,7 @@ function LoginForm() {
   return (
     <>
       <p className="text-gray-500 text-sm mb-6">
-        Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+        Log in to continue your reading and learning journey
       </p>
 
       {error && (
@@ -624,6 +624,7 @@ export default function App() {
         return (
           <>
             <p className="text-gray-500 text-base mb-6">Choose your user type:</p>
+
             <div className="flex justify-center space-x-6">
               {/* Teacher */}
               <div
@@ -676,14 +677,15 @@ export default function App() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 font-sans">
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-[380px] text-center">
-        <h2 className="text-3xl font-bold mb-2">Welcome</h2>
+        <img src="assets/logo.png" alt="logo" className="w-20 block mx-auto" />
+        <h2 className="text-3xl font-bold mb-4">Welcome back!</h2>
         <div className="flex justify-center mb-6 space-x-2">
           <button
             type="button"
             onClick={() => setView("login")}
             className={`px-6 py-2 rounded-full ${view === "login"
-                ? "text-white bg-gradient-to-r from-blue-400 to-blue-600 shadow"
-                : "text-blue-600 border border-blue-400 hover:bg-blue-50"
+              ? "text-white bg-gradient-to-r from-blue-400 to-blue-600 shadow"
+              : "text-blue-600 border border-blue-400 hover:bg-blue-50"
               }`}
           >
             Login
@@ -692,8 +694,8 @@ export default function App() {
             type="button"
             onClick={() => setView("registerUserType")}
             className={`px-6 py-2 rounded-full ${view !== "login"
-                ? "text-white bg-gradient-to-r from-blue-400 to-blue-600 shadow"
-                : "text-blue-600 border border-blue-400 hover:bg-blue-50"
+              ? "text-white bg-gradient-to-r from-blue-400 to-blue-600 shadow"
+              : "text-blue-600 border border-blue-400 hover:bg-blue-50"
               }`}
           >
             Register
