@@ -210,7 +210,14 @@ export default function Dashboard() {
       await updateDoc(userRef, {
         gst_score: correctCount,
         gst_total_questions: totalQs,
-        gst_assessment_attempted: true
+        gst_assessment_attempted: true,
+        ...(correctCount >= 14 ? {
+          gst_status: "PASSED_GST",
+          needs_remediation: false
+        } : {
+          gst_status: "NEEDS_IND",
+          needs_remediation: true
+        })
       });
 
       console.log("GST score saved:", correctCount);
@@ -263,7 +270,7 @@ export default function Dashboard() {
       {step === "welcome" && (
         <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md">
           <h1 className="text-5xl font-bold">
-            Welcome to HenyoReads, {firstName}!
+            Welcome to Readi, {firstName}!
           </h1>
           <br></br>
           <h1 className="text-3xl font-bold">

@@ -70,7 +70,7 @@ export default function Students() {
 
     const getStudentStatus = (student) => {
         if (!student.gst_assessment_attempted) return "PENDING_GST";
-        if (student.gst_score >= 14) return "INDEPENDENT";
+        if (student.gst_score >= 14 || student.gst_status === "PASSED_GST") return "PASSED_GST";
         if (student.individualized_assessment_attempted) return "COMPLETED_IND";
         return "NEEDS_IND";
     };
@@ -113,6 +113,8 @@ export default function Students() {
         switch (status) {
             case "PENDING_GST":
                 return <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs font-bold">Pending</span>;
+            case "PASSED_GST":
+                return <span className="px-2 py-1 bg-green-200 text-green-800 rounded text-xs font-bold">Passed (GST)</span>;
             case "INDEPENDENT":
                 return <span className="px-2 py-1 bg-green-200 text-green-800 rounded text-xs font-bold">Independent</span>;
             case "COMPLETED_IND":
@@ -231,7 +233,7 @@ export default function Students() {
                             >
                                 <option value="ALL">All</option>
                                 <option value="PENDING_GST">Pending</option>
-                                <option value="INDEPENDENT">Independent</option>
+                                <option value="PASSED_GST">Passed (GST)</option>
                                 <option value="NEEDS_IND">To Assess</option>
                                 <option value="COMPLETED_IND">Completed</option>
                             </select>
@@ -481,7 +483,22 @@ export default function Students() {
                                         {activeTab === 'orp' && (
                                             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 animate-fadeIn">
                                                 <h3 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Overall Profile Metrics</h3>
-                                                {selectedStudent.individualized_assessment_attempted ? (
+                                                {selectedStudent.gst_score >= 14 || selectedStudent.gst_status === 'PASSED_GST' ? (
+                                                    <div className="space-y-6 text-lg">
+                                                        <div className="bg-green-50 p-6 rounded-lg border border-green-200 text-center">
+                                                            <h4 className="text-xl font-bold text-green-800 mb-2">Exempt from Remediation (Passed GST)</h4>
+                                                            <p className="text-green-700 text-base">
+                                                                This student scored <strong>{selectedStudent.gst_score} / {selectedStudent.gst_total_questions || '-'}</strong> on the Group Screening Test (GST), exceeding the threshold of 14. They will receive regular classroom instruction without individualized reading remediation.
+                                                            </p>
+                                                        </div>
+                                                        <div className="pt-4 border-t flex items-center justify-between">
+                                                            <h3 className="text-xl font-bold text-gray-800">GST Assessment Status:</h3>
+                                                            <span className="text-2xl font-black text-green-600">
+                                                                Passed (No Remediation Needed)
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ) : selectedStudent.individualized_assessment_attempted ? (
                                                     <div className="space-y-6 text-lg">
                                                         <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg border">
                                                             <span className="font-semibold text-gray-700">Word Reading Level:</span>
