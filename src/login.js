@@ -678,7 +678,9 @@ export default function App() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100 font-sans">
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-[380px] text-center">
         <img src="assets/logo.png" alt="logo" className="w-20 block mx-auto" />
-        <h2 className="text-3xl font-bold mb-4">Welcome back!</h2>
+        <h2 className="text-3xl font-bold mb-4">
+          {view === "login" ? "Welcome back!" : "Welcome!"}
+        </h2>
         <div className="flex justify-center mb-6 space-x-2">
           <button
             type="button"
