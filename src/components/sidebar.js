@@ -25,15 +25,13 @@ export default function SideBar() {
 
   return (
     <aside
-      className={`bg-blue-50 min-h-screen p-4 shadow-md transition-all duration-300
+      className={`sticky top-0 h-screen flex-shrink-0 overflow-y-auto bg-blue-50 p-4 shadow-md transition-all duration-300
       ${isOpen ? "w-64" : "w-20"}`}
     >
       {/* Top section with logo + hamburger */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4">
         {isOpen && (
-          <span className="text-2xl font-bold text-blue-600 whitespace-nowrap">
-            Logo
-          </span>
+          <img src="../../assets/logo.png" alt="logo" className="w-20 block mx-auto" />
         )}
         <button
           onClick={() => setIsOpen(!isOpen)}
