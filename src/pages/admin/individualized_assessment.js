@@ -219,8 +219,12 @@ export default function IndividualizedAssessmentAdmin() {
                 />
             )}
 
-            {/* Organized Story Cards Grid */}
-            {loading && <p className="text-slate-600 font-medium">Loading individualized assessments...</p>}
+            {/* Centered Loader Icon Only */}
+            {loading && (
+                <div className="flex justify-center items-center py-16">
+                    <div className="w-10 h-10 border-4 border-slate-200 border-t-[#0580b2] rounded-full animate-spin"></div>
+                </div>
+            )}
 
             {!loading && stories.length === 0 && (
                 <div className="bg-white p-8 rounded-2xl border border-slate-100 text-center text-slate-500 shadow-sm">

@@ -257,7 +257,9 @@ export default function Students() {
                 </div>
 
                 {loading ? (
-                    <p className="text-center py-4 text-gray-500">Loading students...</p>
+                    <div className="flex justify-center items-center py-12">
+                        <div className="w-8 h-8 border-4 border-slate-200 border-t-[#0580b2] rounded-full animate-spin"></div>
+                    </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse whitespace-nowrap">
@@ -347,11 +349,10 @@ export default function Students() {
                                     <button
                                         key={page}
                                         onClick={() => setCurrentPage(page)}
-                                        className={`px-3 py-1 rounded font-medium transition ${
-                                            currentPage === page
+                                        className={`px-3 py-1 rounded font-medium transition ${currentPage === page
                                                 ? "bg-blue-600 text-white border border-blue-600 shadow-sm"
                                                 : "border border-gray-300 hover:bg-gray-100 text-gray-700 bg-white"
-                                        }`}
+                                            }`}
                                     >
                                         {page}
                                     </button>
