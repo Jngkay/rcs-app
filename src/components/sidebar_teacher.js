@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Book, LogOut, Menu } from "lucide-react";
+import { Book, LogOut, Menu, BarChart2, Users, User } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
@@ -48,7 +48,7 @@ export default function SideBarTeacher() {
           to="/pages/teacher/students"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
-          <Book size={18} />
+          <Users size={18} />
           {isOpen && <span>My Students</span>}
         </Link>
 
@@ -61,10 +61,18 @@ export default function SideBarTeacher() {
         </Link>
 
         <Link
+          to="/pages/teacher/analytics"
+          className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
+        >
+          <BarChart2 size={18} />
+          {isOpen && <span>Analytics</span>}
+        </Link>
+
+        <Link
           to="/pages/teacher/profile"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
-          <Book size={18} />
+          <User size={18} />
           {isOpen && <span>Profile</span>}
         </Link>
 
