@@ -65,7 +65,7 @@ export default function SideBarTeacher() {
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
         >
           <Book size={18} />
-          {isOpen && <span>Settings</span>}
+          {isOpen && <span>Profile</span>}
         </Link>
 
 

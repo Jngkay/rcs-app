@@ -8,6 +8,7 @@ export default function TopBar() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [profilePic, setProfilePic] = useState("");
+  const [role, setRole] = useState("");
 
   const placeholder =
     "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
@@ -17,9 +18,11 @@ export default function TopBar() {
     const f_name = localStorage.getItem("firstName");
     const l_name = localStorage.getItem("lastName");
     const uid = localStorage.getItem("uuid");
+    const userRole = localStorage.getItem("role");
 
     if (f_name) setFirstName(f_name);
     if (l_name) setLastName(l_name);
+    if (userRole) setRole(userRole);
 
     if (uid) {
 
@@ -46,14 +49,11 @@ export default function TopBar() {
   return (
     <header className="flex justify-between items-center bg-white shadow px-6 py-4">
 
-      {/* Search bar */}
-      <div className="relative w-1/3">
-        <input
-          type="text"
-          placeholder="Search here..."
-          className="w-full rounded-full border px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <Search size={18} className="absolute left-3 top-2.5 text-gray-400" />
+      {/* System Tagline */}
+      <div className="flex items-center">
+        <h2 className="text-base md:text-lg font-semibold text-slate-700 italic tracking-wide">
+          "Making every reader, Ready"
+        </h2>
       </div>
 
       {/* Right section */}
@@ -69,12 +69,25 @@ export default function TopBar() {
             className="w-10 h-10 rounded-full object-cover"
           />
 
-          <Link
-            to="/pages/teacher/profile"
-            className="flex items-center gap-2 p-2 rounded-lg bg-orange-500 font-medium"
-          >
-            {firstName} {lastName}
-          </Link>
+          {role === "teacher" ? (
+            <Link
+              to="/pages/teacher/profile"
+              className="flex items-center gap-2 p-2 rounded-lg bg-orange-500 font-medium text-white shadow-sm hover:opacity-95 transition-all"
+            >
+              {firstName} {lastName}
+            </Link>
+          ) : role === "student" ? (
+            <Link
+              to="/pages/student/profile"
+              className="flex items-center gap-2 p-2 rounded-lg bg-orange-500 font-medium text-white shadow-sm hover:opacity-95 transition-all"
+            >
+              {firstName} {lastName}
+            </Link>
+          ) : (
+            <span className="flex items-center gap-2 p-2 rounded-lg bg-orange-500 font-medium text-white cursor-default select-none">
+              {firstName || "Admin"} {lastName}
+            </span>
+          )}
 
         </div>
 
