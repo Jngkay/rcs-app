@@ -1,38 +1,38 @@
 import React, { useState, useEffect } from "react";
 import {
-   getFirestore,
-   collection,
-   addDoc,
-   updateDoc,
-   doc,
-   getDocs,
-   deleteDoc
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  getDocs,
+  deleteDoc
 } from "firebase/firestore";
 
 export default function CompreTestModal({ grade, storyData, onClose, onSuccess, collectionName = "gst_collection" }) {
   const db = getFirestore();
 
   const [story, setStory] = useState(
-  storyData
-    ? {
+    storyData
+      ? {
         title: storyData.title,
         content: storyData.content,
         word_count: storyData.word_count,
       }
-    : { title: "", content: "", word_count: "" }
-    );
+      : { title: "", content: "", word_count: "" }
+  );
 
-    const [questions, setQuestions] = useState(
+  const [questions, setQuestions] = useState(
     storyData ? storyData.questions || [] : []
-    );
-    const [feedbackModal, setFeedbackModal] = useState({
-      show: false,
-      title: "",
-      message: "",
-      isError: false,
-      onConfirm: null,
-      onClose: null
-    });
+  );
+  const [feedbackModal, setFeedbackModal] = useState({
+    show: false,
+    title: "",
+    message: "",
+    isError: false,
+    onConfirm: null,
+    onClose: null
+  });
 
   // Prevent background scroll
   useEffect(() => {
@@ -91,15 +91,15 @@ export default function CompreTestModal({ grade, storyData, onClose, onSuccess, 
 
   const handleSave = async () => {
     try {
-        if (storyData) {
+      if (storyData) {
         // ✏️ EDIT MODE
 
         const storyRef = doc(
-            db,
-            String(collectionName),
-            String(grade),
-            "stories",
-            String(storyData.id)
+          db,
+          String(collectionName),
+          String(grade),
+          "stories",
+          String(storyData.id)
         );
 
         // 1️⃣ Update story document
@@ -107,22 +107,22 @@ export default function CompreTestModal({ grade, storyData, onClose, onSuccess, 
 
         // 2️⃣ Delete old questions
         const questionsRef = collection(
-            db,
-            String(collectionName),
-            String(grade),
-            "stories",
-            String(storyData.id),
-            "questions"
+          db,
+          String(collectionName),
+          String(grade),
+          "stories",
+          String(storyData.id),
+          "questions"
         );
 
         const qSnapshot = await getDocs(questionsRef);
         for (const qDoc of qSnapshot.docs) {
-            await deleteDoc(qDoc.ref);
+          await deleteDoc(qDoc.ref);
         }
 
         // 3️⃣ Re-add updated questions
         for (const q of questions) {
-            await addDoc(questionsRef, q);
+          await addDoc(questionsRef, q);
         }
 
         setFeedbackModal({
@@ -134,26 +134,26 @@ export default function CompreTestModal({ grade, storyData, onClose, onSuccess, 
           onClose: onSuccess
         });
 
-        } else {
+      } else {
         // ➕ ADD MODE
 
         const storyRef = await addDoc(
-            collection(db, String(collectionName), String(grade), "stories"),
-            story
+          collection(db, String(collectionName), String(grade), "stories"),
+          story
         );
 
         for (const q of questions) {
-            await addDoc(
+          await addDoc(
             collection(
-                db,
-                String(collectionName),
-                String(grade),
-                "stories",
-                String(storyRef.id),
-                "questions"
+              db,
+              String(collectionName),
+              String(grade),
+              "stories",
+              String(storyRef.id),
+              "questions"
             ),
             q
-            );
+          );
         }
 
         setFeedbackModal({
@@ -164,45 +164,45 @@ export default function CompreTestModal({ grade, storyData, onClose, onSuccess, 
           onConfirm: null,
           onClose: onSuccess
         });
-        }
+      }
 
     } catch (error) {
-        console.error("Error saving story:", error);
-        setFeedbackModal({
-          show: true,
-          title: "Error",
-          message: "Failed to save story. Error: " + error.message + "\n\n(If it says 'Missing Permissions', please update your Firestore Rules to allow writing to the individualized_assessment collection!)",
-          isError: true,
-          onConfirm: null
-        });
+      console.error("Error saving story:", error);
+      setFeedbackModal({
+        show: true,
+        title: "Error",
+        message: "Failed to save story. Error: " + error.message + "\n\n(If it says 'Missing Permissions', please update your Firestore Rules to allow writing to the individualized_assessment collection!)",
+        isError: true,
+        onConfirm: null
+      });
     }
-}
+  }
 
-return (
+  return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-    
-    {/* Modal Container */}
-    <div className="bg-white w-[95%] max-w-4xl rounded-xl shadow-2xl flex flex-col overflow-hidden min-h-0" style={{ height: "70%" }}>
 
-      {/* Header (Fixed) */}
-      <div className="p-4 border-b shrink-0">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-black">
-            {storyData ? "Edit Story" : "Add New Story"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-red-500 text-lg font-bold"
-          >
-            ✕
-          </button>
+      {/* Modal Container */}
+      <div className="bg-white w-[95%] max-w-4xl rounded-xl shadow-2xl flex flex-col overflow-hidden min-h-0" style={{ height: "70%" }}>
+
+        {/* Header (Fixed) */}
+        <div className="p-4 border-b shrink-0">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-bold text-black">
+              {storyData ? "Edit Story" : "Add New Story"}
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-red-500 text-lg font-bold"
+            >
+              ✕
+            </button>
+          </div>
         </div>
-      </div>
 
         {/* 🔥 SCROLLABLE BODY */}
         <div className="flex-1 overflow-y-auto p-6 text-black">
 
-             <input
+          <input
             type="text"
             placeholder="Story Title"
             className="border p-2 w-full mb-3"
@@ -276,11 +276,10 @@ return (
 
                   <button
                     onClick={() => setCorrectAnswer(qIndex, cIndex)}
-                    className={`ml-2 px-3 py-1 rounded ${
-                      choice.is_correct
-                        ? "bg-green-500 text-white"
-                        : "bg-gray-300"
-                    }`}
+                    className={`ml-2 px-3 py-1 rounded ${choice.is_correct
+                      ? "bg-green-500 text-white"
+                      : "bg-gray-300"
+                      }`}
                   >
                     {choice.is_correct ? "Correct" : "Set Correct"}
                   </button>
@@ -300,21 +299,21 @@ return (
 
         {/* Footer */}
         <div className="p-4 border-t shrink-0 flex justify-end gap-3">
-            <button
+          <button
             onClick={onClose}
             className="bg-gray-400 text-white px-4 py-2 rounded"
-            >
+          >
             Cancel
-            </button>
+          </button>
 
-            <button
+          <button
             onClick={handleSave}
             className="bg-purple-600 text-white px-4 py-2 rounded"
-            >
+          >
             Save Story
-            </button>
+          </button>
         </div>
-        </div>
+      </div>
 
       {/* Feedback / Confirmation Modal */}
       {feedbackModal.show && (
@@ -374,5 +373,5 @@ return (
         </div>
       )}
     </div>
-    );
+  );
 }
