@@ -10,15 +10,16 @@ export default function AccountManagement() {
   const [students, setStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedGrade, setSelectedGrade] = useState("all");
 
   // Pagination state (default 10 rows)
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Reset page when switching roles or searching
+  // Reset page when switching roles, searching, or filtering grade
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedRole, searchTerm]);
+  }, [selectedRole, searchTerm, selectedGrade]);
 
   // Fetch users on load
   useEffect(() => {
@@ -36,13 +37,23 @@ export default function AccountManagement() {
     return () => unsubscribe();
   }, []);
 
-  // Filter students based on search term
+  // Filter students based on grade filter and search term
   const filteredStudents = students.filter((s) => {
+    // Grade Level Filter
+    if (selectedGrade !== "all") {
+      const studentGrade = (s.grade_level || s.grade || "").toString().toLowerCase();
+      const filterNum = selectedGrade.toLowerCase().replace("grade", "").trim();
+      if (!studentGrade.includes(filterNum) && !studentGrade.includes(`grade_${filterNum}`)) {
+        return false;
+      }
+    }
+
+    // Search Term Filter
     if (!searchTerm.trim()) return true;
     const query = searchTerm.toLowerCase();
     const name = `${s.first_name || ""} ${s.last_name || ""}`.toLowerCase();
     const email = (s.email || "").toLowerCase();
-    const grade = (s.grade_level || "").toString().toLowerCase();
+    const grade = (s.grade_level || s.grade || "").toString().toLowerCase();
     return name.includes(query) || email.includes(query) || grade.includes(query);
   });
 
@@ -106,40 +117,62 @@ export default function AccountManagement() {
             </button>
           </div>
 
-          {/* Search Bar Input with Icon/Button */}
-          <div className="relative flex items-center w-full sm:w-80">
-            <input
-              type="text"
-              placeholder={`Search ${selectedRole === "students" ? "students by name/email/grade" : "teachers by name/email/id"}...`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-4 pr-10 py-2 rounded-lg text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm shadow-sm"
-            />
-            {searchTerm ? (
-              <button
-                onClick={() => setSearchTerm("")}
-                className="absolute right-3 text-gray-500 hover:text-gray-700 font-bold text-sm"
-                title="Clear Search"
-              >
-                ✕
-              </button>
-            ) : (
-              <button className="absolute right-2.5 text-blue-600 p-1">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            {/* Grade Level Filter Button (Students only) */}
+            {selectedRole === "students" && (
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-semibold text-blue-100 whitespace-nowrap hidden sm:inline">Grade:</label>
+                <select
+                  value={selectedGrade}
+                  onChange={(e) => setSelectedGrade(e.target.value)}
+                  className="px-3 py-2 rounded-lg text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm shadow-sm font-medium"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  ></path>
-                </svg>
-              </button>
+                  <option value="all">All Grades</option>
+                  <option value="1">Grade 1</option>
+                  <option value="2">Grade 2</option>
+                  <option value="3">Grade 3</option>
+                  <option value="4">Grade 4</option>
+                  <option value="5">Grade 5</option>
+                  <option value="6">Grade 6</option>
+                </select>
+              </div>
             )}
+
+            {/* Search Bar Input with Icon/Button */}
+            <div className="relative flex items-center w-full sm:w-80">
+              <input
+                type="text"
+                placeholder={`Search ${selectedRole === "students" ? "students by name/email/grade" : "teachers by name/email/id"}...`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-4 pr-10 py-2 rounded-lg text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm shadow-sm"
+              />
+              {searchTerm ? (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-3 text-gray-500 hover:text-gray-700 font-bold text-sm"
+                  title="Clear Search"
+                >
+                  ✕
+                </button>
+              ) : (
+                <button className="absolute right-2.5 text-blue-600 p-1">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    ></path>
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

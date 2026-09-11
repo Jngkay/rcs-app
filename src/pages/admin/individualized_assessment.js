@@ -14,6 +14,7 @@ export default function IndividualizedAssessmentAdmin() {
 
     const [grade, setGrade] = useState("2");
     const [stories, setStories] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [selectedStory, setSelectedStory] = useState(null);
@@ -23,6 +24,13 @@ export default function IndividualizedAssessmentAdmin() {
         message: "",
         isError: false,
         onConfirm: null
+    });
+
+    const filteredStories = stories.filter((story) => {
+        const searchLower = searchTerm.toLowerCase();
+        const titleMatch = story.title ? story.title.toLowerCase().includes(searchLower) : false;
+        const contentMatch = story.content ? story.content.toLowerCase().includes(searchLower) : false;
+        return titleMatch || contentMatch;
     });
 
     const fetchStories = async () => {
@@ -141,27 +149,56 @@ export default function IndividualizedAssessmentAdmin() {
                 />
             </div>
 
-            {/* Grade Selector */}
-            <div className="flex justify-between mb-6">
-                <div className="mb-4">
-                    <label className="font-semibold text-black">Select Grade Level:</label>
-                    <select
-                        className="border p-2 ml-3 rounded"
-                        value={grade}
-                        onChange={(e) => setGrade(e.target.value)}
-                    >
-                        <option value="2">Grade 2</option>
-                        <option value="3">Grade 3</option>
-                        <option value="4">Grade 4</option>
-                        <option value="5">Grade 5</option>
-                        <option value="6">Grade 6</option>
-                    </select>
+            {/* Top Bar Controls: Grade Selector, Search Bar & Add Story Button */}
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-6">
+                <div className="flex flex-wrap items-center gap-4">
+                    <div>
+                        <label className="font-semibold text-black text-sm mr-2">Select Grade Level:</label>
+                        <select
+                            className="border border-slate-300 p-2 rounded-lg text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#0580b2]"
+                            value={grade}
+                            onChange={(e) => setGrade(e.target.value)}
+                        >
+                            <option value="2">Grade 2</option>
+                            <option value="3">Grade 3</option>
+                            <option value="4">Grade 4</option>
+                            <option value="5">Grade 5</option>
+                            <option value="6">Grade 6</option>
+                        </select>
+                    </div>
+
+                    {/* Search Input Bar with Icon / Button */}
+                    <div className="relative flex items-center w-full sm:w-72">
+                        <input
+                            type="text"
+                            placeholder="Search stories by title..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-4 pr-10 py-2 border border-slate-300 rounded-lg text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#0580b2] text-sm shadow-sm"
+                        />
+                        {searchTerm ? (
+                            <button
+                                onClick={() => setSearchTerm("")}
+                                className="absolute right-3 text-slate-400 hover:text-slate-600 font-bold text-sm"
+                                title="Clear Search"
+                            >
+                                ✕
+                            </button>
+                        ) : (
+                            <button className="absolute right-2.5 text-[#0580b2] p-1 pointer-events-none" title="Search">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </button>
+                        )}
+                    </div>
                 </div>
+
                 <button
                     onClick={() => setShowModal(true)}
-                    className="bg-green-600 text-white px-4 py-2 rounded"
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"
                 >
-                    Add Story
+                    <span>+ Add Story</span>
                 </button>
             </div>
 
@@ -191,8 +228,14 @@ export default function IndividualizedAssessmentAdmin() {
                 </div>
             )}
 
+            {!loading && stories.length > 0 && filteredStories.length === 0 && (
+                <div className="bg-white p-8 rounded-2xl border border-slate-100 text-center text-slate-500 shadow-sm">
+                    No stories found matching "{searchTerm}".
+                </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {stories.map((story) => (
+                {filteredStories.map((story) => (
                     <div
                         key={story.id}
                         className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between"
