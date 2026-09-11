@@ -38,6 +38,8 @@ export default function TeacherAnalytics() {
   const [metrics, setMetrics] = useState({
     totalStudents: 0,
     assessedCount: 0,
+    passedGstCount: 0,
+    noRemediationCount: 0,
     avgGstScore: 0,
     avgIndScore: 0,
     independentCount: 0,
@@ -92,6 +94,8 @@ export default function TeacherAnalytics() {
       let gstCount = 0;
       let totalIndSum = 0;
       let indCount = 0;
+      let passedGstCount = 0;
+      let noRemediationCount = 0;
       let indep = 0;
       let instruct = 0;
       let frust = 0;
@@ -119,20 +123,28 @@ export default function TeacherAnalytics() {
             console.error("Error fetching student assessment documents:", e);
           }
 
-          // Calculate GST score & percentage from doc or user fields
+          // Calculate GST raw score
           const gstRaw = gstData?.gst_score ?? gstData?.score ?? student.gst_score;
-          const gstTotal = gstData?.gst_total_questions ?? gstData?.total_questions ?? student.gst_total_questions;
+          const gstTotal = gstData?.gst_total_questions ?? gstData?.total_questions ?? student.gst_total_questions ?? 14;
           
           let gstScore = null;
+          let isGstAttempted = student.gst_assessment_attempted || !!gstData;
           if (gstRaw !== undefined && gstRaw !== null && gstTotal > 0) {
             gstScore = Math.round((Number(gstRaw) / Number(gstTotal)) * 100);
             totalGstSum += gstScore;
             gstCount++;
           }
 
+          const hasPassedGst = (gstRaw !== undefined && gstRaw !== null && Number(gstRaw) >= 14) || student.gst_status === "PASSED_GST";
+          if (hasPassedGst) {
+            passedGstCount++;
+            noRemediationCount++;
+          } else if (student.needs_remediation === false) {
+            noRemediationCount++;
+          }
+
           // Calculate Individualized Assessment score & percentage
           const indRaw = indData?.score ?? student.individualized_score;
-          const indTotal = indData?.total_questions ?? 10;
           const indCompPercent = indData?.comprehension_percentage ?? student.individualized_comprehension_percentage;
 
           let indScore = null;
@@ -140,17 +152,19 @@ export default function TeacherAnalytics() {
             indScore = Math.round(Number(indCompPercent));
             totalIndSum += indScore;
             indCount++;
-          } else if (indRaw !== undefined && indRaw !== null && indTotal > 0) {
-            indScore = Math.round((Number(indRaw) / Number(indTotal)) * 100);
+          } else if (indRaw !== undefined && indRaw !== null) {
+            indScore = Math.round((Number(indRaw) / 10) * 100);
             totalIndSum += indScore;
             indCount++;
           }
 
-          // Determine Reading Comprehension Status (Phil-IRI levels)
+          // Determine Reading Level Status (Phil-IRI levels)
           const profileStr = (student.oral_reading_profile || indData?.oral_reading_profile || "").toUpperCase();
           let levelStatus = "PENDING";
 
-          if (profileStr.includes("INDEPENDENT")) {
+          if (hasPassedGst) {
+            levelStatus = "PASSED_GST";
+          } else if (profileStr.includes("INDEPENDENT")) {
             levelStatus = "INDEPENDENT";
             indep++;
           } else if (profileStr.includes("INSTRUCTIONAL")) {
@@ -159,14 +173,12 @@ export default function TeacherAnalytics() {
           } else if (profileStr.includes("FRUSTRATION")) {
             levelStatus = "FRUSTRATION";
             frust++;
-          } else {
-            // Determine level by effective score
-            const effectiveScore = indScore !== null ? indScore : gstScore;
-            if (effectiveScore !== null) {
-              if (effectiveScore >= 80) {
+          } else if (student.individualized_assessment_attempted || indScore !== null) {
+            if (indScore !== null) {
+              if (indScore >= 80) {
                 levelStatus = "INDEPENDENT";
                 indep++;
-              } else if (effectiveScore >= 60) {
+              } else if (indScore >= 60) {
                 levelStatus = "INSTRUCTIONAL";
                 instruct++;
               } else {
@@ -176,20 +188,35 @@ export default function TeacherAnalytics() {
             } else {
               pend++;
             }
+          } else {
+            pend++;
           }
 
-          // Grade level aggregation
+          // Grade level aggregation (Comprehension breakdown per grade)
           const rawGradeStr = (student.grade_level || student.grade || "4").toString();
           const gradeNum = rawGradeStr.replace(/[^0-9]/g, '') || "4";
           const gradeKey = `Grade ${gradeNum}`;
           if (!gradeMap[gradeKey]) {
-            gradeMap[gradeKey] = { total: 0, sumScore: 0, count: 0 };
+            gradeMap[gradeKey] = {
+              total: 0,
+              passedGst: 0,
+              independent: 0,
+              instructional: 0,
+              frustration: 0,
+              pending: 0
+            };
           }
           gradeMap[gradeKey].total++;
-          const evalScore = indScore !== null ? indScore : gstScore;
-          if (evalScore !== null) {
-            gradeMap[gradeKey].sumScore += evalScore;
-            gradeMap[gradeKey].count++;
+          if (levelStatus === "PASSED_GST") {
+            gradeMap[gradeKey].passedGst++;
+          } else if (levelStatus === "INDEPENDENT") {
+            gradeMap[gradeKey].independent++;
+          } else if (levelStatus === "INSTRUCTIONAL") {
+            gradeMap[gradeKey].instructional++;
+          } else if (levelStatus === "FRUSTRATION") {
+            gradeMap[gradeKey].frustration++;
+          } else {
+            gradeMap[gradeKey].pending++;
           }
 
           return {
@@ -201,18 +228,21 @@ export default function TeacherAnalytics() {
             levelStatus,
             gstRaw,
             gstTotal,
-            indRaw
+            indRaw,
+            hasPassedGst
           };
         })
       );
 
       setStudents(enrichedStudents);
 
-      const totalAssessed = indep + instruct + frust;
+      const totalAssessed = passedGstCount + indep + instruct + frust;
 
       setMetrics({
         totalStudents: myStudents.length,
-        assessedCount: totalAssessed > 0 ? totalAssessed : gstCount,
+        assessedCount: totalAssessed,
+        passedGstCount,
+        noRemediationCount,
         avgGstScore: gstCount > 0 ? Math.round(totalGstSum / gstCount) : 0,
         avgIndScore: indCount > 0 ? Math.round(totalIndSum / indCount) : 0,
         independentCount: indep,
@@ -247,15 +277,21 @@ export default function TeacherAnalytics() {
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case "INDEPENDENT":
+      case "PASSED_GST":
         return (
           <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold flex items-center gap-1 w-max">
+            <CheckCircle size={14} /> Passed (GST)
+          </span>
+        );
+      case "INDEPENDENT":
+        return (
+          <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold flex items-center gap-1 w-max">
             <CheckCircle size={14} /> Independent
           </span>
         );
       case "INSTRUCTIONAL":
         return (
-          <span className="px-[#e6f4f8] px-3 py-1 bg-blue-100 text-[#0580b2] rounded-full text-xs font-bold flex items-center gap-1 w-max">
+          <span className="px-3 py-1 bg-blue-100 text-[#0580b2] rounded-full text-xs font-bold flex items-center gap-1 w-max">
             <TrendingUp size={14} /> Instructional
           </span>
         );
@@ -278,7 +314,7 @@ export default function TeacherAnalytics() {
     <TeacherLayout>
       <div className="space-y-8 max-w-7xl mx-auto">
         {/* Header Hero Banner */}
-        <div className="bg-blue-500 text-white p-6 md:p-8 rounded-2xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="bg-blue-600 text-white p-6 md:p-8 rounded-2xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <span className="px-3 py-1 bg-white/20 text-white text-xs font-semibold rounded-full uppercase tracking-wider mb-2 inline-block">
               Reading Comprehension Analytics
@@ -302,59 +338,65 @@ export default function TeacherAnalytics() {
         ) : (
           <>
             {/* Top Key Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {/* Passed GST / No Remediation */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">No Remediation</span>
+                  <div className="p-2 bg-green-50 text-green-600 rounded-xl">
+                    <CheckCircle size={20} />
+                  </div>
+                </div>
+                <h3 className="text-3xl font-extrabold text-slate-900">{metrics.passedGstCount}</h3>
+                <p className="text-xs text-green-600 font-medium mt-1">Passed GST Score</p>
+              </div>
+
               {/* Average GST Score */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">Avg GST Score</span>
-                  <div className="p-2.5 bg-blue-50 text-[#0580b2] rounded-xl">
+                  <div className="p-2 bg-blue-50 text-[#0580b2] rounded-xl">
                     <Award size={20} />
                   </div>
                 </div>
                 <h3 className="text-3xl font-extrabold text-slate-900">{metrics.avgGstScore}%</h3>
-                <p className="text-xs text-slate-500 mt-1">Group Screening Test score average</p>
+                <p className="text-xs text-slate-500 mt-1">Group Screening Test average</p>
               </div>
 
               {/* Independent Readers */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">Independent</span>
-                  <div className="p-2.5 bg-green-50 text-green-600 rounded-xl">
-                    <CheckCircle size={20} />
+                  <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <BookOpen size={20} />
                   </div>
                 </div>
                 <h3 className="text-3xl font-extrabold text-slate-900">{metrics.independentCount}</h3>
-                <p className="text-xs text-green-600 font-medium mt-1">
-                  {metrics.assessedCount > 0 ? Math.round((metrics.independentCount / metrics.assessedCount) * 100) : 0}% of assessed
-                </p>
+                <p className="text-xs text-emerald-600 font-medium mt-1">Individualized Reading Profile</p>
               </div>
 
               {/* Instructional Level */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">Instructional</span>
-                  <div className="p-2.5 bg-blue-50 text-[#0580b2] rounded-xl">
+                  <div className="p-2 bg-blue-50 text-[#0580b2] rounded-xl">
                     <TrendingUp size={20} />
                   </div>
                 </div>
                 <h3 className="text-3xl font-extrabold text-slate-900">{metrics.instructionalCount}</h3>
-                <p className="text-xs text-[#0580b2] font-medium mt-1">
-                  {metrics.assessedCount > 0 ? Math.round((metrics.instructionalCount / metrics.assessedCount) * 100) : 0}% of assessed
-                </p>
+                <p className="text-xs text-[#0580b2] font-medium mt-1">Individualized Reading Profile</p>
               </div>
 
               {/* Frustration / Needs Support */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">Needs Support</span>
-                  <div className="p-2.5 bg-red-50 text-red-600 rounded-xl">
+                  <div className="p-2 bg-red-50 text-red-600 rounded-xl">
                     <AlertCircle size={20} />
                   </div>
                 </div>
                 <h3 className="text-3xl font-extrabold text-slate-900">{metrics.frustrationCount}</h3>
-                <p className="text-xs text-red-600 font-medium mt-1">
-                  {metrics.assessedCount > 0 ? Math.round((metrics.frustrationCount / metrics.assessedCount) * 100) : 0}% of assessed
-                </p>
+                <p className="text-xs text-red-600 font-medium mt-1">Frustration Level</p>
               </div>
             </div>
 
@@ -365,23 +407,39 @@ export default function TeacherAnalytics() {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="text-lg font-bold text-slate-900">Comprehension Level Distribution</h3>
-                    <p className="text-xs text-slate-500">Breakdown of students by reading level status</p>
+                    <p className="text-xs text-slate-500">Overall status breakdown across all students</p>
                   </div>
                   <BarChart className="text-slate-400" size={20} />
                 </div>
 
                 <div className="space-y-5">
-                  {/* Independent Tier Bar */}
+                  {/* Passed GST (No Remediation Required) */}
                   <div>
                     <div className="flex justify-between text-xs font-semibold mb-1.5">
-                      <span className="text-slate-700">Independent (80% - 100%)</span>
-                      <span className="text-green-700">{metrics.independentCount} Students</span>
+                      <span className="text-slate-700">Passed GST - Exempt from Remediation</span>
+                      <span className="text-green-700 font-bold">{metrics.passedGstCount} Students</span>
                     </div>
                     <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
                       <div
                         className="bg-green-500 h-full rounded-full transition-all duration-500"
                         style={{
-                          width: `${metrics.assessedCount > 0 ? (metrics.independentCount / metrics.assessedCount) * 100 : 0}%`
+                          width: `${metrics.totalStudents > 0 ? (metrics.passedGstCount / metrics.totalStudents) * 100 : 0}%`
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Independent Tier Bar */}
+                  <div>
+                    <div className="flex justify-between text-xs font-semibold mb-1.5">
+                      <span className="text-slate-700">Individualized: Independent (80% - 100%)</span>
+                      <span className="text-emerald-700 font-bold">{metrics.independentCount} Students</span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                      <div
+                        className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${metrics.totalStudents > 0 ? (metrics.independentCount / metrics.totalStudents) * 100 : 0}%`
                         }}
                       ></div>
                     </div>
@@ -390,14 +448,14 @@ export default function TeacherAnalytics() {
                   {/* Instructional Tier Bar */}
                   <div>
                     <div className="flex justify-between text-xs font-semibold mb-1.5">
-                      <span className="text-slate-700">Instructional (60% - 79%)</span>
-                      <span className="text-[#0580b2]">{metrics.instructionalCount} Students</span>
+                      <span className="text-slate-700">Individualized: Instructional (60% - 79%)</span>
+                      <span className="text-[#0580b2] font-bold">{metrics.instructionalCount} Students</span>
                     </div>
                     <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
                       <div
                         className="bg-[#0580b2] h-full rounded-full transition-all duration-500"
                         style={{
-                          width: `${metrics.assessedCount > 0 ? (metrics.instructionalCount / metrics.assessedCount) * 100 : 0}%`
+                          width: `${metrics.totalStudents > 0 ? (metrics.instructionalCount / metrics.totalStudents) * 100 : 0}%`
                         }}
                       ></div>
                     </div>
@@ -406,14 +464,14 @@ export default function TeacherAnalytics() {
                   {/* Frustration Tier Bar */}
                   <div>
                     <div className="flex justify-between text-xs font-semibold mb-1.5">
-                      <span className="text-slate-700">Frustration Level (&lt; 60%)</span>
-                      <span className="text-red-600">{metrics.frustrationCount} Students</span>
+                      <span className="text-slate-700">Individualized: Frustration (&lt; 60%)</span>
+                      <span className="text-red-600 font-bold">{metrics.frustrationCount} Students</span>
                     </div>
                     <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
                       <div
                         className="bg-red-500 h-full rounded-full transition-all duration-500"
                         style={{
-                          width: `${metrics.assessedCount > 0 ? (metrics.frustrationCount / metrics.assessedCount) * 100 : 0}%`
+                          width: `${metrics.totalStudents > 0 ? (metrics.frustrationCount / metrics.totalStudents) * 100 : 0}%`
                         }}
                       ></div>
                     </div>
@@ -445,13 +503,65 @@ export default function TeacherAnalytics() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 mt-4">
+                <div className="pt-4 border-t border-slate-100 mt-4 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
+                    <span>Exempt from Remediation:</span>
+                    <span className="text-green-600 font-bold">{metrics.passedGstCount} Students</span>
+                  </div>
                   <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
                     <span>Pending Assessment:</span>
                     <span className="text-amber-600 font-bold">{metrics.pendingCount} Students</span>
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Comprehension Distribution Breakdown Per Grade Level */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <div className="mb-6">
+                <h3 className="text-lg font-bold text-slate-900">Grade Level Comprehension Breakdown</h3>
+                <p className="text-xs text-slate-500">Distribution of student performance across different grade levels handled</p>
+              </div>
+
+              {Object.keys(metrics.gradeBreakdown).length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Object.entries(metrics.gradeBreakdown).map(([gradeName, data]) => (
+                    <div key={gradeName} className="border border-slate-200 rounded-xl p-5 bg-slate-50 space-y-3">
+                      <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                        <h4 className="font-bold text-slate-900 text-base">{gradeName}</h4>
+                        <span className="text-xs font-bold bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full">
+                          {data.total} Student{data.total > 1 ? "s" : ""}
+                        </span>
+                      </div>
+
+                      <div className="space-y-2 text-xs">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600">Passed GST (No Rem.):</span>
+                          <span className="font-bold text-green-700">{data.passedGst}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600">Independent:</span>
+                          <span className="font-bold text-emerald-700">{data.independent}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600">Instructional:</span>
+                          <span className="font-bold text-blue-700">{data.instructional}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600">Frustration:</span>
+                          <span className="font-bold text-red-600">{data.frustration}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600">Pending:</span>
+                          <span className="font-bold text-slate-500">{data.pending}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 italic">No grade breakdown data available.</p>
+              )}
             </div>
 
             {/* Student Performance Table */}
@@ -470,6 +580,7 @@ export default function TeacherAnalytics() {
                     className="border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#0580b2]"
                   >
                     <option value="all">All Statuses</option>
+                    <option value="PASSED_GST">Passed (GST)</option>
                     <option value="INDEPENDENT">Independent</option>
                     <option value="INSTRUCTIONAL">Instructional</option>
                     <option value="FRUSTRATION">Frustration</option>
