@@ -59,7 +59,7 @@ export default function TopBar() {
       {/* Right section */}
       <div className="flex items-center gap-4">
 
-        <Bell size={20} className="text-gray-600 cursor-pointer" />
+
 
         <div className="flex items-center gap-2">
 

@@ -52,14 +52,14 @@ export default function TopBar() {
       {/* System Tagline */}
       <div className="flex items-center">
         <h2 className="text-base md:text-lg font-semibold text-slate-700 italic tracking-wide">
-          "Making Every Reader, Ready"
+          Making Every Reader, Ready
         </h2>
       </div>
 
       {/* Right section */}
       <div className="flex items-center gap-4">
 
-        <Bell size={20} className="text-gray-600 cursor-pointer" />
+
 
         <div className="flex items-center gap-2">
 
