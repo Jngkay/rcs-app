@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
+import { Eye, EyeOff } from "lucide-react";
 import { collection, query, where, getDoc, doc, getDocs, setDoc } from "firebase/firestore";
 
 import { auth, db } from "./firebase";
@@ -8,12 +9,13 @@ import { auth, db } from "./firebase";
 
 
 // ----------------- Login Form -----------------
-function LoginForm() {
+function LoginForm({ onRegister }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
 
   const handleLogin = async (e) => {
@@ -91,23 +93,22 @@ function LoginForm() {
 
         <div className="mb-4 text-left">
           <label className="block mb-1 text-gray-700 text-sm">Password</label>
-          <input
-            type="password"
-            className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your Password"
-          />
-        </div>
-
-        <div className="flex justify-between items-center mb-6 text-sm">
-          <label className="flex items-center space-x-2">
-            <input type="checkbox" className="accent-blue-500" />
-            <span className="text-gray-600">Remember me</span>
-          </label>
-          <button className="text-blue-500 hover:underline">
-            Forgot Password?
-          </button>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              className="w-full border border-gray-300 rounded-full px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your Password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
         </div>
 
         <button
@@ -141,6 +142,17 @@ function LoginForm() {
           )}
         </button>
       </form>
+
+      <div className="mt-6 text-center text-sm text-gray-600">
+        Don't have an account yet?{" "}
+        <button
+          type="button"
+          onClick={onRegister}
+          className="text-blue-600 hover:underline font-semibold"
+        >
+          Register
+        </button>
+      </div>
     </>
   );
 }
@@ -620,7 +632,7 @@ export default function App() {
   const renderContent = () => {
     switch (view) {
       case "login":
-        return <LoginForm />;
+        return <LoginForm onRegister={() => setView("registerUserType")} />;
       case "registerUserType":
         return (
           <>
