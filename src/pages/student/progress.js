@@ -113,7 +113,7 @@ export default function Progress() {
                 </div>
 
                 {/* Chart Area */}
-                <div className="ml-10 h-64 flex items-end gap-4 border-b border-gray-200 pb-2 relative">
+                <div className="ml-10 h-64 border-b border-gray-200 pb-2 relative mb-6">
                   {/* Grid lines */}
                   <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                     <div className="border-t border-gray-100 w-full h-0"></div>
@@ -123,32 +123,54 @@ export default function Progress() {
                     <div className="border-t border-gray-200 w-full h-0"></div>
                   </div>
 
-                  {/* Bars */}
+                  {/* SVG Line */}
+                  <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polyline 
+                      points={gstHistory.map((attempt, idx) => {
+                        const maxScore = attempt.total_questions || 20;
+                        const p = Math.min((attempt.score / maxScore) * 100, 100);
+                        const x = gstHistory.length > 1 ? 5 + (idx / (gstHistory.length - 1)) * 90 : 50;
+                        return `${x},${100 - p}`;
+                      }).join(" ")}
+                      fill="none"
+                      stroke="#2563eb"
+                      strokeWidth="3"
+                      vectorEffect="non-scaling-stroke"
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+
+                  {/* Markers & Tooltips */}
                   {gstHistory.map((attempt, idx) => {
-                    // Maximum GST score is typically 20
                     const maxScore = attempt.total_questions || 20;
-                    const percentage = (attempt.score / maxScore) * 100;
+                    const percentage = Math.min((attempt.score / maxScore) * 100, 100);
+                    const xPos = gstHistory.length > 1 ? 5 + (idx / (gstHistory.length - 1)) * 90 : 50;
                     const isLatest = idx === gstHistory.length - 1;
 
                     return (
-                      <div key={idx} className="flex flex-col items-center flex-1 z-10 group cursor-default">
-                        <div className="relative w-full max-w-[60px] flex justify-center">
-                          {/* Tooltip */}
-                          <div className="opacity-0 group-hover:opacity-100 absolute -top-12 bg-gray-800 text-white text-xs py-1 px-2 rounded transition-opacity whitespace-nowrap pointer-events-none">
+                      <React.Fragment key={idx}>
+                        <div 
+                          className="absolute flex flex-col items-center group cursor-default z-10"
+                          style={{ left: `${xPos}%`, bottom: `${percentage}%`, transform: 'translate(-50%, 50%)' }}
+                        >
+                          <div className="opacity-0 group-hover:opacity-100 absolute bottom-4 bg-gray-800 text-white text-xs py-1 px-2 rounded transition-opacity whitespace-nowrap pointer-events-none z-20">
                             Score: {attempt.score}/{maxScore}
                           </div>
                           
-                          {/* The Bar */}
-                          <div 
-                            className={`w-full rounded-t-md transition-all duration-1000 ease-out shadow-sm
-                              ${isLatest ? 'bg-blue-600' : 'bg-blue-300 hover:bg-blue-400'}`}
-                            style={{ height: `${percentage}%`, minHeight: '4px' }}
-                          ></div>
+                          <div className={`w-4 h-4 rounded-full border-2 border-white shadow-md transition-transform group-hover:scale-125
+                            ${isLatest ? 'bg-blue-600' : 'bg-blue-400'}`}>
+                          </div>
                         </div>
-                        <span className={`text-xs mt-3 font-semibold ${isLatest ? 'text-blue-600' : 'text-gray-500'}`}>
+
+                        {/* X-axis labels (Try numbers) */}
+                        <span 
+                          className={`absolute -bottom-8 text-xs font-semibold whitespace-nowrap ${isLatest ? 'text-blue-600' : 'text-gray-500'}`}
+                          style={{ left: `${xPos}%`, transform: 'translateX(-50%)' }}
+                        >
                           Try {idx + 1}
                         </span>
-                      </div>
+                      </React.Fragment>
                     );
                   })}
                 </div>
@@ -173,7 +195,7 @@ export default function Progress() {
                     <span>50</span>
                     <span>0</span>
                   </div>
-                  <div className="ml-10 h-64 flex items-end gap-4 border-b border-gray-200 pb-2 relative">
+                  <div className="ml-10 h-64 border-b border-gray-200 pb-2 relative mb-6">
                     <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                       <div className="border-t border-gray-100 w-full h-0"></div>
                       <div className="border-t border-gray-100 w-full h-0"></div>
@@ -181,26 +203,52 @@ export default function Progress() {
                       <div className="border-t border-gray-100 w-full h-0"></div>
                       <div className="border-t border-gray-200 w-full h-0"></div>
                     </div>
+                    
+                    {/* SVG Line */}
+                    <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                      <polyline 
+                        points={indHistory.map((attempt, idx) => {
+                          const score = attempt.word_per_minute || 0;
+                          const p = Math.min((score / 200) * 100, 100);
+                          const x = indHistory.length > 1 ? 5 + (idx / (indHistory.length - 1)) * 90 : 50;
+                          return `${x},${100 - p}`;
+                        }).join(" ")}
+                        fill="none"
+                        stroke="#6366f1" // indigo-500
+                        strokeWidth="3"
+                        vectorEffect="non-scaling-stroke"
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+
                     {indHistory.map((attempt, idx) => {
                       const score = attempt.word_per_minute || 0;
                       const percentage = Math.min((score / 200) * 100, 100);
+                      const xPos = indHistory.length > 1 ? 5 + (idx / (indHistory.length - 1)) * 90 : 50;
                       const isLatest = idx === indHistory.length - 1;
+                      
                       return (
-                        <div key={idx} className="flex flex-col items-center flex-1 z-10 group cursor-default">
-                          <div className="relative w-full max-w-[50px] flex justify-center">
-                            <div className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-gray-800 text-white text-xs py-1 px-2 rounded transition-opacity whitespace-nowrap pointer-events-none z-20">
+                        <React.Fragment key={idx}>
+                          <div 
+                            className="absolute flex flex-col items-center group cursor-default z-10"
+                            style={{ left: `${xPos}%`, bottom: `${percentage}%`, transform: 'translate(-50%, 50%)' }}
+                          >
+                            <div className="opacity-0 group-hover:opacity-100 absolute bottom-4 bg-gray-800 text-white text-xs py-1 px-2 rounded transition-opacity whitespace-nowrap pointer-events-none z-20">
                               {score} WPM
                             </div>
-                            <div 
-                              className={`w-full rounded-t-md transition-all duration-1000 ease-out shadow-sm
-                                ${isLatest ? 'bg-indigo-500' : 'bg-indigo-300 hover:bg-indigo-400'}`}
-                              style={{ height: `${percentage}%`, minHeight: '4px' }}
-                            ></div>
+                            <div className={`w-4 h-4 rounded-full border-2 border-white shadow-md transition-transform group-hover:scale-125
+                              ${isLatest ? 'bg-indigo-600' : 'bg-indigo-400'}`}>
+                            </div>
                           </div>
-                          <span className={`text-xs mt-3 font-semibold ${isLatest ? 'text-indigo-600' : 'text-gray-500'}`}>
+
+                          <span 
+                            className={`absolute -bottom-8 text-xs font-semibold whitespace-nowrap ${isLatest ? 'text-indigo-600' : 'text-gray-500'}`}
+                            style={{ left: `${xPos}%`, transform: 'translateX(-50%)' }}
+                          >
                             Try {idx + 1}
                           </span>
-                        </div>
+                        </React.Fragment>
                       );
                     })}
                   </div>
@@ -220,7 +268,7 @@ export default function Progress() {
                     <span>25</span>
                     <span>0</span>
                   </div>
-                  <div className="ml-10 h-64 flex items-end gap-4 border-b border-gray-200 pb-2 relative">
+                  <div className="ml-10 h-64 border-b border-gray-200 pb-2 relative mb-6">
                     <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                       <div className="border-t border-gray-100 w-full h-0"></div>
                       <div className="border-t border-gray-100 w-full h-0"></div>
@@ -228,26 +276,52 @@ export default function Progress() {
                       <div className="border-t border-gray-100 w-full h-0"></div>
                       <div className="border-t border-gray-200 w-full h-0"></div>
                     </div>
+
+                    {/* SVG Line */}
+                    <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                      <polyline 
+                        points={indHistory.map((attempt, idx) => {
+                          const score = attempt.individualized_score || 0;
+                          const p = Math.min(score, 100);
+                          const x = indHistory.length > 1 ? 5 + (idx / (indHistory.length - 1)) * 90 : 50;
+                          return `${x},${100 - p}`;
+                        }).join(" ")}
+                        fill="none"
+                        stroke="#14b8a6" // teal-500
+                        strokeWidth="3"
+                        vectorEffect="non-scaling-stroke"
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+
                     {indHistory.map((attempt, idx) => {
                       const score = attempt.individualized_score || 0;
                       const percentage = Math.min(score, 100);
+                      const xPos = indHistory.length > 1 ? 5 + (idx / (indHistory.length - 1)) * 90 : 50;
                       const isLatest = idx === indHistory.length - 1;
+                      
                       return (
-                        <div key={idx} className="flex flex-col items-center flex-1 z-10 group cursor-default">
-                          <div className="relative w-full max-w-[50px] flex justify-center">
-                            <div className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-gray-800 text-white text-xs py-1 px-2 rounded transition-opacity whitespace-nowrap pointer-events-none z-20">
+                        <React.Fragment key={idx}>
+                          <div 
+                            className="absolute flex flex-col items-center group cursor-default z-10"
+                            style={{ left: `${xPos}%`, bottom: `${percentage}%`, transform: 'translate(-50%, 50%)' }}
+                          >
+                            <div className="opacity-0 group-hover:opacity-100 absolute bottom-4 bg-gray-800 text-white text-xs py-1 px-2 rounded transition-opacity whitespace-nowrap pointer-events-none z-20">
                               {score}%
                             </div>
-                            <div 
-                              className={`w-full rounded-t-md transition-all duration-1000 ease-out shadow-sm
-                                ${isLatest ? 'bg-teal-500' : 'bg-teal-300 hover:bg-teal-400'}`}
-                              style={{ height: `${percentage}%`, minHeight: '4px' }}
-                            ></div>
+                            <div className={`w-4 h-4 rounded-full border-2 border-white shadow-md transition-transform group-hover:scale-125
+                              ${isLatest ? 'bg-teal-600' : 'bg-teal-400'}`}>
+                            </div>
                           </div>
-                          <span className={`text-xs mt-3 font-semibold ${isLatest ? 'text-teal-600' : 'text-gray-500'}`}>
+
+                          <span 
+                            className={`absolute -bottom-8 text-xs font-semibold whitespace-nowrap ${isLatest ? 'text-teal-600' : 'text-gray-500'}`}
+                            style={{ left: `${xPos}%`, transform: 'translateX(-50%)' }}
+                          >
                             Try {idx + 1}
                           </span>
-                        </div>
+                        </React.Fragment>
                       );
                     })}
                   </div>
