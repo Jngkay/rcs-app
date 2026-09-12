@@ -358,24 +358,7 @@ export default function TeacherAnalytics() {
 
   return (
     <TeacherLayout>
-      {/* <div className="space-y-8 max-w-7xl mx-auto"> */}
-      {/* Header Hero Banner */}
-      {/* <div className="bg-primary-600 text-white p-6 md:p-8 rounded-2xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <span className="px-3 py-1 bg-white/20 text-white text-xs font-semibold rounded-full uppercase tracking-wider mb-2 inline-block">
-              Reading Comprehension Analytics
-            </span>
-            <h1 className="text-2xl md:text-3xl font-extrabold">Student Comprehension Performance</h1>
-            <p className="mt-2 text-white/80 text-sm font-light">Track and analyze student reading performance</p>
-            <p className="text-white/60 text-sm mt-1 max-w-xl">
-              Track, analyze, and support reading comprehension levels across all your assigned classes.
-            </p>
-          </div>
-          <div className="bg-white/10 p-4 rounded-xl border border-white/20 text-center min-w-[140px]">
-            <p className="text-xs text-blue-100 uppercase tracking-wide font-medium">Overall Assessed</p>
-            <p className="text-3xl font-black mt-1">{metrics.assessedCount} / {metrics.totalStudents}</p>
-          </div>
-        </div> */}
+
 
       <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-6">
         <div>
@@ -405,7 +388,7 @@ export default function TeacherAnalytics() {
       ) : (
         <>
           {/* Top Key Metrics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
             {/* Passed GST / No Remediation */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
               <div className="flex items-center justify-between mb-3">
@@ -468,7 +451,7 @@ export default function TeacherAnalytics() {
           </div>
 
           {/* Performance Tier Distribution & Grade Comparison Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-4">
             {/* Distribution Progress Bars & Visual Chart */}
             <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
@@ -683,7 +666,7 @@ export default function TeacherAnalytics() {
           </div>
 
           {/* Aggregated Individualized Metrics Summary */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mb-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">Individualized Assessment Score Breakdown</h3>

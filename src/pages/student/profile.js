@@ -116,16 +116,18 @@ export default function Profile() {
       <div className="space-y-6">
 
         <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Your Profile</h1>
+            <p className="text-sm mt-1 text-blue-100">Manage your profile</p>
+          </div>
 
-          <h1 className="text-2xl font-bold">Student Profile</h1>
-            <p className="mt-2 text-white/80 text-sm font-light">Manage your student profile</p>
 
           <label className="cursor-pointer flex flex-col items-center">
 
             <img
               src={preview || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
               alt="profile"
-              className="w-24 h-24 rounded-full object-cover border"
+              className="w-32 h-32 rounded-full object-cover border"
             />
 
             {editing && (
@@ -287,7 +289,7 @@ export default function Profile() {
           <div className="bg-white p-6 rounded-xl shadow-xl w-120">
 
             <h2 className="text-xl font-bold mb-2">Update Profile</h2>
-            <hr/>
+            <hr />
 
             <p className="mb-2 mt-4">
               You are about to update your profile details.

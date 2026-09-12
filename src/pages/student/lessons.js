@@ -162,12 +162,17 @@ export default function Lessons() {
 
   return (
     <MainLayout>
-      <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between">
-        <div className="pb-15">
-          <h1 className="text-4xl font-bold">Your Personalized Learning Plan</h1>
-          {/* <p className="mt-2 text-white/80 text-sm font-light">Manage your your personalized learning plan</p> */}
-          <p>Check your lessons to improve your reading comprehension.</p>
+      <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Recommended Learning Modules</h1>
+          {/* <p className="mt-2 text-white/80 text-sm font-light">View and manage student accounts and GST results</p> */}
+          <p className="text-sm mt-1 text-blue-100">Review your personalized reading recommendations and start improving your comprehension now</p>
         </div>
+        <img
+          src={require("../../assets/lesson.png")}
+          alt="lesson"
+          className="w-32 drop-shadow-md"
+        />
       </div>
 
       <div className="mt-8">

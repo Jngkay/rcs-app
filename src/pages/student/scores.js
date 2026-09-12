@@ -39,12 +39,17 @@ export default function Scores() {
 
   return (
     <MainLayout>
-      <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-10">
-        <div className="pb-15">
-          <h1 className="text-4xl font-bold">Your Score Breakdown</h1>
-          {/* <p className="mt-2 text-white/80 text-sm font-light">Manage your your score breakdown</p> */}
-          <p>Check how well did do in the assessment</p>
+      <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Your Score Breakdown</h1>
+          {/* <p className="mt-2 text-white/80 text-sm font-light">View and manage student accounts and GST results</p> */}
+          <p className="text-sm mt-1 text-blue-100">Check how well did you do in the assessment</p>
         </div>
+        <img
+          src={require("../../assets/scores.png")}
+          alt="student"
+          className="w-32 drop-shadow-md"
+        />
       </div>
 
       {loading ? (
@@ -56,7 +61,7 @@ export default function Scores() {
           {error}
         </div>
       ) : (
-        <div className="space-y-8 max-w-4xl mx-auto">
+        <div className="space-y-8">
 
           {/* Phase 1: GST Score */}
           {!userData?.gst_assessment_attempted ? (
