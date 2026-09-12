@@ -7,6 +7,7 @@ export default function useRecorder() {
   const [result, setResult] = useState("");
   const [error, setError] = useState(null);
   const [duration, setDuration] = useState(0);
+  const [audioBlob, setAudioBlob] = useState(null);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -16,6 +17,7 @@ export default function useRecorder() {
     try {
       setError(null);
       setDuration(0);
+      setAudioBlob(null);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
       const mediaRecorder = new MediaRecorder(stream);
@@ -60,9 +62,10 @@ export default function useRecorder() {
       });
 
       mediaRecorder.stop();
-      const audioBlob = await recordingPromise;
+      const finalAudioBlob = await recordingPromise;
+      setAudioBlob(finalAudioBlob);
 
-      const file = new File([audioBlob], "speech.webm", { type: 'audio/webm' });
+      const file = new File([finalAudioBlob], "speech.webm", { type: 'audio/webm' });
 
       const formData = new FormData();
       formData.append("file", file);
@@ -97,6 +100,7 @@ export default function useRecorder() {
     setResult("");
     setError(null);
     setDuration(0);
+    setAudioBlob(null);
   };
 
   return {
@@ -105,6 +109,7 @@ export default function useRecorder() {
     result,
     error,
     duration,
+    audioBlob,
     startRecording,
     stopRecording,
     resetRecording,

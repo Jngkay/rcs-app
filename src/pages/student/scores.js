@@ -5,6 +5,7 @@ import { doc, getDoc } from "firebase/firestore";
 
 export default function Scores() {
   const [userData, setUserData] = useState(null);
+  const [userIndData, setUserIndData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -23,6 +24,11 @@ export default function Scores() {
 
         if (userSnap.exists()) {
           setUserData(userSnap.data());
+          const indRef = doc(db, "user_individual_assessment", uid);
+          const indSnap = await getDoc(indRef);
+          if (indSnap.exists()) {
+            setUserIndData(indSnap.data());
+          }
         } else {
           setError("No user data found.");
         }
@@ -133,6 +139,13 @@ export default function Scores() {
                       <span className="text-2xl font-bold">{userData.oral_reading_profile || "Pending"}</span>
                     </div>
                   </div>
+
+                  {userIndData?.audio_recording_url && (
+                    <div className="col-span-1 md:col-span-2 mt-4 bg-gray-50 border border-gray-200 p-6 rounded-lg text-center">
+                      <h3 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider">Your Reading Recording</h3>
+                      <audio controls src={userIndData.audio_recording_url} className="w-full max-w-md mx-auto" />
+                    </div>
+                  )}
                 </div>
               )}
             </div>

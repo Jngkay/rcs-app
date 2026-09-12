@@ -532,6 +532,13 @@ export default function Students() {
                                                                 </span>
                                                             </div>
                                                         </div>
+
+                                                        {studentIndData?.audio_recording_url && (
+                                                            <div className="mt-6 bg-gray-50 border border-gray-200 p-6 rounded-lg text-center">
+                                                                <h3 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider">Student's Reading Recording</h3>
+                                                                <audio controls src={studentIndData.audio_recording_url} className="w-full max-w-md mx-auto" />
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 ) : (
                                                     <p className="text-gray-500 italic">This student has not yet completed the individualized assessment.</p>

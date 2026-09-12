@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import MainLayout from "../../layout/mainLayout";
 import useRecorder from "./use_recorder";
 import SpeechResult from "./assessment_result";
-import { db } from "../../firebase";
+import { db, storage } from "../../firebase";
 import { collection, doc, getDoc, getDocs, updateDoc, setDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
 
 export default function Assessment() {
@@ -13,6 +14,7 @@ export default function Assessment() {
     result,
     error,
     duration,
+    audioBlob,
     startRecording,
     stopRecording,
     resetRecording,
@@ -32,6 +34,8 @@ export default function Assessment() {
   const [readingRate, setReadingRate] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [profileData, setProfileData] = useState({});
+  const [audioRecordingUrl, setAudioRecordingUrl] = useState(null);
+  const audioUrlRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -111,6 +115,24 @@ export default function Assessment() {
     try {
       const uid = localStorage.getItem("uuid");
       if (!uid) return;
+
+      let uploadedUrl = null;
+      if (audioBlob) {
+        console.log("Starting audio upload...");
+        try {
+          // Show a temporary loading state or just await it before moving on
+          const audioRef = ref(storage, `reading_recordings/${uid}_${Date.now()}.webm`);
+          await uploadBytes(audioRef, audioBlob);
+          uploadedUrl = await getDownloadURL(audioRef);
+          console.log("✅ Audio uploaded successfully! URL: ", uploadedUrl);
+          setAudioRecordingUrl(uploadedUrl);
+          audioUrlRef.current = uploadedUrl;
+        } catch (uploadErr) {
+          console.error("❌ Failed to upload audio blob to Firebase Storage. This is usually a permission/rules issue.", uploadErr);
+        }
+      } else {
+        console.warn("⚠️ audioBlob is null when trying to upload!");
+      }
 
       const userRef = doc(db, "users", uid);
       await updateDoc(userRef, {
@@ -217,12 +239,7 @@ export default function Assessment() {
         student_id: uid,
         student_name: firstName,
         timestamp: new Date(),
-        // word_reading_score: oralReadingScore,
-        // word_reading_level: wordLevel,
-        // comprehension_score: correctCount,
-        // comprehension_level: compLevel,
-        // reading_rate: readingRate,
-        // overall_profile: overall,
+        audio_recording_url: audioUrlRef.current || audioRecordingUrl || null,
         answers: userAnswers
       });
       console.log("Detailed individual assessment stored.");
