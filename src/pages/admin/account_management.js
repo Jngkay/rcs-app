@@ -158,15 +158,15 @@ export default function AccountManagement() {
 
   return (
     <AdminLayout>
-      <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between">
+      <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Account Management</h1>
-            <p className="mt-2 text-white/80 text-sm font-light">View and manage teacher and student accounts</p>
+          <p className="text-sm mt-1 text-blue-100">View and manage accounts</p>
         </div>
         <img
-          src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-          alt="books"
-          className="w-32"
+          src={require("../../assets/admin-panel.png")}
+          alt="student"
+          className="w-32 drop-shadow-md"
         />
       </div>
 
@@ -177,8 +177,8 @@ export default function AccountManagement() {
             <button
               onClick={() => setSelectedRole("students")}
               className={`px-4 py-2 rounded font-semibold transition ${selectedRole === "students"
-                  ? "bg-white text-blue-600 shadow"
-                  : "bg-blue-500 hover:bg-blue-400"
+                ? "bg-white text-blue-600 shadow"
+                : "bg-blue-500 hover:bg-blue-400"
                 }`}
             >
               Students ({filteredStudents.length})
@@ -187,8 +187,8 @@ export default function AccountManagement() {
             <button
               onClick={() => setSelectedRole("teachers")}
               className={`px-4 py-2 rounded font-semibold transition ${selectedRole === "teachers"
-                  ? "bg-white text-blue-600 shadow"
-                  : "bg-blue-500 hover:bg-blue-400"
+                ? "bg-white text-blue-600 shadow"
+                : "bg-blue-500 hover:bg-blue-400"
                 }`}
             >
               Teachers ({filteredTeachers.length})
@@ -344,8 +344,8 @@ export default function AccountManagement() {
                         key={page}
                         onClick={() => setCurrentPage(page)}
                         className={`px-3 py-1 rounded font-medium transition ${currentPage === page
-                            ? "bg-white text-blue-600 font-bold shadow-sm"
-                            : "border border-white/40 hover:bg-white/20 text-white"
+                          ? "bg-white text-blue-600 font-bold shadow-sm"
+                          : "border border-white/40 hover:bg-white/20 text-white"
                           }`}
                       >
                         {page}
@@ -456,8 +456,8 @@ export default function AccountManagement() {
                         key={page}
                         onClick={() => setCurrentPage(page)}
                         className={`px-3 py-1 rounded font-medium transition ${currentPage === page
-                            ? "bg-white text-blue-600 font-bold shadow-sm"
-                            : "border border-white/40 hover:bg-white/20 text-white"
+                          ? "bg-white text-blue-600 font-bold shadow-sm"
+                          : "border border-white/40 hover:bg-white/20 text-white"
                           }`}
                       >
                         {page}
@@ -619,9 +619,8 @@ export default function AccountManagement() {
       {/* Feedback Toast */}
       {feedback.show && (
         <div
-          className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white font-medium text-sm animate-bounce ${
-            feedback.isError ? "bg-red-600" : "bg-green-600"
-          }`}
+          className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white font-medium text-sm animate-bounce ${feedback.isError ? "bg-red-600" : "bg-green-600"
+            }`}
         >
           {feedback.message}
         </div>
