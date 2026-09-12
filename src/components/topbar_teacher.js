@@ -20,11 +20,15 @@ export default function TopBar() {
     const uid = localStorage.getItem("uuid");
     const userRole = localStorage.getItem("role");
 
+    const cachedProfilePic = localStorage.getItem("profilePicUrl");
+
     if (f_name) setFirstName(f_name);
     if (l_name) setLastName(l_name);
     if (userRole) setRole(userRole);
 
-    if (uid) {
+    if (cachedProfilePic) {
+      setProfilePic(cachedProfilePic);
+    } else if (uid) {
 
       const storage = getStorage();
       const profilePicRef = ref(storage, `userProfile/${uid}`);
@@ -32,6 +36,7 @@ export default function TopBar() {
       getDownloadURL(profilePicRef)
         .then((url) => {
           setProfilePic(url);
+          localStorage.setItem("profilePicUrl", url);
         })
         .catch(() => {
           // If image does not exist → use placeholder

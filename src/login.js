@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 import { Eye, EyeOff } from "lucide-react";
 import { collection, query, where, getDoc, doc, getDocs, setDoc } from "firebase/firestore";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 import { auth, db } from "./firebase";
 // import { Link } from "lucide-react";
@@ -51,6 +52,16 @@ function LoginForm({ onRegister }) {
       localStorage.setItem("lastName", lastName);
       localStorage.setItem("grade_level", gradeLevel);
       localStorage.setItem("role", role);
+
+      // Fetch and cache profile picture
+      try {
+        const storage = getStorage();
+        const profilePicRef = ref(storage, `userProfile/${uuid}`);
+        const url = await getDownloadURL(profilePicRef);
+        localStorage.setItem("profilePicUrl", url);
+      } catch (err) {
+        localStorage.setItem("profilePicUrl", "");
+      }
 
 
       if (role === "admin") {

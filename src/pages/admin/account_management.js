@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 
 import AdminLayout from "../../layout/adminLayout";
 
@@ -74,6 +75,20 @@ export default function AccountManagement() {
     } catch (err) {
       console.error("Error updating user:", err);
       setFeedback({ show: true, message: "Failed to update account: " + err.message, isError: true });
+    }
+  };
+
+  // Admin Reset Password Handler
+  const handleAdminResetPassword = async () => {
+    if (!editingUser || !editingUser.email) return;
+    const auth = getAuth();
+    try {
+      await sendPasswordResetEmail(auth, editingUser.email);
+      setFeedback({ show: true, message: "Password reset email sent to " + editingUser.email, isError: false });
+      setTimeout(() => setFeedback({ show: false, message: "", isError: false }), 4000);
+    } catch (err) {
+      console.error("Error sending reset email:", err);
+      setFeedback({ show: true, message: "Failed to send reset email: " + err.message, isError: true });
     }
   };
 
@@ -558,22 +573,31 @@ export default function AccountManagement() {
               )}
             </div>
 
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+            <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-100">
               <button
-                onClick={() => {
-                  setEditModalOpen(false);
-                  setEditingUser(null);
-                }}
-                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold rounded-lg transition"
+                onClick={handleAdminResetPassword}
+                className="px-4 py-2 bg-systemYellow-400 hover:bg-yellow-500 text-white text-sm font-semibold rounded-lg shadow transition"
               >
-                Cancel
+                Send Reset Password Email
               </button>
-              <button
-                onClick={handleSaveEdit}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition"
-              >
-                Save Changes
-              </button>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setEditModalOpen(false);
+                    setEditingUser(null);
+                  }}
+                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold rounded-lg transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition"
+                >
+                  Save Changes
+                </button>
+              </div>
             </div>
           </div>
         </div>
