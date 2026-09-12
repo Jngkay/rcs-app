@@ -527,7 +527,7 @@ export default function TeacherAnalytics() {
                           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                             {/* Base track */}
                             <circle cx="50" cy="50" r="40" stroke="#f1f5f9" strokeWidth="12" fill="transparent" />
-                            
+
                             {totalInSubset > 0 ? (
                               <>
                                 {/* Passed GST */}
