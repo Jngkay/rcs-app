@@ -211,6 +211,7 @@ export default function Dashboard() {
         gst_score: correctCount,
         gst_total_questions: totalQs,
         gst_assessment_attempted: true,
+        assessment_date: new Date().toISOString(),
         ...(correctCount >= 14 ? {
           gst_status: "PASSED_GST",
           needs_remediation: false

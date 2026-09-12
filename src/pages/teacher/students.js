@@ -44,10 +44,17 @@ export default function Students() {
                 where("role", "==", "student")
             );
             const studentsSnapshot = await getDocs(studentsQuery);
-            const allStudents = studentsSnapshot.docs.map(doc => ({
+            let allStudents = studentsSnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
+
+            // Sort by latest registered first
+            allStudents.sort((a, b) => {
+                const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+                const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+                return dateB - dateA;
+            });
 
             // 3. Filter students who belong to any of this teacher's classes
             const myStudents = allStudents.filter(student =>
@@ -180,6 +187,24 @@ export default function Students() {
         }
     };
 
+    const formatDateTime = (dateVal) => {
+        if (!dateVal) return 'N/A';
+        const dateObj = dateVal.toDate ? dateVal.toDate() : new Date(dateVal);
+
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const month = months[dateObj.getMonth()];
+        const day = dateObj.getDate();
+        const year = dateObj.getFullYear();
+
+        let hours = dateObj.getHours();
+        const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+
+        return `${month} ${day}, ${year} ${hours}:${minutes}${ampm}`;
+    };
+
     return (
         <TeacherLayout>
             <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-6">
@@ -268,9 +293,11 @@ export default function Students() {
                         <table className="w-full text-left border-collapse whitespace-nowrap">
                             <thead>
                                 <tr className="bg-blue-100 text-blue-800">
+                                    <th className="p-3 border-b">Date Registered</th>
                                     <th className="p-3 border-b">Name</th>
                                     <th className="p-3 border-b">Grade Level</th>
                                     <th className="p-3 border-b">Class Code</th>
+                                    <th className="p-3 border-b text-center">GST Date</th>
                                     <th className="p-3 border-b text-center">GST Score</th>
                                     <th className="p-3 border-b text-center">Status</th>
                                     <th className="p-3 border-b text-center">Actions</th>
@@ -280,9 +307,15 @@ export default function Students() {
                                 {paginatedStudents.length > 0 ? (
                                     paginatedStudents.map(student => (
                                         <tr key={student.id} className="hover:bg-gray-50 border-b">
+                                            <td className="p-3 text-sm text-gray-600 whitespace-nowrap font-medium">
+                                                {formatDateTime(student.createdAt)}
+                                            </td>
                                             <td className="p-3 font-medium">{student.first_name} {student.last_name}</td>
                                             <td className="p-3">{student.grade_level}</td>
                                             <td className="p-3 font-mono text-sm text-gray-600">{student.classCode}</td>
+                                            <td className="p-3 text-center text-sm text-gray-600">
+                                                {student.assessment_date ? new Date(student.assessment_date).toLocaleDateString() : 'N/A'}
+                                            </td>
                                             <td className="p-3 text-center font-bold">
                                                 {student.gst_assessment_attempted ? `${student.gst_score} / ${student.gst_total_questions || '-'}` : '-'}
                                             </td>
@@ -300,7 +333,7 @@ export default function Students() {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="6" className="p-6 text-center text-gray-500">
+                                        <td colSpan="8" className="p-6 text-center text-gray-500">
                                             No students found for this selection.
                                         </td>
                                     </tr>

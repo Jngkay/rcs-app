@@ -35,9 +35,19 @@ export default function Assessment() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [profileData, setProfileData] = useState({});
   const [audioRecordingUrl, setAudioRecordingUrl] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const audioUrlRef = useRef(null);
+  const resultRef = useRef(null);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (result && resultRef.current) {
+      setTimeout(() => {
+        resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    }
+  }, [result]);
 
   useEffect(() => {
     const fetchParagraphAndQuestions = async () => {
@@ -111,6 +121,7 @@ export default function Assessment() {
   const handleSaveResult = async (oralScore, wpm) => {
     setOralReadingScore(parseFloat(oralScore) || 0);
     setReadingRate(wpm || 0);
+    setIsUploading(true);
 
     try {
       const uid = localStorage.getItem("uuid");
@@ -138,7 +149,8 @@ export default function Assessment() {
       await updateDoc(userRef, {
         individualized_score: parseFloat(oralScore),
         word_per_minute: wpm,
-        individualized_assessment_attempted: true
+        individualized_assessment_attempted: true,
+        assessment_date: new Date().toISOString()
       });
 
       if (questions.length > 0) {
@@ -149,6 +161,8 @@ export default function Assessment() {
     } catch (err) {
       console.error("Error saving result:", err);
       alert("Failed to save result. Please try again.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -278,7 +292,15 @@ export default function Assessment() {
       <div className="w-full bg-white shadow-lg rounded-lg p-8 mt-6 min-h-[500px] flex flex-col">
         {testStep === "reading" && (
           <>
-            <div className="border-t border-blue-500 mb-6"></div>
+            {isUploading ? (
+              <div className="flex flex-col items-center justify-center p-12 bg-blue-50/80 rounded-2xl w-full border border-blue-100 shadow-inner my-12 animate-fadeIn flex-1">
+                 <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+                 <h2 className="text-3xl font-bold text-gray-700 text-center">Saving Results & Audio...</h2>
+                 <p className="text-gray-500 mt-2 text-center text-lg">Preparing your comprehension questions</p>
+              </div>
+            ) : (
+              <>
+                <div className="border-t border-blue-500 mb-6"></div>
 
             <div className="border rounded-md p-6 bg-gray-50 flex-1">
               <h2 className="text-blue-700 font-semibold text-lg border-l-4 border-blue-500 pl-3 mb-4">
@@ -292,17 +314,23 @@ export default function Assessment() {
               </div>
 
               <div className="flex justify-center mt-4">
-                {!isRecording ? (
+                {isProcessing ? (
+                  <div className="flex flex-col items-center justify-center p-8 bg-blue-50/80 rounded-2xl w-full border border-blue-100 shadow-inner">
+                     <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                     <p className="text-blue-800 font-bold text-xl animate-pulse">Analyzing pronunciation...</p>
+                     <p className="text-blue-600 mt-2 text-sm font-medium">This may take a few moments</p>
+                  </div>
+                ) : !isRecording ? (
                   <button
                     onClick={startRecording}
-                    disabled={isProcessing || !hasStories}
+                    disabled={!hasStories}
                     className={`px-10 py-4 text-lg rounded-full font-semibold transition shadow-md ${
-                      isProcessing || !hasStories
+                      !hasStories
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-blue-700 hover:bg-blue-800 text-white"
                     }`}
                   >
-                    {isProcessing ? 'Processing Speech...' : 'START READING'}
+                    START READING
                   </button>
                 ) : (
                   <button
@@ -318,7 +346,7 @@ export default function Assessment() {
             </div>
 
             {result && paragraph !== "Loading..." && (
-              <div className="mt-8">
+              <div className="mt-8" ref={resultRef}>
                 <SpeechResult
                   originalText={paragraph}
                   spokenText={result}
@@ -328,6 +356,8 @@ export default function Assessment() {
                 />
               </div>
             )}
+            </>
+          )}
           </>
         )}
 

@@ -264,6 +264,7 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
         grade_level,
         email,
         classCode,
+        createdAt: new Date(),
 
         // Assessment fields
         gst_score: 0,
