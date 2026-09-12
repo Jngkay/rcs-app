@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import TeacherLayout from "../../layout/teacherLayout";
-import { collection, query, where, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 
 export default function Students() {
@@ -16,7 +16,13 @@ export default function Students() {
     const [activeTab, setActiveTab] = useState("gst");
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [studentGstData, setStudentGstData] = useState(null);
+    const [studentGstHistory, setStudentGstHistory] = useState([]);
+    const [activeGstAttemptIndex, setActiveGstAttemptIndex] = useState(0);
+    const [showRetakeModal, setShowRetakeModal] = useState(false);
+    const [showIndRetakeModal, setShowIndRetakeModal] = useState(false);
     const [studentIndData, setStudentIndData] = useState(null);
+    const [studentIndHistory, setStudentIndHistory] = useState([]);
+    const [activeIndAttemptIndex, setActiveIndAttemptIndex] = useState(0);
     const [studentModuleData, setStudentModuleData] = useState(null);
     const [teacherNotes, setTeacherNotes] = useState("");
     const [isSavingNotes, setIsSavingNotes] = useState(false);
@@ -140,21 +146,60 @@ export default function Students() {
         setActiveTab("gst");
         setLoadingAssessment(true);
         setStudentGstData(null);
+        setStudentGstHistory([]);
+        setActiveGstAttemptIndex(0);
         setStudentIndData(null);
+        setStudentIndHistory([]);
+        setActiveIndAttemptIndex(0);
         setStudentModuleData(null);
         setTeacherNotes("");
 
         try {
-            const gstDocRef = doc(db, "user_gst", student.id);
-            const gstDocSnap = await getDoc(gstDocRef);
-            if (gstDocSnap.exists()) {
-                setStudentGstData(gstDocSnap.data());
+            // Fetch historical GST attempts
+            const gstAttemptsRef = collection(db, "user_gst_attempts");
+            const q = query(gstAttemptsRef, where("student_id", "==", student.id));
+            const gstAttemptsSnap = await getDocs(q);
+            
+            let attempts = [];
+            gstAttemptsSnap.forEach((doc) => attempts.push(doc.data()));
+            
+            // Sort by timestamp ascending
+            attempts.sort((a, b) => {
+                const tA = a.timestamp?.toMillis ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
+                const tB = b.timestamp?.toMillis ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
+                return tA - tB;
+            });
+            
+            if (attempts.length > 0) {
+                setStudentGstHistory(attempts);
+                setStudentGstData(attempts[attempts.length - 1]); // Show latest attempt initially
+                setActiveGstAttemptIndex(attempts.length - 1);
             }
 
-            const indDocRef = doc(db, "user_individual_assessment", student.id);
-            const indDocSnap = await getDoc(indDocRef);
-            if (indDocSnap.exists()) {
-                setStudentIndData(indDocSnap.data());
+            const indAttemptsRef = collection(db, "user_ind_attempts");
+            const qInd = query(indAttemptsRef, where("student_id", "==", student.id));
+            const indAttemptsSnap = await getDocs(qInd);
+            
+            let indAttempts = [];
+            indAttemptsSnap.forEach((doc) => indAttempts.push(doc.data()));
+            
+            indAttempts.sort((a, b) => {
+                const tA = a.timestamp?.toMillis ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
+                const tB = b.timestamp?.toMillis ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
+                return tA - tB;
+            });
+            
+            if (indAttempts.length > 0) {
+                setStudentIndHistory(indAttempts);
+                setStudentIndData(indAttempts[indAttempts.length - 1]);
+                setActiveIndAttemptIndex(indAttempts.length - 1);
+            } else {
+                // Fallback to legacy structure if no history found
+                const indDocRef = doc(db, "user_individual_assessment", student.id);
+                const indDocSnap = await getDoc(indDocRef);
+                if (indDocSnap.exists()) {
+                    setStudentIndData(indDocSnap.data());
+                }
             }
 
             const modDocRef = doc(db, "user_learning_modules", student.id);
@@ -184,6 +229,43 @@ export default function Students() {
             setFeedbackModal({ show: true, message: "Failed to save notes.", isError: true });
         } finally {
             setIsSavingNotes(false);
+        }
+    };
+
+    const confirmAllowRetake = async () => {
+        if (!selectedStudent) return;
+        
+        try {
+            const userRef = doc(db, "users", selectedStudent.id);
+            await updateDoc(userRef, {
+                allow_gst_retake: true
+            });
+            
+            // Instantly disable the button without needing a full refresh
+            setSelectedStudent(prev => ({ ...prev, allow_gst_retake: true }));
+            
+            setShowRetakeModal(false);
+            setFeedbackModal({ show: true, message: "GST Retake enabled for student!", isError: false });
+        } catch (error) {
+            console.error("Error allowing retake:", error);
+            setShowRetakeModal(false);
+            setFeedbackModal({ show: true, message: "Failed to enable retake.", isError: true });
+        }
+    };
+
+    const confirmAllowIndRetake = async () => {
+        if (!selectedStudent) return;
+        try {
+            const userRef = doc(db, "users", selectedStudent.id);
+            await updateDoc(userRef, { allow_ind_retake: true });
+            setSelectedStudent(prev => ({ ...prev, allow_ind_retake: true }));
+            setStudents(students.map(s => s.id === selectedStudent.id ? { ...s, allow_ind_retake: true } : s));
+            setShowIndRetakeModal(false);
+            setFeedbackModal({ show: true, message: "Phase 2 Retake enabled for student!", isError: false });
+        } catch (error) {
+            console.error("Error allowing IND retake:", error);
+            setShowIndRetakeModal(false);
+            setFeedbackModal({ show: true, message: "Failed to enable Phase 2 retake.", isError: true });
         }
     };
 
@@ -457,7 +539,43 @@ export default function Students() {
                                         {/* GST Section */}
                                         {activeTab === 'gst' && (
                                             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 animate-fadeIn">
-                                                <h3 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Group Screening Test Data</h3>
+                                                <div className="flex justify-between items-center mb-4 border-b pb-2">
+                                                    <h3 className="text-xl font-bold text-gray-800">Group Screening Test Data</h3>
+                                                    <button 
+                                                        onClick={() => setShowRetakeModal(true)}
+                                                        disabled={selectedStudent?.allow_gst_retake === true || studentGstHistory.length >= 3}
+                                                        className={`px-4 py-1.5 rounded-md text-sm font-semibold transition shadow-sm ${
+                                                            selectedStudent?.allow_gst_retake === true || studentGstHistory.length >= 3
+                                                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                                : "bg-yellow-500 hover:bg-yellow-600 text-white"
+                                                        }`}
+                                                    >
+                                                        {selectedStudent?.allow_gst_retake === true 
+                                                            ? "Retake Pending" 
+                                                            : studentGstHistory.length >= 3 
+                                                                ? "Max Tries Reached" 
+                                                                : "Allow GST Retake"}
+                                                    </button>
+                                                </div>
+
+                                                {/* History Tabs */}
+                                                {studentGstHistory.length > 1 && (
+                                                    <div className="flex gap-2 mb-4 bg-gray-100 p-1 rounded-md w-fit">
+                                                        {studentGstHistory.map((_, idx) => (
+                                                            <button
+                                                                key={idx}
+                                                                onClick={() => {
+                                                                    setActiveGstAttemptIndex(idx);
+                                                                    setStudentGstData(studentGstHistory[idx]);
+                                                                }}
+                                                                className={`px-4 py-1.5 text-sm font-semibold rounded-md transition ${activeGstAttemptIndex === idx ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                                                            >
+                                                                Try {idx + 1}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+
                                                 {studentGstData ? (
                                                     <div>
                                                         <p className="mb-4 font-semibold text-lg text-blue-700">
@@ -486,7 +604,42 @@ export default function Students() {
                                         {/* Individualized Assessment Section */}
                                         {activeTab === 'ind' && (
                                             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 animate-fadeIn">
-                                                <h3 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Comprehension Questions</h3>
+                                                <div className="flex justify-between items-center mb-4 border-b pb-2">
+                                                    <h3 className="text-xl font-bold text-gray-800">Comprehension Questions</h3>
+                                                    <button 
+                                                        onClick={() => setShowIndRetakeModal(true)}
+                                                        disabled={selectedStudent?.allow_ind_retake === true || studentIndHistory.length >= 3}
+                                                        className={`px-4 py-1.5 rounded-md text-sm font-semibold transition shadow-sm ${
+                                                            selectedStudent?.allow_ind_retake === true || studentIndHistory.length >= 3
+                                                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                                : "bg-indigo-500 hover:bg-indigo-600 text-white"
+                                                        }`}
+                                                    >
+                                                        {selectedStudent?.allow_ind_retake === true 
+                                                            ? "Retake Pending" 
+                                                            : studentIndHistory.length >= 3 
+                                                                ? "Max Tries Reached" 
+                                                                : "Allow Phase 2 Retake"}
+                                                    </button>
+                                                </div>
+
+                                                {/* History Tabs */}
+                                                {studentIndHistory.length > 1 && (
+                                                    <div className="flex gap-2 mb-4 bg-gray-100 p-1 rounded-md w-fit">
+                                                        {studentIndHistory.map((_, idx) => (
+                                                            <button
+                                                                key={idx}
+                                                                onClick={() => {
+                                                                    setActiveIndAttemptIndex(idx);
+                                                                    setStudentIndData(studentIndHistory[idx]);
+                                                                }}
+                                                                className={`px-4 py-1.5 text-sm font-semibold rounded-md transition ${activeIndAttemptIndex === idx ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                                                            >
+                                                                Try {idx + 1}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
                                                 {studentIndData ? (
                                                     <div>
                                                         <div className="space-y-4 mt-4">
@@ -537,16 +690,16 @@ export default function Students() {
                                                         <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg border">
                                                             <span className="font-semibold text-gray-700">Word Reading Level:</span>
                                                             <div className="text-right">
-                                                                <span className="font-medium mr-3">{selectedStudent.individualized_score}%</span>
-                                                                <span className="text-blue-700 font-bold">{selectedStudent.word_reading_level || "N/A"}</span>
+                                                                <span className="font-medium mr-3">{studentIndData?.individualized_score || selectedStudent.individualized_score}%</span>
+                                                                <span className="text-blue-700 font-bold">{studentIndData?.word_reading_level || selectedStudent.word_reading_level || "N/A"}</span>
                                                             </div>
                                                         </div>
 
                                                         <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg border">
                                                             <span className="font-semibold text-gray-700">Comprehension Level:</span>
                                                             <div className="text-right">
-                                                                <span className="font-medium mr-3">{selectedStudent.individualized_comprehension_percentage || 0}%</span>
-                                                                <span className="text-blue-700 font-bold">{selectedStudent.comprehension_level || "N/A"}</span>
+                                                                <span className="font-medium mr-3">{studentIndData?.individualized_comprehension_percentage || selectedStudent.individualized_comprehension_percentage || 0}%</span>
+                                                                <span className="text-blue-700 font-bold">{studentIndData?.comprehension_level || selectedStudent.comprehension_level || "N/A"}</span>
                                                             </div>
                                                         </div>
 
@@ -652,6 +805,73 @@ export default function Students() {
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Custom Retake Confirmation Modal */}
+            {showRetakeModal && selectedStudent && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 60 }}>
+                    <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full animate-fadeIn">
+                        <div className="w-16 h-16 bg-yellow-100 text-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Allow GST Retake?</h2>
+                        <p className="text-gray-600 mb-8 text-center">
+                            Are you sure you want to allow this student to retake the GST? 
+                            Their current score will be preserved in their history.
+                        </p>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => setShowRetakeModal(false)}
+                                className="flex-1 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmAllowRetake}
+                                className="flex-1 py-2.5 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition"
+                            >
+                                Confirm Retake
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Custom IND Retake Confirmation Modal */}
+            {showIndRetakeModal && selectedStudent && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 60 }}>
+                    <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full animate-fadeIn">
+                        <div className="flex justify-center mb-6">
+                            <div className="bg-indigo-100 p-4 rounded-full text-indigo-600">
+                                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            </div>
+                        </div>
+                        
+                        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
+                            Allow Phase 2 Retake?
+                        </h2>
+                        
+                        <p className="text-center text-gray-600 mb-8">
+                            Are you sure you want to allow <span className="font-bold text-gray-800">{selectedStudentName}</span> to retake the <span className="font-semibold">Individualized Assessment</span>?
+                            Their previous attempts will be securely stored in history.
+                        </p>
+
+                        <div className="flex gap-4 w-full">
+                            <button
+                                onClick={() => setShowIndRetakeModal(false)}
+                                className="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-lg transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmAllowIndRetake}
+                                className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-md transition"
+                            >
+                                Allow Retake
+                            </button>
                         </div>
                     </div>
                 </div>

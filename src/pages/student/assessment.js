@@ -3,7 +3,7 @@ import MainLayout from "../../layout/mainLayout";
 import useRecorder from "./use_recorder";
 import SpeechResult from "./assessment_result";
 import { db, storage } from "../../firebase";
-import { collection, doc, getDoc, getDocs, updateDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, updateDoc, setDoc, addDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
 
@@ -246,7 +246,8 @@ export default function Assessment() {
         individualized_comprehension_percentage: percentage,
         word_reading_level: wordLevel,
         comprehension_level: compLevel,
-        oral_reading_profile: overall
+        oral_reading_profile: overall,
+        allow_ind_retake: false
       });
 
       await setDoc(doc(db, "user_individual_assessment", uid), {
@@ -257,6 +258,22 @@ export default function Assessment() {
         answers: userAnswers
       });
       console.log("Detailed individual assessment stored.");
+
+      // Save to historical attempts collection
+      await addDoc(collection(db, "user_ind_attempts"), {
+        student_id: uid,
+        student_name: firstName,
+        timestamp: new Date(),
+        audio_recording_url: audioUrlRef.current || audioRecordingUrl || null,
+        word_reading_level: wordLevel,
+        comprehension_level: compLevel,
+        oral_reading_profile: overall,
+        individualized_score: oralReadingScore,
+        individualized_comprehension_percentage: percentage,
+        word_per_minute: readingRate,
+        answers: userAnswers
+      });
+      console.log("Detailed IND attempt saved to history.");
 
     } catch (err) {
       console.error("Error saving comprehension score:", err);

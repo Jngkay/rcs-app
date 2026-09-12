@@ -69,7 +69,7 @@ function LoginForm({ onRegister }) {
       } else if (role === "teacher") {
         navigate("../pages/teacher/students");
       } else if (role === "student") {
-        navigate("../pages/student/dashboard");
+        navigate("../pages/student/home");
       }
       setError("");
     } catch (err) {

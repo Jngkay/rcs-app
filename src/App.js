@@ -3,6 +3,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./login";
 import Dashboard from "./pages/student/dashboard";
+import Home from "./pages/student/home";
 import Lessons from "./pages/student/lessons";
 import Scores from "./pages/student/scores";
 import Progress from "./pages/student/progress";
@@ -35,6 +36,7 @@ function App() {
 
 
         {/* Routes for Student  */}
+        <Route path="/pages/student/home" element={<Home />} />
         <Route path="/pages/student/dashboard" element={<Dashboard />} />
         <Route path="/pages/student/lessons" element={<Lessons />} />
         <Route path="/pages/student/scores" element={<Scores />} />

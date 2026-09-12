@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MainLayout from "../../layout/mainLayout";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
-import { doc, getDoc, collection, getDocs, updateDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, updateDoc, setDoc, addDoc, query, where } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
@@ -12,10 +12,12 @@ export default function Dashboard() {
   const [testFlow, setTestFlow] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [profileData, setProfileData] = useState(null);
+  const [userData, setUserData] = useState(null);
 
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
+  const [historyScores, setHistoryScores] = useState([]);
 
   const [firstName, setFirstName] = useState("");
   const [profilePic, setProfilePic] = useState("");
@@ -54,14 +56,19 @@ export default function Dashboard() {
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) return;
 
-        const userData = userSnap.data();
+        const fetchedData = userSnap.data();
+        setUserData(fetchedData);
+
+        // Check if explicitly allowed to retake
+        const isRetakeAllowed = fetchedData.allow_gst_retake === true;
+        const isIndRetakeAllowed = fetchedData.allow_ind_retake === true;
 
         // 🚫 Block returning if already took Individualized Assessment
-        if (userData.individualized_assessment_attempted === true) {
+        if (fetchedData.individualized_assessment_attempted === true && !isIndRetakeAllowed) {
           setProfileData({
-            wordLevel: userData.individualized_score,
-            compLevel: userData.individualized_comprehension_percentage,
-            overall: userData.oral_reading_profile
+            wordLevel: fetchedData.individualized_score,
+            compLevel: fetchedData.individualized_comprehension_percentage,
+            overall: fetchedData.oral_reading_profile
           });
           setStep("finalResult");
           setLoading(false);
@@ -69,9 +76,26 @@ export default function Dashboard() {
         }
 
         // 🚫 Block retake of GST
-        if (userData.gst_assessment_attempted === true) {
-          setScore(userData.gst_score || 0); // show previous score
-          setTotalQuestions(userData.gst_total_questions || 0);
+        if (fetchedData.gst_assessment_attempted === true && !isRetakeAllowed) {
+          setScore(fetchedData.gst_score || 0); // show previous score
+          setTotalQuestions(fetchedData.gst_total_questions || 0);
+          
+          // Fetch historical attempts for display
+          const gstAttemptsRef = collection(db, "user_gst_attempts");
+          const q = query(gstAttemptsRef, where("student_id", "==", user.uid));
+          const gstAttemptsSnap = await getDocs(q);
+          
+          let attempts = [];
+          gstAttemptsSnap.forEach((doc) => attempts.push(doc.data()));
+          
+          // Sort by timestamp ascending
+          attempts.sort((a, b) => {
+              const tA = a.timestamp?.toMillis ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
+              const tB = b.timestamp?.toMillis ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
+              return tA - tB;
+          });
+          
+          setHistoryScores(attempts);
           setStep("result");
           setLoading(false);
           return;
@@ -211,6 +235,7 @@ export default function Dashboard() {
         gst_score: correctCount,
         gst_total_questions: totalQs,
         gst_assessment_attempted: true,
+        allow_gst_retake: false, // Reset retake flag
         assessment_date: new Date().toISOString(),
         ...(correctCount >= 14 ? {
           gst_status: "PASSED_GST",
@@ -223,7 +248,7 @@ export default function Dashboard() {
 
       console.log("GST score saved:", correctCount);
 
-      // Save detailed answers to user_gst
+      // Save detailed answers to user_gst (latest)
       await setDoc(doc(db, "user_gst", user.uid), {
         student_id: user.uid,
         student_name: firstName || "Unknown Student",
@@ -232,7 +257,19 @@ export default function Dashboard() {
         answers: userAnswers,
         timestamp: new Date()
       });
-      console.log("Detailed GST answers saved to user_gst.");
+
+      // Save to historical attempts collection
+      await addDoc(collection(db, "user_gst_attempts"), {
+        student_id: user.uid,
+        student_name: firstName || "Unknown Student",
+        score: correctCount,
+        total_questions: totalQs,
+        answers: userAnswers,
+        timestamp: new Date()
+      });
+      console.log("Detailed GST answers saved to user_gst_attempts.");
+
+      setHistoryScores(prev => [...prev, { score: correctCount, total_questions: totalQs }]);
 
     } catch (error) {
       console.error("Error saving GST score or detailed answers:", error);
@@ -269,24 +306,27 @@ export default function Dashboard() {
 
       {/* ================= WELCOME ================= */}
       {step === "welcome" && (
-        <div className="bg-secondary text-white p-6 rounded-xl shadow-md">
-          <h1 className="text-5xl font-bold">
-            Welcome to Readi, {firstName}!
-          </h1>
+        <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold">Phil- IRI Group Test Screening (GST) assessment</h1>
+            {/* <p className="mt-2 text-white/80 text-sm font-light">View and manage student accounts and GST results</p> */}
+            <p className="text-sm mt-1 text-blue-100">You are about to take the Phil- IRI Group Test Screening (GST) assessment.</p>
 
-          <br></br>
-          <h1 className="text-3xl font-bold">
-            You are about to take the Phil- IRI Group Test Screening (GST) assessment.
-          </h1>
-
-
-          <button
-            onClick={() => setStep("quiz")}
-            className="px-12 py-2 mt-10 bg-yellow-500 text-2xl rounded-full font-semibold hover:bg-yellow-600 transition"
-          >
-            Take the GST Test
-          </button>
+            <button
+              onClick={() => setStep("quiz")}
+              className="px-12 py-2 mt-10 bg-yellow-500 text-2xl rounded-full font-semibold hover:bg-yellow-600 transition"
+            >
+              Take the GST Test
+            </button>
+          </div>
+          <img
+            src={require("../../assets/book.png")}
+            alt="lesson"
+            className="w-32 drop-shadow-md"
+          />
         </div>
+
+
       )}
 
       {/* ================= QUIZ ================= */}
@@ -378,12 +418,26 @@ export default function Dashboard() {
 
 
           <p className="text-3xl mt-8">
-            Your Raw Score:
+            Your {historyScores.length > 1 ? "Latest " : ""}Raw Score:
           </p>
 
           <p className="text-6xl font-bold mt-4">
             {score} / {totalQuestions || testFlow.filter((item) => item.type === "question").length}
           </p>
+
+          {historyScores.length > 1 && (
+            <div className="mt-8 bg-white/10 p-6 rounded-lg w-fit">
+              <h3 className="text-xl font-bold mb-3 text-blue-200 uppercase tracking-wide">Previous Attempts</h3>
+              <ul className="text-lg space-y-2">
+                {historyScores.slice(0, -1).map((attempt, index) => (
+                  <li key={index} className="flex gap-8 justify-between border-b border-white/20 pb-2">
+                    <span className="font-medium text-white/80">Try {index + 1}:</span>
+                    <span className="font-bold">{attempt.score} / {attempt.total_questions || 20}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* ================= DECISION LOGIC ================= */}
 
@@ -406,14 +460,16 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              <div className="mt-8">
-                <button
-                  onClick={() => navigate("/pages/student/assessment")}
-                  className="px-16 py-3 bg-white text-blue-600 text-xl rounded-full font-semibold hover:bg-gray-200 transition"
-                >
-                  Proceed to Individualized Assessment
-                </button>
-              </div>
+              {(historyScores.length <= 1 || userData?.allow_ind_retake === true) && (
+                <div className="mt-8">
+                  <button
+                    onClick={() => navigate("/pages/student/assessment")}
+                    className="px-16 py-3 bg-white text-blue-600 text-xl rounded-full font-semibold hover:bg-gray-200 transition"
+                  >
+                    Proceed to Individualized Assessment
+                  </button>
+                </div>
+              )}
             </>
           ) : (
             <>
@@ -431,14 +487,14 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              <div className="mt-8">
+              {/* <div className="mt-8">
                 <button
                   onClick={() => navigate("/pages/student/lessons")}
                   className="px-16 py-3 bg-white text-blue-600 text-xl rounded-full font-semibold hover:bg-gray-200 transition"
                 >
                   Continue to Lessons
                 </button>
-              </div>
+              </div> */}
             </>
           )}
         </div>

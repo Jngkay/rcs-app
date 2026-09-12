@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { Book, BookOpen, LayoutDashboard, Award, TrendingUp, LogOut, Menu } from "lucide-react";
+import { Book, BookOpen, LayoutDashboard, Award, TrendingUp, LogOut, Menu, Home } from "lucide-react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
@@ -44,6 +44,23 @@ export default function SideBar() {
       {/* Nav links */}
       <nav className="flex-1 space-y-4">
         <NavLink
+          to="/pages/student/home"
+          className={({ isActive }) =>
+            `flex items-center gap-3 p-2 rounded-full font-semibold transition-all duration-200 group ${isActive ? "bg-systemYellow-400 text-white shadow-md" : "text-brandNeutral-text hover:bg-slate-200/50"
+            }`
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <div className={`${isActive ? "bg-white text-systemYellow-400" : "text-brandNeutral-text"} p-2 rounded-full transition-colors`}>
+                <Home size={20} className={!isActive ? "group-hover:scale-110 transition-transform" : ""} />
+              </div>
+              {isOpen && <span>Home</span>}
+            </>
+          )}
+        </NavLink>
+
+        <NavLink
           to="/pages/student/dashboard"
           className={({ isActive }) =>
             `flex items-center gap-3 p-2 rounded-full font-semibold transition-all duration-200 group ${isActive ? "bg-systemYellow-400 text-white shadow-md" : "text-brandNeutral-text hover:bg-slate-200/50"
@@ -55,7 +72,7 @@ export default function SideBar() {
               <div className={`${isActive ? "bg-white text-systemYellow-400" : "text-brandNeutral-text"} p-2 rounded-full transition-colors`}>
                 <LayoutDashboard size={20} className={!isActive ? "group-hover:scale-110 transition-transform" : ""} />
               </div>
-              {isOpen && <span>Dashboard</span>}
+              {isOpen && <span>Assessment</span>}
             </>
           )}
         </NavLink>
@@ -94,7 +111,7 @@ export default function SideBar() {
           )}
         </NavLink>
 
-        {/* <NavLink
+        <NavLink
           to="/pages/student/progress"
           className={({ isActive }) =>
             `flex items-center gap-3 p-2 rounded-full font-semibold transition-all duration-200 group ${
@@ -105,12 +122,12 @@ export default function SideBar() {
           {({ isActive }) => (
             <>
               <div className={`${isActive ? "bg-white text-systemYellow-400" : "text-brandNeutral-text"} p-2 rounded-full transition-colors`}>
-                <Book size={20} className={!isActive ? "group-hover:scale-110 transition-transform" : ""} />
+                <TrendingUp size={20} className={!isActive ? "group-hover:scale-110 transition-transform" : ""} />
               </div>
               {isOpen && <span>Your Progress</span>}
             </>
           )}
-        </NavLink> */}
+        </NavLink>
       </nav>
 
       <div className="mt-auto pt-4">
