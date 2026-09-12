@@ -170,15 +170,15 @@ export default function AccountManagement() {
         />
       </div>
 
-      <div className="bg-secondary text-white p-6 rounded-xl shadow-md mt-8">
+      <div className="bg-white p-6 rounded-xl  shadow-inner shadow-lg mt-8">
         {/* Toggle Buttons & Search Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex gap-4">
             <button
               onClick={() => setSelectedRole("students")}
               className={`px-4 py-2 rounded font-semibold transition ${selectedRole === "students"
-                ? "bg-white text-blue-600 shadow"
-                : "bg-blue-500 hover:bg-blue-400"
+                ? "bg-blue-600 text-white shadow-md"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
             >
               Students ({filteredStudents.length})
@@ -187,8 +187,8 @@ export default function AccountManagement() {
             <button
               onClick={() => setSelectedRole("teachers")}
               className={`px-4 py-2 rounded font-semibold transition ${selectedRole === "teachers"
-                ? "bg-white text-blue-600 shadow"
-                : "bg-blue-500 hover:bg-blue-400"
+                ? "bg-blue-600 text-white shadow-md"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
             >
               Teachers ({filteredTeachers.length})
@@ -199,7 +199,7 @@ export default function AccountManagement() {
             {/* Grade Level Filter Button (Students only) */}
             {selectedRole === "students" && (
               <div className="flex items-center gap-2">
-                <label className="text-xs font-semibold text-blue-100 whitespace-nowrap hidden sm:inline">Grade:</label>
+                <label className="text-xs font-semibold text-gray-700 whitespace-nowrap hidden sm:inline">Grade:</label>
                 <select
                   value={selectedGrade}
                   onChange={(e) => setSelectedGrade(e.target.value)}
@@ -303,7 +303,7 @@ export default function AccountManagement() {
 
             {/* Students Pagination Controls */}
             {filteredStudents.length > 0 && (
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 pt-4 border-t border-blue-500/30 gap-4 text-sm text-white">
+              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 pt-4 border-t border-gray-200 gap-4 text-sm text-gray-600">
                 <div>
                   Showing <span className="font-bold">{studentStartIndex + 1}</span> to{" "}
                   <span className="font-bold">
@@ -334,7 +334,7 @@ export default function AccountManagement() {
                     <button
                       onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                       disabled={currentPage === 1}
-                      className="px-3 py-1 rounded border border-white/40 hover:bg-white/20 disabled:opacity-40 disabled:hover:bg-transparent font-medium transition text-white"
+                      className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent font-medium transition text-gray-700 bg-white"
                     >
                       Previous
                     </button>
@@ -344,8 +344,8 @@ export default function AccountManagement() {
                         key={page}
                         onClick={() => setCurrentPage(page)}
                         className={`px-3 py-1 rounded font-medium transition ${currentPage === page
-                          ? "bg-white text-blue-600 font-bold shadow-sm"
-                          : "border border-white/40 hover:bg-white/20 text-white"
+                          ? "bg-blue-600 text-white border border-blue-600 shadow-sm"
+                          : "border border-gray-300 hover:bg-gray-100 text-gray-700 bg-white"
                           }`}
                       >
                         {page}
@@ -355,7 +355,7 @@ export default function AccountManagement() {
                     <button
                       onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalStudentPages))}
                       disabled={currentPage === totalStudentPages}
-                      className="px-3 py-1 rounded border border-white/40 hover:bg-white/20 disabled:opacity-40 disabled:hover:bg-transparent font-medium transition text-white"
+                      className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent font-medium transition text-gray-700 bg-white"
                     >
                       Next
                     </button>
@@ -415,7 +415,7 @@ export default function AccountManagement() {
 
             {/* Teachers Pagination Controls */}
             {filteredTeachers.length > 0 && (
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 pt-4 border-t border-blue-500/30 gap-4 text-sm text-white">
+              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 pt-4 border-t border-gray-200 gap-4 text-sm text-gray-600">
                 <div>
                   Showing <span className="font-bold">{teacherStartIndex + 1}</span> to{" "}
                   <span className="font-bold">
@@ -446,7 +446,7 @@ export default function AccountManagement() {
                     <button
                       onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                       disabled={currentPage === 1}
-                      className="px-3 py-1 rounded border border-white/40 hover:bg-white/20 disabled:opacity-40 disabled:hover:bg-transparent font-medium transition text-white"
+                      className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent font-medium transition text-gray-700 bg-white"
                     >
                       Previous
                     </button>
@@ -456,8 +456,8 @@ export default function AccountManagement() {
                         key={page}
                         onClick={() => setCurrentPage(page)}
                         className={`px-3 py-1 rounded font-medium transition ${currentPage === page
-                          ? "bg-white text-blue-600 font-bold shadow-sm"
-                          : "border border-white/40 hover:bg-white/20 text-white"
+                          ? "bg-blue-600 text-white border border-blue-600 shadow-sm"
+                          : "border border-gray-300 hover:bg-gray-100 text-gray-700 bg-white"
                           }`}
                       >
                         {page}
@@ -467,7 +467,7 @@ export default function AccountManagement() {
                     <button
                       onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalTeacherPages))}
                       disabled={currentPage === totalTeacherPages}
-                      className="px-3 py-1 rounded border border-white/40 hover:bg-white/20 disabled:opacity-40 disabled:hover:bg-transparent font-medium transition text-white"
+                      className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent font-medium transition text-gray-700 bg-white"
                     >
                       Next
                     </button>

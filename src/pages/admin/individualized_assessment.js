@@ -153,7 +153,7 @@ export default function IndividualizedAssessmentAdmin() {
             </div>
 
             {/* Top Bar Controls: Grade Selector, Search Bar & Add Story Button */}
-            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row  bg-white p-6 rounded-xl shadow-md justify-between items-stretch sm:items-center gap-4 mb-6">
                 <div className="flex flex-wrap items-center gap-4">
                     <div>
                         <label className="font-semibold text-black text-sm mr-2">Select Grade Level:</label>
