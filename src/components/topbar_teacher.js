@@ -52,7 +52,7 @@ export default function TopBar() {
       {/* System Tagline */}
       <div className="flex items-center">
         <h2 className="text-base md:text-lg font-semibold text-slate-700 italic tracking-wide">
-          "Making every reader, Ready"
+          "Making Every Reader, Ready"
         </h2>
       </div>
 
@@ -72,14 +72,14 @@ export default function TopBar() {
           {role === "teacher" ? (
             <Link
               to="/pages/teacher/profile"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 font-medium text-white shadow-sm hover:shadow transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-systemYellow-400 font-medium text-white shadow-sm hover:shadow transition-all"
             >
               {firstName} {lastName}
             </Link>
           ) : role === "student" ? (
             <Link
               to="/pages/student/profile"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 font-medium text-white shadow-sm hover:shadow transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-systemYellow-400 font-medium text-white shadow-sm hover:shadow transition-all"
             >
               {firstName} {lastName}
             </Link>

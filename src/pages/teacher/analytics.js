@@ -358,9 +358,9 @@ export default function TeacherAnalytics() {
 
   return (
     <TeacherLayout>
-      <div className="space-y-8 max-w-7xl mx-auto">
-        {/* Header Hero Banner */}
-        <div className="bg-primary-600 text-white p-6 md:p-8 rounded-2xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* <div className="space-y-8 max-w-7xl mx-auto"> */}
+      {/* Header Hero Banner */}
+      {/* <div className="bg-primary-600 text-white p-6 md:p-8 rounded-2xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <span className="px-3 py-1 bg-white/20 text-white text-xs font-semibold rounded-full uppercase tracking-wider mb-2 inline-block">
               Reading Comprehension Analytics
@@ -375,307 +375,113 @@ export default function TeacherAnalytics() {
             <p className="text-xs text-blue-100 uppercase tracking-wide font-medium">Overall Assessed</p>
             <p className="text-3xl font-black mt-1">{metrics.assessedCount} / {metrics.totalStudents}</p>
           </div>
+        </div> */}
+
+      <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Reading Comprehension Analytics</h1>
+          {/* <p className="mt-2 text-white/80 text-sm font-light">View and manage student accounts and GST results</p> */}
+          <p className="text-sm mt-1 text-blue-100">Track, analyze, and support reading comprehension levels across all your assigned classes.</p>
+        </div>
+        <div className="flex">
+          <div className="bg-white/10 p-4 rounded-xl border border-white/20 text-center min-w-[140px]">
+            <p className="text-xs text-blue-100 uppercase tracking-wide font-medium">Overall Assessed</p>
+            <p className="text-3xl font-black mt-1">{metrics.assessedCount} / {metrics.totalStudents}</p>
+          </div>
+          <img
+            src={require("../../assets/analysis.png")}
+            alt="student"
+            className="w-32 drop-shadow-md"
+          />
         </div>
 
-        {/* Loading Spinner */}
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="w-10 h-10 border-4 border-slate-200 border-t-[#0580b2] rounded-full animate-spin"></div>
+      </div>
+
+      {/* Loading Spinner */}
+      {loading ? (
+        <div className="flex justify-center items-center py-20">
+          <div className="w-10 h-10 border-4 border-slate-200 border-t-[#0580b2] rounded-full animate-spin"></div>
+        </div>
+      ) : (
+        <>
+          {/* Top Key Metrics Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* Passed GST / No Remediation */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">No Remediation</span>
+                <div className="p-2 bg-green-50 text-green-600 rounded-xl">
+                  <CheckCircle size={20} />
+                </div>
+              </div>
+              <h3 className="text-3xl font-extrabold text-slate-900">{metrics.passedGstCount}</h3>
+              <p className="text-xs text-green-600 font-medium mt-1">Passed GST Score</p>
+            </div>
+
+            {/* Average GST Score */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">Avg GST Score</span>
+                <div className="p-2 bg-blue-50 text-[#0580b2] rounded-xl">
+                  <Award size={20} />
+                </div>
+              </div>
+              <h3 className="text-3xl font-extrabold text-slate-900">{metrics.avgGstScore}%</h3>
+              <p className="text-xs text-slate-500 mt-1">Group Screening Test average</p>
+            </div>
+
+            {/* Independent Readers */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">Independent</span>
+                <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                  <BookOpen size={20} />
+                </div>
+              </div>
+              <h3 className="text-3xl font-extrabold text-slate-900">{metrics.independentCount}</h3>
+              <p className="text-xs text-emerald-600 font-medium mt-1">Individualized Reading Profile</p>
+            </div>
+
+            {/* Instructional Level */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">Instructional</span>
+                <div className="p-2 bg-blue-50 text-[#0580b2] rounded-xl">
+                  <TrendingUp size={20} />
+                </div>
+              </div>
+              <h3 className="text-3xl font-extrabold text-slate-900">{metrics.instructionalCount}</h3>
+              <p className="text-xs text-[#0580b2] font-medium mt-1">Individualized Reading Profile</p>
+            </div>
+
+            {/* Frustration / Needs Support */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">Needs Support</span>
+                <div className="p-2 bg-red-50 text-red-600 rounded-xl">
+                  <AlertCircle size={20} />
+                </div>
+              </div>
+              <h3 className="text-3xl font-extrabold text-slate-900">{metrics.frustrationCount}</h3>
+              <p className="text-xs text-red-600 font-medium mt-1">Frustration Level</p>
+            </div>
           </div>
-        ) : (
-          <>
-            {/* Top Key Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              {/* Passed GST / No Remediation */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">No Remediation</span>
-                  <div className="p-2 bg-green-50 text-green-600 rounded-xl">
-                    <CheckCircle size={20} />
-                  </div>
-                </div>
-                <h3 className="text-3xl font-extrabold text-slate-900">{metrics.passedGstCount}</h3>
-                <p className="text-xs text-green-600 font-medium mt-1">Passed GST Score</p>
-              </div>
 
-              {/* Average GST Score */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">Avg GST Score</span>
-                  <div className="p-2 bg-blue-50 text-[#0580b2] rounded-xl">
-                    <Award size={20} />
-                  </div>
-                </div>
-                <h3 className="text-3xl font-extrabold text-slate-900">{metrics.avgGstScore}%</h3>
-                <p className="text-xs text-slate-500 mt-1">Group Screening Test average</p>
-              </div>
-
-              {/* Independent Readers */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">Independent</span>
-                  <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-                    <BookOpen size={20} />
-                  </div>
-                </div>
-                <h3 className="text-3xl font-extrabold text-slate-900">{metrics.independentCount}</h3>
-                <p className="text-xs text-emerald-600 font-medium mt-1">Individualized Reading Profile</p>
-              </div>
-
-              {/* Instructional Level */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">Instructional</span>
-                  <div className="p-2 bg-blue-50 text-[#0580b2] rounded-xl">
-                    <TrendingUp size={20} />
-                  </div>
-                </div>
-                <h3 className="text-3xl font-extrabold text-slate-900">{metrics.instructionalCount}</h3>
-                <p className="text-xs text-[#0580b2] font-medium mt-1">Individualized Reading Profile</p>
-              </div>
-
-              {/* Frustration / Needs Support */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-slate-500 font-semibold text-xs uppercase tracking-wider">Needs Support</span>
-                  <div className="p-2 bg-red-50 text-red-600 rounded-xl">
-                    <AlertCircle size={20} />
-                  </div>
-                </div>
-                <h3 className="text-3xl font-extrabold text-slate-900">{metrics.frustrationCount}</h3>
-                <p className="text-xs text-red-600 font-medium mt-1">Frustration Level</p>
-              </div>
-            </div>
-
-            {/* Performance Tier Distribution & Grade Comparison Cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Distribution Progress Bars & Visual Chart */}
-              <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900">Comprehension Level Distribution</h3>
-                    <p className="text-xs text-slate-500">Filter distribution by grade level or class</p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    {/* Grade Filter */}
-                    <select
-                      value={distributionGradeFilter}
-                      onChange={(e) => setDistributionGradeFilter(e.target.value)}
-                      className="border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#0580b2]"
-                    >
-                      <option value="ALL">All Grades</option>
-                      {Array.from(new Set(students.map(s => (s.grade_level || s.grade || "4").toString().replace(/[^0-9]/g, '') || "4"))).sort().map(g => (
-                        <option key={g} value={g}>Grade {g}</option>
-                      ))}
-                    </select>
-
-                    {/* Class Filter */}
-                    <select
-                      value={distributionClassFilter}
-                      onChange={(e) => setDistributionClassFilter(e.target.value)}
-                      className="border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#0580b2]"
-                    >
-                      <option value="ALL">All Classes</option>
-                      {classes.map(c => (
-                        <option key={c.class_code} value={c.class_code}>
-                          {c.subject_name || c.class_name || c.class_code} ({c.class_code})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {(() => {
-                  // Calculate distribution subset based on filters
-                  const subset = students.filter(student => {
-                    const gradeNum = (student.grade_level || student.grade || "4").toString().replace(/[^0-9]/g, '') || "4";
-                    const matchesGrade = distributionGradeFilter === "ALL" || gradeNum === distributionGradeFilter;
-                    const matchesClass = distributionClassFilter === "ALL" || student.classCode === distributionClassFilter;
-                    return matchesGrade && matchesClass;
-                  }).filter(s => s.levelStatus !== "PENDING");
-
-                  const totalInSubset = subset.length;
-                  const passedGstCount = subset.filter(s => s.levelStatus === "PASSED_GST").length;
-                  const independentCount = subset.filter(s => s.levelStatus === "INDEPENDENT").length;
-                  const instructionalCount = subset.filter(s => s.levelStatus === "INSTRUCTIONAL").length;
-                  const frustrationCount = subset.filter(s => s.levelStatus === "FRUSTRATION").length;
-
-                  const getPct = (cnt) => totalInSubset > 0 ? Math.round((cnt / totalInSubset) * 100) : 0;
-
-                  const pGst = getPct(passedGstCount);
-                  const pInd = getPct(independentCount);
-                  const pIns = getPct(instructionalCount);
-                  const pFru = getPct(frustrationCount);
-
-                  // Calculate SVG Donut strokeDasharray segments (radius=40, circumference=2*pi*40 ~ 251.32)
-                  const circ = 251.32;
-                  const strokeGst = (pGst / 100) * circ;
-                  const strokeInd = (pInd / 100) * circ;
-                  const strokeIns = (pIns / 100) * circ;
-                  const strokeFru = (pFru / 100) * circ;
-
-                  const offGst = 0;
-                  const offInd = -strokeGst;
-                  const offIns = -(strokeGst + strokeInd);
-                  const offFru = -(strokeGst + strokeInd + strokeIns);
-
-                  return (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-                      {/* Donut Chart Visualizer */}
-                      <div className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-xl border border-slate-100">
-                        <div className="relative w-36 h-36 flex items-center justify-center">
-                          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                            {/* Base track */}
-                            <circle cx="50" cy="50" r="40" stroke="#f1f5f9" strokeWidth="12" fill="transparent" />
-
-                            {totalInSubset > 0 ? (
-                              <>
-                                {/* Passed GST */}
-                                <circle cx="50" cy="50" r="40" stroke="#22c55e" strokeWidth="12" fill="transparent"
-                                  strokeDasharray={`${strokeGst} ${circ}`} strokeDashoffset={offGst} className="transition-all duration-700" />
-                                {/* Independent */}
-                                <circle cx="50" cy="50" r="40" stroke="#3b82f6" strokeWidth="12" fill="transparent"
-                                  strokeDasharray={`${strokeInd} ${circ}`} strokeDashoffset={offInd} className="transition-all duration-700" />
-                                {/* Instructional */}
-                                <circle cx="50" cy="50" r="40" stroke="#eab308" strokeWidth="12" fill="transparent"
-                                  strokeDasharray={`${strokeIns} ${circ}`} strokeDashoffset={offIns} className="transition-all duration-700" />
-                                {/* Frustration */}
-                                <circle cx="50" cy="50" r="40" stroke="#ef4444" strokeWidth="12" fill="transparent"
-                                  strokeDasharray={`${strokeFru} ${circ}`} strokeDashoffset={offFru} className="transition-all duration-700" />
-                              </>
-                            ) : null}
-                          </svg>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                            <span className="text-2xl font-black text-slate-800">{totalInSubset}</span>
-                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Students</span>
-                          </div>
-                        </div>
-                        <span className="text-xs font-semibold text-slate-500 mt-2">Overall Category Split</span>
-                      </div>
-
-                      {/* Progress Bars */}
-                      <div className="md:col-span-2 space-y-4">
-                        {/* Passed GST (No Remediation Required) */}
-                        <div>
-                          <div className="flex justify-between text-xs font-semibold mb-1">
-                            <span className="text-slate-700 flex items-center gap-1.5">
-                              <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span>
-                              Passed GST - Exempt from Remediation
-                            </span>
-                            <span className="text-green-700 font-bold">
-                              {passedGstCount} / {totalInSubset} <span className="text-green-600 font-medium">({pGst}%)</span>
-                            </span>
-                          </div>
-                          <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                            <div className="bg-green-500 h-full rounded-full transition-all duration-500" style={{ width: `${pGst}%` }}></div>
-                          </div>
-                        </div>
-
-                        {/* Independent Tier Bar */}
-                        <div>
-                          <div className="flex justify-between text-xs font-semibold mb-1">
-                            <span className="text-slate-700 flex items-center gap-1.5">
-                              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>
-                              Individualized: Independent (80% - 100%)
-                            </span>
-                            <span className="text-blue-700 font-bold">
-                              {independentCount} / {totalInSubset} <span className="text-blue-600 font-medium">({pInd}%)</span>
-                            </span>
-                          </div>
-                          <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                            <div className="bg-blue-500 h-full rounded-full transition-all duration-500" style={{ width: `${pInd}%` }}></div>
-                          </div>
-                        </div>
-
-                        {/* Instructional Tier Bar */}
-                        <div>
-                          <div className="flex justify-between text-xs font-semibold mb-1">
-                            <span className="text-slate-700 flex items-center gap-1.5">
-                              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 inline-block"></span>
-                              Individualized: Instructional (60% - 79%)
-                            </span>
-                            <span className="text-yellow-700 font-bold">
-                              {instructionalCount} / {totalInSubset} <span className="text-yellow-600 font-medium">({pIns}%)</span>
-                            </span>
-                          </div>
-                          <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                            <div className="bg-yellow-500 h-full rounded-full transition-all duration-500" style={{ width: `${pIns}%` }}></div>
-                          </div>
-                        </div>
-
-                        {/* Frustration Tier Bar */}
-                        <div>
-                          <div className="flex justify-between text-xs font-semibold mb-1">
-                            <span className="text-slate-700 flex items-center gap-1.5">
-                              <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span>
-                              Individualized: Frustration (&lt; 60%)
-                            </span>
-                            <span className="text-red-600 font-bold">
-                              {frustrationCount} / {totalInSubset} <span className="text-red-500 font-medium">({pFru}%)</span>
-                            </span>
-                          </div>
-                          <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                            <div className="bg-red-500 h-full rounded-full transition-all duration-500" style={{ width: `${pFru}%` }}></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-
-              {/* Class Summary Info */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-1">Class Statistics</h3>
-                  <p className="text-xs text-slate-500 mb-6">Active class codes overview</p>
-
-                  <div className="space-y-3">
-                    {classes.map((c, idx) => (
-                      <div key={idx} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-                        <div>
-                          <p className="text-sm font-bold text-slate-800">{c.class_name || c.class_code}</p>
-                          <p className="text-xs text-slate-500">Code: {c.class_code}</p>
-                        </div>
-                        <span className="px-2.5 py-1 bg-blue-100 text-[#0580b2] text-xs font-bold rounded-lg">
-                          Grade {c.grade_level || "N/A"}
-                        </span>
-                      </div>
-                    ))}
-                    {classes.length === 0 && (
-                      <p className="text-xs text-slate-400 italic">No active classes found.</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-slate-100 mt-4 space-y-2">
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
-                    <span>Exempt from Remediation:</span>
-                    <span className="text-green-600 font-bold">{metrics.passedGstCount} Students</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
-                    <span>Pending Assessment:</span>
-                    <span className="text-amber-600 font-bold">{metrics.pendingCount} Students</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Aggregated Individualized Metrics Summary */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          {/* Performance Tier Distribution & Grade Comparison Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Distribution Progress Bars & Visual Chart */}
+            <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Individualized Assessment Score Breakdown</h3>
-                  <p className="text-xs text-slate-500">Aggregated metrics for Word Reading Level, Comprehension Level, and Reading Rate</p>
+                  <h3 className="text-lg font-bold text-slate-900">Comprehension Level Distribution</h3>
+                  <p className="text-xs text-slate-500">Filter distribution by grade level or class</p>
                 </div>
 
-                {/* Grade Level Filter */}
-                <div className="flex items-center gap-2">
-                  <label className="text-xs font-semibold text-slate-600">Grade Level:</label>
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Grade Filter */}
                   <select
-                    value={indGradeFilter}
-                    onChange={(e) => setIndGradeFilter(e.target.value)}
+                    value={distributionGradeFilter}
+                    onChange={(e) => setDistributionGradeFilter(e.target.value)}
                     className="border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#0580b2]"
                   >
                     <option value="ALL">All Grades</option>
@@ -683,157 +489,155 @@ export default function TeacherAnalytics() {
                       <option key={g} value={g}>Grade {g}</option>
                     ))}
                   </select>
+
+                  {/* Class Filter */}
+                  <select
+                    value={distributionClassFilter}
+                    onChange={(e) => setDistributionClassFilter(e.target.value)}
+                    className="border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#0580b2]"
+                  >
+                    <option value="ALL">All Classes</option>
+                    {classes.map(c => (
+                      <option key={c.class_code} value={c.class_code}>
+                        {c.subject_name || c.class_name || c.class_code} ({c.class_code})
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
               {(() => {
-                // Filter student subset based on grade filter
-                const indSubset = students.filter(student => {
+                // Calculate distribution subset based on filters
+                const subset = students.filter(student => {
                   const gradeNum = (student.grade_level || student.grade || "4").toString().replace(/[^0-9]/g, '') || "4";
-                  const matchesGrade = indGradeFilter === "ALL" || gradeNum === indGradeFilter;
-                  return matchesGrade;
-                });
+                  const matchesGrade = distributionGradeFilter === "ALL" || gradeNum === distributionGradeFilter;
+                  const matchesClass = distributionClassFilter === "ALL" || student.classCode === distributionClassFilter;
+                  return matchesGrade && matchesClass;
+                }).filter(s => s.levelStatus !== "PENDING");
 
-                let wordIndep = 0, wordInstruct = 0, wordFrust = 0;
-                let compIndep = 0, compInstruct = 0, compFrust = 0;
-                let sumWpm = 0, wpmCount = 0;
-                let sumCompPct = 0, compCount = 0;
+                const totalInSubset = subset.length;
+                const passedGstCount = subset.filter(s => s.levelStatus === "PASSED_GST").length;
+                const independentCount = subset.filter(s => s.levelStatus === "INDEPENDENT").length;
+                const instructionalCount = subset.filter(s => s.levelStatus === "INSTRUCTIONAL").length;
+                const frustrationCount = subset.filter(s => s.levelStatus === "FRUSTRATION").length;
 
-                indSubset.forEach(s => {
-                  if (s.wordReadingLevel === "Independent") wordIndep++;
-                  else if (s.wordReadingLevel === "Instructional") wordInstruct++;
-                  else if (s.wordReadingLevel === "Frustration") wordFrust++;
+                const getPct = (cnt) => totalInSubset > 0 ? Math.round((cnt / totalInSubset) * 100) : 0;
 
-                  if (s.comprehensionLevel === "Independent") compIndep++;
-                  else if (s.comprehensionLevel === "Instructional") compInstruct++;
-                  else if (s.comprehensionLevel === "Frustration") compFrust++;
+                const pGst = getPct(passedGstCount);
+                const pInd = getPct(independentCount);
+                const pIns = getPct(instructionalCount);
+                const pFru = getPct(frustrationCount);
 
-                  if (s.readingRate && Number(s.readingRate) > 0) {
-                    sumWpm += Number(s.readingRate);
-                    wpmCount++;
-                  }
+                // Calculate SVG Donut strokeDasharray segments (radius=40, circumference=2*pi*40 ~ 251.32)
+                const circ = 251.32;
+                const strokeGst = (pGst / 100) * circ;
+                const strokeInd = (pInd / 100) * circ;
+                const strokeIns = (pIns / 100) * circ;
+                const strokeFru = (pFru / 100) * circ;
 
-                  if (s.indScore !== null && s.indScore !== undefined) {
-                    sumCompPct += Number(s.indScore);
-                    compCount++;
-                  }
-                });
-
-                // Count assessed students in individualized assessment
-                const assessedIndStudents = indSubset.filter(s =>
-                  s.individualized_assessment_attempted || !!s.indData || s.indScore !== null || (s.wordReadingLevel && s.wordReadingLevel !== "N/A")
-                );
-                const totalIndAssessed = assessedIndStudents.length;
-                const avgWpmSubset = wpmCount > 0 ? Math.round(sumWpm / wpmCount) : 0;
-                const avgCompSubset = compCount > 0 ? Math.round(sumCompPct / compCount) : 0;
-
-                const getPctWord = (val) => totalIndAssessed > 0 ? Math.round((val / totalIndAssessed) * 100) : 0;
-                const getPctComp = (val) => totalIndAssessed > 0 ? Math.round((val / totalIndAssessed) * 100) : 0;
+                const offGst = 0;
+                const offInd = -strokeGst;
+                const offIns = -(strokeGst + strokeInd);
+                const offFru = -(strokeGst + strokeInd + strokeIns);
 
                 return (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Word Reading Level Aggregation Card */}
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
-                      <div className="flex justify-between items-center border-b border-slate-200 pb-2">
-                        <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-                          <BookOpen size={16} className="text-blue-600" /> Word Reading Level
-                        </h4>
-                        <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
-                          {totalIndAssessed} Assessed
-                        </span>
-                      </div>
-                      <div className="space-y-3 text-xs">
-                        <div>
-                          <div className="flex justify-between font-medium mb-1">
-                            <span className="text-slate-600">Independent (97% - 100%):</span>
-                            <span className="font-bold text-emerald-700">{wordIndep} ({getPctWord(wordIndep)}%)</span>
-                          </div>
-                          <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                            <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${getPctWord(wordIndep)}%` }}></div>
-                          </div>
-                        </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                    {/* Donut Chart Visualizer */}
+                    <div className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                      <div className="relative w-36 h-36 flex items-center justify-center">
+                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                          {/* Base track */}
+                          <circle cx="50" cy="50" r="40" stroke="#f1f5f9" strokeWidth="12" fill="transparent" />
 
-                        <div>
-                          <div className="flex justify-between font-medium mb-1">
-                            <span className="text-slate-600">Instructional (90% - 96%):</span>
-                            <span className="font-bold text-blue-700">{wordInstruct} ({getPctWord(wordInstruct)}%)</span>
-                          </div>
-                          <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                            <div className="bg-blue-500 h-full rounded-full transition-all duration-500" style={{ width: `${getPctWord(wordInstruct)}%` }}></div>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex justify-between font-medium mb-1">
-                            <span className="text-slate-600">Frustration (&lt; 90%):</span>
-                            <span className="font-bold text-red-600">{wordFrust} ({getPctWord(wordFrust)}%)</span>
-                          </div>
-                          <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                            <div className="bg-red-500 h-full rounded-full transition-all duration-500" style={{ width: `${getPctWord(wordFrust)}%` }}></div>
-                          </div>
+                          {totalInSubset > 0 ? (
+                            <>
+                              {/* Passed GST */}
+                              <circle cx="50" cy="50" r="40" stroke="#22c55e" strokeWidth="12" fill="transparent"
+                                strokeDasharray={`${strokeGst} ${circ}`} strokeDashoffset={offGst} className="transition-all duration-700" />
+                              {/* Independent */}
+                              <circle cx="50" cy="50" r="40" stroke="#3b82f6" strokeWidth="12" fill="transparent"
+                                strokeDasharray={`${strokeInd} ${circ}`} strokeDashoffset={offInd} className="transition-all duration-700" />
+                              {/* Instructional */}
+                              <circle cx="50" cy="50" r="40" stroke="#eab308" strokeWidth="12" fill="transparent"
+                                strokeDasharray={`${strokeIns} ${circ}`} strokeDashoffset={offIns} className="transition-all duration-700" />
+                              {/* Frustration */}
+                              <circle cx="50" cy="50" r="40" stroke="#ef4444" strokeWidth="12" fill="transparent"
+                                strokeDasharray={`${strokeFru} ${circ}`} strokeDashoffset={offFru} className="transition-all duration-700" />
+                            </>
+                          ) : null}
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                          <span className="text-2xl font-black text-slate-800">{totalInSubset}</span>
+                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Students</span>
                         </div>
                       </div>
+                      <span className="text-xs font-semibold text-slate-500 mt-2">Overall Category Split</span>
                     </div>
 
-                    {/* Comprehension Level Aggregation Card */}
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
-                      <div className="flex justify-between items-center border-b border-slate-200 pb-2">
-                        <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-                          <Award size={16} className="text-[#0580b2]" /> Comprehension Level
-                        </h4>
-                        <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
-                          Avg: {avgCompSubset}%
-                        </span>
-                      </div>
-                      <div className="space-y-3 text-xs">
-                        <div>
-                          <div className="flex justify-between font-medium mb-1">
-                            <span className="text-slate-600">Independent (80% - 100%):</span>
-                            <span className="font-bold text-emerald-700">{compIndep} ({getPctComp(compIndep)}%)</span>
-                          </div>
-                          <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                            <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${getPctComp(compIndep)}%` }}></div>
-                          </div>
+                    {/* Progress Bars */}
+                    <div className="md:col-span-2 space-y-4">
+                      {/* Passed GST (No Remediation Required) */}
+                      <div>
+                        <div className="flex justify-between text-xs font-semibold mb-1">
+                          <span className="text-slate-700 flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span>
+                            Passed GST - Exempt from Remediation
+                          </span>
+                          <span className="text-green-700 font-bold">
+                            {passedGstCount} / {totalInSubset} <span className="text-green-600 font-medium">({pGst}%)</span>
+                          </span>
                         </div>
-
-                        <div>
-                          <div className="flex justify-between font-medium mb-1">
-                            <span className="text-slate-600">Instructional (59% - 79%):</span>
-                            <span className="font-bold text-blue-700">{compInstruct} ({getPctComp(compInstruct)}%)</span>
-                          </div>
-                          <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                            <div className="bg-blue-500 h-full rounded-full transition-all duration-500" style={{ width: `${getPctComp(compInstruct)}%` }}></div>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex justify-between font-medium mb-1">
-                            <span className="text-slate-600">Frustration (&lt; 59%):</span>
-                            <span className="font-bold text-red-600">{compFrust} ({getPctComp(compFrust)}%)</span>
-                          </div>
-                          <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                            <div className="bg-red-500 h-full rounded-full transition-all duration-500" style={{ width: `${getPctComp(compFrust)}%` }}></div>
-                          </div>
+                        <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                          <div className="bg-green-500 h-full rounded-full transition-all duration-500" style={{ width: `${pGst}%` }}></div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Reading Rate (WPM) Aggregation Card */}
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-3 flex flex-col justify-between">
-                      <div className="flex justify-between items-center border-b border-slate-200 pb-2">
-                        <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-                          <TrendingUp size={16} className="text-emerald-600" /> Reading Fluency Rate
-                        </h4>
-                        <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                          WPM Speed
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-center justify-center py-4 text-center my-auto">
-                        <div className="w-24 h-24 rounded-full bg-emerald-50 border-4 border-emerald-400 flex flex-col items-center justify-center shadow-inner mb-2">
-                          <span className="text-3xl font-black text-emerald-800">{avgWpmSubset}</span>
-                          <span className="text-[10px] text-emerald-600 font-bold uppercase">WPM</span>
+                      {/* Independent Tier Bar */}
+                      <div>
+                        <div className="flex justify-between text-xs font-semibold mb-1">
+                          <span className="text-slate-700 flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>
+                            Individualized: Independent (80% - 100%)
+                          </span>
+                          <span className="text-blue-700 font-bold">
+                            {independentCount} / {totalInSubset} <span className="text-blue-600 font-medium">({pInd}%)</span>
+                          </span>
                         </div>
-                        <span className="text-xs text-slate-600 font-medium">Average Words Per Minute</span>
+                        <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                          <div className="bg-blue-500 h-full rounded-full transition-all duration-500" style={{ width: `${pInd}%` }}></div>
+                        </div>
+                      </div>
+
+                      {/* Instructional Tier Bar */}
+                      <div>
+                        <div className="flex justify-between text-xs font-semibold mb-1">
+                          <span className="text-slate-700 flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 inline-block"></span>
+                            Individualized: Instructional (60% - 79%)
+                          </span>
+                          <span className="text-yellow-700 font-bold">
+                            {instructionalCount} / {totalInSubset} <span className="text-yellow-600 font-medium">({pIns}%)</span>
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                          <div className="bg-yellow-500 h-full rounded-full transition-all duration-500" style={{ width: `${pIns}%` }}></div>
+                        </div>
+                      </div>
+
+                      {/* Frustration Tier Bar */}
+                      <div>
+                        <div className="flex justify-between text-xs font-semibold mb-1">
+                          <span className="text-slate-700 flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span>
+                            Individualized: Frustration (&lt; 60%)
+                          </span>
+                          <span className="text-red-600 font-bold">
+                            {frustrationCount} / {totalInSubset} <span className="text-red-500 font-medium">({pFru}%)</span>
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                          <div className="bg-red-500 h-full rounded-full transition-all duration-500" style={{ width: `${pFru}%` }}></div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -841,77 +645,293 @@ export default function TeacherAnalytics() {
               })()}
             </div>
 
-            {/* Grade Level Comprehension Breakdown */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <div className="mb-6">
-                <h3 className="text-lg font-bold text-slate-900">Grade Level Comprehension Breakdown</h3>
-                <p className="text-xs text-slate-500">Visual comparison of reading levels across different grade levels</p>
+            {/* Class Summary Info */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">Class Statistics</h3>
+                <p className="text-xs text-slate-500 mb-6">Active class codes overview</p>
+
+                <div className="space-y-3">
+                  {classes.map((c, idx) => (
+                    <div key={idx} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      <div>
+                        <p className="text-sm font-bold text-slate-800">{c.class_name || c.class_code}</p>
+                        <p className="text-xs text-slate-500">Code: {c.class_code}</p>
+                      </div>
+                      <span className="px-2.5 py-1 bg-blue-100 text-[#0580b2] text-xs font-bold rounded-lg">
+                        Grade {c.grade_level || "N/A"}
+                      </span>
+                    </div>
+                  ))}
+                  {classes.length === 0 && (
+                    <p className="text-xs text-slate-400 italic">No active classes found.</p>
+                  )}
+                </div>
               </div>
 
-              {Object.keys(metrics.gradeBreakdown).length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {Object.entries(metrics.gradeBreakdown).map(([gradeName, data]) => {
-                    const assessedCount = data.passedGst + data.independent + data.instructional + data.frustration;
-                    const totalG = assessedCount > 0 ? assessedCount : 1;
-                    const pctP = Math.round((data.passedGst / totalG) * 100);
-                    const pctInd = Math.round((data.independent / totalG) * 100);
-                    const pctIns = Math.round((data.instructional / totalG) * 100);
-                    const pctFru = Math.round((data.frustration / totalG) * 100);
+              <div className="pt-4 border-t border-slate-100 mt-4 space-y-2">
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
+                  <span>Exempt from Remediation:</span>
+                  <span className="text-green-600 font-bold">{metrics.passedGstCount} Students</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
+                  <span>Pending Assessment:</span>
+                  <span className="text-amber-600 font-bold">{metrics.pendingCount} Students</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                    return (
-                      <div key={gradeName} className="border border-slate-200 rounded-xl p-5 bg-slate-50 space-y-4">
-                        <div className="flex justify-between items-center border-b border-slate-200 pb-2">
-                          <h4 className="font-bold text-slate-900 text-base">{gradeName}</h4>
-                          <span className="text-xs font-bold bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full">
-                            {assessedCount} Student{assessedCount !== 1 ? "s" : ""} Assessed
-                          </span>
+          {/* Aggregated Individualized Metrics Summary */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Individualized Assessment Score Breakdown</h3>
+                <p className="text-xs text-slate-500">Aggregated metrics for Word Reading Level, Comprehension Level, and Reading Rate</p>
+              </div>
+
+              {/* Grade Level Filter */}
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-semibold text-slate-600">Grade Level:</label>
+                <select
+                  value={indGradeFilter}
+                  onChange={(e) => setIndGradeFilter(e.target.value)}
+                  className="border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#0580b2]"
+                >
+                  <option value="ALL">All Grades</option>
+                  {Array.from(new Set(students.map(s => (s.grade_level || s.grade || "4").toString().replace(/[^0-9]/g, '') || "4"))).sort().map(g => (
+                    <option key={g} value={g}>Grade {g}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {(() => {
+              // Filter student subset based on grade filter
+              const indSubset = students.filter(student => {
+                const gradeNum = (student.grade_level || student.grade || "4").toString().replace(/[^0-9]/g, '') || "4";
+                const matchesGrade = indGradeFilter === "ALL" || gradeNum === indGradeFilter;
+                return matchesGrade;
+              });
+
+              let wordIndep = 0, wordInstruct = 0, wordFrust = 0;
+              let compIndep = 0, compInstruct = 0, compFrust = 0;
+              let sumWpm = 0, wpmCount = 0;
+              let sumCompPct = 0, compCount = 0;
+
+              indSubset.forEach(s => {
+                if (s.wordReadingLevel === "Independent") wordIndep++;
+                else if (s.wordReadingLevel === "Instructional") wordInstruct++;
+                else if (s.wordReadingLevel === "Frustration") wordFrust++;
+
+                if (s.comprehensionLevel === "Independent") compIndep++;
+                else if (s.comprehensionLevel === "Instructional") compInstruct++;
+                else if (s.comprehensionLevel === "Frustration") compFrust++;
+
+                if (s.readingRate && Number(s.readingRate) > 0) {
+                  sumWpm += Number(s.readingRate);
+                  wpmCount++;
+                }
+
+                if (s.indScore !== null && s.indScore !== undefined) {
+                  sumCompPct += Number(s.indScore);
+                  compCount++;
+                }
+              });
+
+              // Count assessed students in individualized assessment
+              const assessedIndStudents = indSubset.filter(s =>
+                s.individualized_assessment_attempted || !!s.indData || s.indScore !== null || (s.wordReadingLevel && s.wordReadingLevel !== "N/A")
+              );
+              const totalIndAssessed = assessedIndStudents.length;
+              const avgWpmSubset = wpmCount > 0 ? Math.round(sumWpm / wpmCount) : 0;
+              const avgCompSubset = compCount > 0 ? Math.round(sumCompPct / compCount) : 0;
+
+              const getPctWord = (val) => totalIndAssessed > 0 ? Math.round((val / totalIndAssessed) * 100) : 0;
+              const getPctComp = (val) => totalIndAssessed > 0 ? Math.round((val / totalIndAssessed) * 100) : 0;
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Word Reading Level Aggregation Card */}
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                      <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                        <BookOpen size={16} className="text-blue-600" /> Word Reading Level
+                      </h4>
+                      <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
+                        {totalIndAssessed} Assessed
+                      </span>
+                    </div>
+                    <div className="space-y-3 text-xs">
+                      <div>
+                        <div className="flex justify-between font-medium mb-1">
+                          <span className="text-slate-600">Independent (97% - 100%):</span>
+                          <span className="font-bold text-emerald-700">{wordIndep} ({getPctWord(wordIndep)}%)</span>
                         </div>
-
-                        {/* Grade Stacked Bar Chart Visual */}
-                        <div className="w-full bg-slate-200 h-3 rounded-full overflow-hidden flex shadow-inner">
-                          <div style={{ width: `${pctP}%` }} className="bg-green-500 h-full transition-all" title={`Passed GST: ${data.passedGst} (${pctP}%)`}></div>
-                          <div style={{ width: `${pctInd}%` }} className="bg-blue-500 h-full transition-all" title={`Independent: ${data.independent} (${pctInd}%)`}></div>
-                          <div style={{ width: `${pctIns}%` }} className="bg-yellow-500 h-full transition-all" title={`Instructional: ${data.instructional} (${pctIns}%)`}></div>
-                          <div style={{ width: `${pctFru}%` }} className="bg-red-500 h-full transition-all" title={`Frustration: ${data.frustration} (${pctFru}%)`}></div>
-                        </div>
-
-                        <div className="space-y-2 text-xs">
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-600 flex items-center gap-1.5">
-                              <span className="w-2 h-2 rounded-full bg-green-500"></span> Passed GST (No Rem.):
-                            </span>
-                            <span className="font-bold text-green-700">{data.passedGst} ({pctP}%)</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-600 flex items-center gap-1.5">
-                              <span className="w-2 h-2 rounded-full bg-blue-500"></span> Independent:
-                            </span>
-                            <span className="font-bold text-blue-700">{data.independent} ({pctInd}%)</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-600 flex items-center gap-1.5">
-                              <span className="w-2 h-2 rounded-full bg-yellow-500"></span> Instructional:
-                            </span>
-                            <span className="font-bold text-yellow-700">{data.instructional} ({pctIns}%)</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-600 flex items-center gap-1.5">
-                              <span className="w-2 h-2 rounded-full bg-red-500"></span> Frustration:
-                            </span>
-                            <span className="font-bold text-red-600">{data.frustration} ({pctFru}%)</span>
-                          </div>
+                        <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                          <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${getPctWord(wordIndep)}%` }}></div>
                         </div>
                       </div>
-                    );
-                  })}
+
+                      <div>
+                        <div className="flex justify-between font-medium mb-1">
+                          <span className="text-slate-600">Instructional (90% - 96%):</span>
+                          <span className="font-bold text-blue-700">{wordInstruct} ({getPctWord(wordInstruct)}%)</span>
+                        </div>
+                        <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                          <div className="bg-blue-500 h-full rounded-full transition-all duration-500" style={{ width: `${getPctWord(wordInstruct)}%` }}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between font-medium mb-1">
+                          <span className="text-slate-600">Frustration (&lt; 90%):</span>
+                          <span className="font-bold text-red-600">{wordFrust} ({getPctWord(wordFrust)}%)</span>
+                        </div>
+                        <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                          <div className="bg-red-500 h-full rounded-full transition-all duration-500" style={{ width: `${getPctWord(wordFrust)}%` }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Comprehension Level Aggregation Card */}
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                      <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                        <Award size={16} className="text-[#0580b2]" /> Comprehension Level
+                      </h4>
+                      <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
+                        Avg: {avgCompSubset}%
+                      </span>
+                    </div>
+                    <div className="space-y-3 text-xs">
+                      <div>
+                        <div className="flex justify-between font-medium mb-1">
+                          <span className="text-slate-600">Independent (80% - 100%):</span>
+                          <span className="font-bold text-emerald-700">{compIndep} ({getPctComp(compIndep)}%)</span>
+                        </div>
+                        <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                          <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${getPctComp(compIndep)}%` }}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between font-medium mb-1">
+                          <span className="text-slate-600">Instructional (59% - 79%):</span>
+                          <span className="font-bold text-blue-700">{compInstruct} ({getPctComp(compInstruct)}%)</span>
+                        </div>
+                        <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                          <div className="bg-blue-500 h-full rounded-full transition-all duration-500" style={{ width: `${getPctComp(compInstruct)}%` }}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between font-medium mb-1">
+                          <span className="text-slate-600">Frustration (&lt; 59%):</span>
+                          <span className="font-bold text-red-600">{compFrust} ({getPctComp(compFrust)}%)</span>
+                        </div>
+                        <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                          <div className="bg-red-500 h-full rounded-full transition-all duration-500" style={{ width: `${getPctComp(compFrust)}%` }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Reading Rate (WPM) Aggregation Card */}
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-3 flex flex-col justify-between">
+                    <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                      <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                        <TrendingUp size={16} className="text-emerald-600" /> Reading Fluency Rate
+                      </h4>
+                      <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                        WPM Speed
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-center py-4 text-center my-auto">
+                      <div className="w-24 h-24 rounded-full bg-emerald-50 border-4 border-emerald-400 flex flex-col items-center justify-center shadow-inner mb-2">
+                        <span className="text-3xl font-black text-emerald-800">{avgWpmSubset}</span>
+                        <span className="text-[10px] text-emerald-600 font-bold uppercase">WPM</span>
+                      </div>
+                      <span className="text-xs text-slate-600 font-medium">Average Words Per Minute</span>
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <p className="text-xs text-slate-400 italic">No grade breakdown data available.</p>
-              )}
+              );
+            })()}
+          </div>
+
+          {/* Grade Level Comprehension Breakdown */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <div className="mb-6">
+              <h3 className="text-lg font-bold text-slate-900">Grade Level Comprehension Breakdown</h3>
+              <p className="text-xs text-slate-500">Visual comparison of reading levels across different grade levels</p>
             </div>
-          </>
-        )}
-      </div>
+
+            {Object.keys(metrics.gradeBreakdown).length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Object.entries(metrics.gradeBreakdown).map(([gradeName, data]) => {
+                  const assessedCount = data.passedGst + data.independent + data.instructional + data.frustration;
+                  const totalG = assessedCount > 0 ? assessedCount : 1;
+                  const pctP = Math.round((data.passedGst / totalG) * 100);
+                  const pctInd = Math.round((data.independent / totalG) * 100);
+                  const pctIns = Math.round((data.instructional / totalG) * 100);
+                  const pctFru = Math.round((data.frustration / totalG) * 100);
+
+                  return (
+                    <div key={gradeName} className="border border-slate-200 rounded-xl p-5 bg-slate-50 space-y-4">
+                      <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                        <h4 className="font-bold text-slate-900 text-base">{gradeName}</h4>
+                        <span className="text-xs font-bold bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full">
+                          {assessedCount} Student{assessedCount !== 1 ? "s" : ""} Assessed
+                        </span>
+                      </div>
+
+                      {/* Grade Stacked Bar Chart Visual */}
+                      <div className="w-full bg-slate-200 h-3 rounded-full overflow-hidden flex shadow-inner">
+                        <div style={{ width: `${pctP}%` }} className="bg-green-500 h-full transition-all" title={`Passed GST: ${data.passedGst} (${pctP}%)`}></div>
+                        <div style={{ width: `${pctInd}%` }} className="bg-blue-500 h-full transition-all" title={`Independent: ${data.independent} (${pctInd}%)`}></div>
+                        <div style={{ width: `${pctIns}%` }} className="bg-yellow-500 h-full transition-all" title={`Instructional: ${data.instructional} (${pctIns}%)`}></div>
+                        <div style={{ width: `${pctFru}%` }} className="bg-red-500 h-full transition-all" title={`Frustration: ${data.frustration} (${pctFru}%)`}></div>
+                      </div>
+
+                      <div className="space-y-2 text-xs">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-green-500"></span> Passed GST (No Rem.):
+                          </span>
+                          <span className="font-bold text-green-700">{data.passedGst} ({pctP}%)</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-blue-500"></span> Independent:
+                          </span>
+                          <span className="font-bold text-blue-700">{data.independent} ({pctInd}%)</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-yellow-500"></span> Instructional:
+                          </span>
+                          <span className="font-bold text-yellow-700">{data.instructional} ({pctIns}%)</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-red-500"></span> Frustration:
+                          </span>
+                          <span className="font-bold text-red-600">{data.frustration} ({pctFru}%)</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-xs text-slate-400 italic">No grade breakdown data available.</p>
+            )}
+          </div>
+        </>
+      )}
+      {/* </div> */}
     </TeacherLayout>
   );
 }

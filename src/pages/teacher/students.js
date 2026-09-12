@@ -185,13 +185,13 @@ export default function Students() {
             <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-2xl font-bold">Student Management</h1>
-            <p className="mt-2 text-white/80 text-sm font-light">View and manage student accounts and GST results</p>
+                    {/* <p className="mt-2 text-white/80 text-sm font-light">View and manage student accounts and GST results</p> */}
                     <p className="text-sm mt-1 text-blue-100">View and manage student accounts and GST results</p>
                 </div>
                 <img
-                    src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                    alt="books"
-                    className="w-32"
+                    src={require("../../assets/student.png")}
+                    alt="student"
+                    className="w-32 drop-shadow-md"
                 />
             </div>
 
@@ -353,8 +353,8 @@ export default function Students() {
                                         key={page}
                                         onClick={() => setCurrentPage(page)}
                                         className={`px-3 py-1 rounded font-medium transition ${currentPage === page
-                                                ? "bg-blue-600 text-white border border-blue-600 shadow-sm"
-                                                : "border border-gray-300 hover:bg-gray-100 text-gray-700 bg-white"
+                                            ? "bg-blue-600 text-white border border-blue-600 shadow-sm"
+                                            : "border border-gray-300 hover:bg-gray-100 text-gray-700 bg-white"
                                             }`}
                                     >
                                         {page}

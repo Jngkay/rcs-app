@@ -188,14 +188,17 @@ export default function Classes() {
     <TeacherLayout>
 
       {/* HEADER */}
-      <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">My Classes</h1>
-            <p className="mt-2 text-white/80 text-sm font-light">Manage your my classes</p>
 
+      <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Manage Classes</h1>
+          {/* <p className="mt-2 text-white/80 text-sm font-light">View and manage student accounts and GST results</p> */}
+          <p className="text-sm mt-1 text-blue-100">View and manage classes</p>
+        </div>
         <img
-          src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-          className="w-24"
-          alt="teacher"
+          src={require("../../assets/classes.png")}
+          alt="student"
+          className="w-32 drop-shadow-md"
         />
       </div>
 
@@ -215,7 +218,7 @@ export default function Classes() {
             className="border p-2 rounded"
             placeholder="Subject Code"
             value={subject_code}
-            onChange={(e)=>setSubjectCode(e.target.value)}
+            onChange={(e) => setSubjectCode(e.target.value)}
             required
           />
 
@@ -223,7 +226,7 @@ export default function Classes() {
             className="border p-2 rounded"
             placeholder="Subject Name"
             value={subject_name}
-            onChange={(e)=>setSubjectName(e.target.value)}
+            onChange={(e) => setSubjectName(e.target.value)}
             required
           />
 
@@ -231,7 +234,7 @@ export default function Classes() {
             className="border p-2 rounded"
             placeholder="Academic Year"
             value={class_ay}
-            onChange={(e)=>setClassAy(e.target.value)}
+            onChange={(e) => setClassAy(e.target.value)}
             required
           />
 
@@ -240,7 +243,7 @@ export default function Classes() {
             className="border p-2 rounded"
             placeholder="Grade Level"
             value={grade_level}
-            onChange={(e)=>setGradeLevel(e.target.value)}
+            onChange={(e) => setGradeLevel(e.target.value)}
             required
           />
 
@@ -317,7 +320,7 @@ export default function Classes() {
 
                 <button
                   disabled={loading}
-                  onClick={()=>startEdit(cls)}
+                  onClick={() => startEdit(cls)}
                   className="bg-yellow-400 px-3 py-1 rounded text-sm hover:bg-yellow-500"
                 >
                   Edit
@@ -325,7 +328,7 @@ export default function Classes() {
 
                 <button
                   disabled={loading}
-                  onClick={()=>{
+                  onClick={() => {
                     setClassToDelete(cls.id);
                     setShowDeleteModal(true);
                   }}
@@ -386,11 +389,10 @@ export default function Classes() {
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1 rounded font-medium transition ${
-                    currentPage === page
-                      ? "bg-blue-600 text-white border border-blue-600 shadow-sm"
-                      : "border border-gray-300 hover:bg-gray-100 text-gray-700 bg-white"
-                  }`}
+                  className={`px-3 py-1 rounded font-medium transition ${currentPage === page
+                    ? "bg-blue-600 text-white border border-blue-600 shadow-sm"
+                    : "border border-gray-300 hover:bg-gray-100 text-gray-700 bg-white"
+                    }`}
                 >
                   {page}
                 </button>
@@ -426,7 +428,7 @@ export default function Classes() {
             <div className="flex justify-end gap-3">
 
               <button
-                onClick={()=>setShowDeleteModal(false)}
+                onClick={() => setShowDeleteModal(false)}
                 className="px-4 py-2 bg-gray-300 rounded"
               >
                 Cancel
