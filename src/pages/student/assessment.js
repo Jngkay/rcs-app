@@ -280,7 +280,7 @@ export default function Assessment() {
       <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Individualized Assessment</h1>
-            <p className="mt-2 text-white/80 text-sm font-light">Manage individualized reading assessments</p>
+          <p className="mt-2 text-white/80 text-sm font-light">Manage individualized reading assessments</p>
         </div>
         <img
           src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
@@ -294,70 +294,69 @@ export default function Assessment() {
           <>
             {isUploading ? (
               <div className="flex flex-col items-center justify-center p-12 bg-blue-50/80 rounded-2xl w-full border border-blue-100 shadow-inner my-12 animate-fadeIn flex-1">
-                 <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
-                 <h2 className="text-3xl font-bold text-gray-700 text-center">Saving Results & Audio...</h2>
-                 <p className="text-gray-500 mt-2 text-center text-lg">Preparing your comprehension questions</p>
+                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+                <h2 className="text-3xl font-bold text-gray-700 text-center">Saving Results & Audio...</h2>
+                <p className="text-gray-500 mt-2 text-center text-lg">Preparing your comprehension questions</p>
               </div>
             ) : (
               <>
                 <div className="border-t border-blue-500 mb-6"></div>
 
-            <div className="border rounded-md p-6 bg-gray-50 flex-1">
-              <h2 className="text-blue-700 font-semibold text-lg border-l-4 border-blue-500 pl-3 mb-4">
-                Read the paragraph below
-              </h2>
+                <div className="border rounded-md p-6 bg-gray-50 flex-1">
+                  <h2 className="text-blue-700 font-semibold text-lg border-l-4 border-blue-500 pl-3 mb-4">
+                    Read the paragraph below
+                  </h2>
 
-              <div className="bg-white shadow-inner border rounded-md p-6 text-gray-800 text-lg md:text-xl leading-relaxed mb-8 text-center space-y-4">
-                {(paragraph || "").split(/(?<=\.)\s+/).filter(s => s.trim() !== "").map((sentence, idx) => (
-                  <p key={idx}>{sentence}</p>
-                ))}
-              </div>
-
-              <div className="flex justify-center mt-4">
-                {isProcessing ? (
-                  <div className="flex flex-col items-center justify-center p-8 bg-blue-50/80 rounded-2xl w-full border border-blue-100 shadow-inner">
-                     <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                     <p className="text-blue-800 font-bold text-xl animate-pulse">Analyzing pronunciation...</p>
-                     <p className="text-blue-600 mt-2 text-sm font-medium">This may take a few moments</p>
+                  <div className="bg-white shadow-inner border rounded-md p-6 text-gray-800 text-lg md:text-xl leading-relaxed mb-8 text-center space-y-4">
+                    {(paragraph || "").split(/(?<=\.)\s+/).filter(s => s.trim() !== "").map((sentence, idx) => (
+                      <p key={idx}>{sentence}</p>
+                    ))}
                   </div>
-                ) : !isRecording ? (
-                  <button
-                    onClick={startRecording}
-                    disabled={!hasStories}
-                    className={`px-10 py-4 text-lg rounded-full font-semibold transition shadow-md ${
-                      !hasStories
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-blue-700 hover:bg-blue-800 text-white"
-                    }`}
-                  >
-                    START READING
-                  </button>
-                ) : (
-                  <button
-                    onClick={stopRecording}
-                    className="bg-red-600 hover:bg-red-700 text-white px-10 py-4 text-lg rounded-full font-semibold animate-pulse shadow-md"
-                  >
-                    STOP RECORDING
-                  </button>
+
+                  <div className="flex justify-center mt-4">
+                    {isProcessing ? (
+                      <div className="flex flex-col items-center justify-center p-8 bg-blue-50/80 rounded-2xl w-full border border-blue-100 shadow-inner">
+                        <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p className="text-blue-800 font-bold text-xl animate-pulse">Analyzing and transcribing...</p>
+                        <p className="text-blue-600 mt-2 text-sm font-medium">This may take a few moments</p>
+                      </div>
+                    ) : !isRecording ? (
+                      <button
+                        onClick={startRecording}
+                        disabled={!hasStories}
+                        className={`px-10 py-4 text-lg rounded-full font-semibold transition shadow-md ${!hasStories
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "bg-blue-700 hover:bg-blue-800 text-white"
+                          }`}
+                      >
+                        START READING
+                      </button>
+                    ) : (
+                      <button
+                        onClick={stopRecording}
+                        className="bg-red-600 hover:bg-red-700 text-white px-10 py-4 text-lg rounded-full font-semibold animate-pulse shadow-md"
+                      >
+                        STOP RECORDING
+                      </button>
+                    )}
+                  </div>
+
+                  {error && <div className="mt-6 text-red-500 font-semibold text-center">{error}</div>}
+                </div>
+
+                {result && paragraph !== "Loading..." && (
+                  <div className="mt-8" ref={resultRef}>
+                    <SpeechResult
+                      originalText={paragraph}
+                      spokenText={result}
+                      duration={duration}
+                      onSave={handleSaveResult}
+                      onRetry={handleRetry}
+                    />
+                  </div>
                 )}
-              </div>
-
-              {error && <div className="mt-6 text-red-500 font-semibold text-center">{error}</div>}
-            </div>
-
-            {result && paragraph !== "Loading..." && (
-              <div className="mt-8" ref={resultRef}>
-                <SpeechResult
-                  originalText={paragraph}
-                  spokenText={result}
-                  duration={duration}
-                  onSave={handleSaveResult}
-                  onRetry={handleRetry}
-                />
-              </div>
+              </>
             )}
-            </>
-          )}
           </>
         )}
 
@@ -379,8 +378,8 @@ export default function Assessment() {
                     key={idx}
                     onClick={() => handleSelectChoice(currentQuestion.id, idx)}
                     className={`border-2 p-5 rounded-lg cursor-pointer transition text-xl shadow-sm ${isSelected
-                        ? "bg-blue-500 text-white border-blue-500 shadow-md"
-                        : "hover:bg-blue-50 bg-gray-50 border-gray-200"
+                      ? "bg-blue-500 text-white border-blue-500 shadow-md"
+                      : "hover:bg-blue-50 bg-gray-50 border-gray-200"
                       }`}
                   >
                     {choice.text}
@@ -394,8 +393,8 @@ export default function Assessment() {
                 onClick={handleNextQuestion}
                 disabled={!isAnswered}
                 className={`px-12 py-4 text-xl rounded-full font-semibold transition shadow-md ${!isAnswered
-                    ? "bg-gray-300 text-white cursor-not-allowed"
-                    : "bg-blue-600 text-white hover:bg-blue-700"
+                  ? "bg-gray-300 text-white cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
                   }`}
               >
                 {currentQIndex < questions.length - 1 ? "NEXT QUESTION" : "SUBMIT ANSWERS"}
@@ -448,7 +447,7 @@ export default function Assessment() {
                   <div className="flex items-center justify-between">
                     <h3 className="text-2xl font-bold text-gray-800">Overall Profile:</h3>
                     <span className={`text-4xl font-black ${profileData.overallProfile === 'Independent' ? 'text-green-600' :
-                        profileData.overallProfile === 'Instructional' ? 'text-blue-600' : 'text-red-500'
+                      profileData.overallProfile === 'Instructional' ? 'text-blue-600' : 'text-red-500'
                       }`}>
                       {profileData.overallProfile}
                     </span>
