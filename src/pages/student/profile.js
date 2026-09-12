@@ -115,9 +115,10 @@ export default function Profile() {
 
       <div className="space-y-6">
 
-        <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between">
+        <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between">
 
           <h1 className="text-2xl font-bold">Student Profile</h1>
+            <p className="mt-2 text-white/80 text-sm font-light">Manage your student profile</p>
 
           <label className="cursor-pointer flex flex-col items-center">
 

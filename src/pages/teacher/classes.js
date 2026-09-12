@@ -188,8 +188,9 @@ export default function Classes() {
     <TeacherLayout>
 
       {/* HEADER */}
-      <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex justify-between items-center mb-6">
+      <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">My Classes</h1>
+            <p className="mt-2 text-white/80 text-sm font-light">Manage your my classes</p>
 
         <img
           src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"

@@ -162,10 +162,11 @@ export default function Lessons() {
 
   return (
     <MainLayout>
-      <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between">
+      <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between">
         <div className="pb-15">
           <h1 className="text-4xl font-bold">Your Personalized Learning Plan</h1>
-          <p>Check your Reading Assessments</p>
+          {/* <p className="mt-2 text-white/80 text-sm font-light">Manage your your personalized learning plan</p> */}
+          <p>Check your lessons to improve your reading comprehension.</p>
         </div>
       </div>
 
@@ -197,7 +198,7 @@ export default function Lessons() {
             {moduleData?.targeted_strategies && moduleData.targeted_strategies.length > 0 && (
               <div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                  🎯 Targeted Reading Strategies
+                  Targeted Reading Strategies
                 </h3>
                 <div className="grid md:grid-cols-3 gap-6">
                   {moduleData.targeted_strategies.map((strategy, idx) => (
@@ -214,7 +215,7 @@ export default function Lessons() {
             {moduleData?.recommended_materials && moduleData.recommended_materials.length > 0 && (
               <div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                  📚 Recommended Reading Materials
+                  Recommended Reading Materials
                 </h3>
                 <div className="grid md:grid-cols-3 gap-6">
                   {moduleData.recommended_materials.map((material, idx) => (

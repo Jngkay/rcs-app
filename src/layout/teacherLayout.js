@@ -4,7 +4,7 @@ import SideBarTeacher from "../components/sidebar_teacher";
 
 export default function TeacherLayout({ children }) {
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-slate-50">
       {/* Sidebar  */}
       <SideBarTeacher />
 

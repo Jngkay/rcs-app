@@ -182,7 +182,7 @@ export default function CompreTestModal({ grade, storyData, onClose, onSuccess, 
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
 
       {/* Modal Container */}
-      <div className="bg-white w-[95%] max-w-4xl rounded-xl shadow-2xl flex flex-col overflow-hidden min-h-0" style={{ height: "70%" }}>
+      <div className="bg-white w-[95%] max-w-4xl rounded-2xl shadow-glass border border-slate-200/60 flex flex-col overflow-hidden min-h-0" style={{ height: "70%" }}>
 
         {/* Header (Fixed) */}
         <div className="p-4 border-b shrink-0">
@@ -290,7 +290,7 @@ export default function CompreTestModal({ grade, storyData, onClose, onSuccess, 
 
           <button
             onClick={addQuestion}
-            className="bg-blue-500 text-white px-4 py-2 mt-4 rounded"
+            className="bg-primary-500 hover:bg-primary-600 transition-colors text-white px-5 py-2.5 mt-4 rounded-xl font-medium shadow-sm hover:shadow"
           >
             Add Question
           </button>
@@ -301,14 +301,14 @@ export default function CompreTestModal({ grade, storyData, onClose, onSuccess, 
         <div className="p-4 border-t shrink-0 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="bg-gray-400 text-white px-4 py-2 rounded"
+            className="bg-slate-200 hover:bg-slate-300 transition-colors text-slate-800 px-5 py-2.5 rounded-xl font-medium"
           >
             Cancel
           </button>
 
           <button
             onClick={handleSave}
-            className="bg-purple-600 text-white px-4 py-2 rounded"
+            className="bg-primary-600 hover:bg-primary-700 transition-colors text-white px-5 py-2.5 rounded-xl font-medium shadow-sm hover:shadow"
           >
             Save Story
           </button>

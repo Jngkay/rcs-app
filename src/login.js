@@ -113,7 +113,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-4 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 text-white text-xl shadow hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center"
+          className="w-full py-3.5 rounded-xl bg-secondary hover:bg-systemYellow-400 text-white text-lg font-bold shadow-sm hover:shadow transition-all disabled:opacity-50 flex items-center justify-center mt-4"
         >
           {loading ? (
             <svg
@@ -198,7 +198,7 @@ function ClassCodeForm({ onCodeValidated, onSwitchToLogin }) {
         </div>
         <button
           type="submit"
-          className="w-full py-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 text-white font-medium shadow hover:opacity-90 transition">
+          className="w-full py-3.5 rounded-xl bg-secondary hover:bg-systemYellow-400 text-white text-lg font-bold shadow-sm hover:shadow transition-all mt-4">
           Next
         </button>
       </form>
@@ -429,7 +429,7 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
         </div>
         <button
           type="submit"
-          className="w-full py-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 text-white font-medium shadow hover:opacity-90 transition">
+          className="w-full py-3.5 rounded-xl bg-secondary hover:bg-systemYellow-400 text-white text-lg font-bold shadow-sm hover:shadow transition-all mt-4">
           Register
         </button>
       </form>
@@ -591,7 +591,7 @@ function RegisterTeacherForm({ onSwitchToLogin }) {
 
         <button
           type="submit"
-          className="w-full py-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 text-white font-medium shadow hover:opacity-90"
+          className="w-full py-3.5 rounded-xl bg-secondary hover:bg-systemYellow-400 text-white text-lg font-bold shadow-sm hover:shadow transition-all mt-4"
         >
           Register Teacher
         </button>
@@ -675,19 +675,19 @@ export default function App() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 font-sans">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-[380px] text-center">
-        <img src="assets/logo.png" alt="logo" className="w-20 block mx-auto" />
-        <h2 className="text-3xl font-bold mb-4">
+    <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
+      <div className={`bg-white p-8 rounded-3xl shadow-soft w-full ${view === 'registerForm' ? 'max-w-2xl' : 'max-w-md'} text-center border border-slate-100`}>
+        <img src="assets/logo.png" alt="logo" className="w-20 block mx-auto mb-2" />
+        <h2 className="text-3xl font-extrabold mb-4 text-slate-800">
           {view === "login" ? "Welcome back!" : "Welcome!"}
         </h2>
-        <div className="flex justify-center mb-6 space-x-2">
+        <div className="flex justify-center mb-8 space-x-3">
           <button
             type="button"
             onClick={() => setView("login")}
-            className={`px-6 py-2 rounded-full ${view === "login"
-              ? "text-white bg-gradient-to-r from-blue-400 to-blue-600 shadow"
-              : "text-blue-600 border border-blue-400 hover:bg-blue-50"
+            className={`px-6 py-2.5 rounded-xl font-medium transition-all ${view === "login"
+              ? "text-white bg-secondary shadow-sm"
+              : "text-slate-500 bg-slate-100 hover:bg-slate-200"
               }`}
           >
             Login
@@ -695,9 +695,9 @@ export default function App() {
           <button
             type="button"
             onClick={() => setView("registerUserType")}
-            className={`px-6 py-2 rounded-full ${view !== "login"
-              ? "text-white bg-gradient-to-r from-blue-400 to-blue-600 shadow"
-              : "text-blue-600 border border-blue-400 hover:bg-blue-50"
+            className={`px-6 py-2.5 rounded-xl font-medium transition-all ${view !== "login"
+              ? "text-white bg-secondary shadow-sm"
+              : "text-slate-500 bg-slate-100 hover:bg-slate-200"
               }`}
           >
             Register

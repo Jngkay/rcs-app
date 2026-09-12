@@ -158,9 +158,10 @@ export default function AccountManagement() {
 
   return (
     <AdminLayout>
-      <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between">
+      <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Account Management</h1>
+            <p className="mt-2 text-white/80 text-sm font-light">View and manage teacher and student accounts</p>
         </div>
         <img
           src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
@@ -169,7 +170,7 @@ export default function AccountManagement() {
         />
       </div>
 
-      <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md mt-8">
+      <div className="bg-secondary text-white p-6 rounded-xl shadow-md mt-8">
         {/* Toggle Buttons & Search Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex gap-4">

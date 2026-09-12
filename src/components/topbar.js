@@ -47,7 +47,7 @@ export default function TopBar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-20 flex justify-between items-center bg-white shadow px-6 py-4">
+    <header className="sticky top-0 z-20 flex justify-between items-center bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-6 py-4 shadow-sm">
 
       {/* System Tagline */}
       <div className="flex items-center">
@@ -72,19 +72,19 @@ export default function TopBar() {
           {role === "teacher" ? (
             <Link
               to="/pages/teacher/profile"
-              className="flex items-center gap-2 p-2 rounded-lg bg-blue-500 font-medium text-white shadow-sm hover:opacity-95 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-systemYellow-400 font-medium text-white shadow-sm hover:shadow transition-all"
             >
               {firstName} {lastName}
             </Link>
           ) : role === "student" ? (
             <Link
               to="/pages/student/profile"
-              className="flex items-center gap-2 p-2 rounded-lg bg-blue-500 font-medium text-white shadow-sm hover:opacity-95 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-systemYellow-400 font-medium text-white shadow-sm hover:shadow transition-all"
             >
               {firstName} {lastName}
             </Link>
           ) : (
-            <span className="flex items-center gap-2 p-2 rounded-lg bg-blue-500 font-medium text-white cursor-default select-none">
+            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary font-medium text-white shadow-sm cursor-default select-none">
               {firstName || "Admin"} {lastName}
             </span>
           )}

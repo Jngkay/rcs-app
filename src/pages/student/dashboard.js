@@ -268,14 +268,16 @@ export default function Dashboard() {
 
       {/* ================= WELCOME ================= */}
       {step === "welcome" && (
-        <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md">
+        <div className="bg-secondary text-white p-6 rounded-xl shadow-md">
           <h1 className="text-5xl font-bold">
             Welcome to Readi, {firstName}!
           </h1>
+
           <br></br>
           <h1 className="text-3xl font-bold">
             You are about to take the Phil- IRI Group Test Screening (GST) assessment.
           </h1>
+
 
           <button
             onClick={() => setStep("quiz")}
@@ -298,6 +300,7 @@ export default function Dashboard() {
                     <h1 className="text-4xl font-bold mb-6">
                       {currentCard.title}
                     </h1>
+
                     <div className="text-2xl leading-relaxed space-y-4">
                       {(currentCard.content || "").split(/(?<=\.)\s+/).filter(s => s.trim() !== "").map((sentence, idx) => (
                         <p key={idx}>{sentence}</p>
@@ -366,11 +369,12 @@ export default function Dashboard() {
 
       {/* ================= RESULT ================= */}
       {step === "result" && (
-        <div className="bg-blue-600 text-white p-8 rounded-xl shadow-md">
+        <div className="bg-secondary text-white p-8 rounded-xl shadow-md">
 
           <h1 className="text-5xl font-bold">
             Group Screening Test Completed
           </h1>
+
 
           <p className="text-3xl mt-8">
             Your Raw Score:
@@ -441,9 +445,11 @@ export default function Dashboard() {
 
       {/* ================= FINAL RESULT ================= */}
       {step === "finalResult" && (
-        <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between">
+        <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between">
           <div className="pb-15">
             <h1 className="text-4xl font-bold">Assessment Completed</h1>
+
+
             <p className="pt-4">
               You have completely finished all necessary parts of the reading assessment.
               Your teacher now has your results on file! You can check your detailed breakdown at any time by visiting the <strong>Scores</strong> tab on the sidebar.

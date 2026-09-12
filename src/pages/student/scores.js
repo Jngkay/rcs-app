@@ -39,10 +39,11 @@ export default function Scores() {
 
   return (
     <MainLayout>
-      <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-10">
+      <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-10">
         <div className="pb-15">
           <h1 className="text-4xl font-bold">Your Score Breakdown</h1>
-          <p>Track your reading assessment progress</p>
+          {/* <p className="mt-2 text-white/80 text-sm font-light">Manage your your score breakdown</p> */}
+          <p>Check how well did do in the assessment</p>
         </div>
       </div>
 

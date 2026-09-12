@@ -360,13 +360,14 @@ export default function TeacherAnalytics() {
     <TeacherLayout>
       <div className="space-y-8 max-w-7xl mx-auto">
         {/* Header Hero Banner */}
-        <div className="bg-blue-600 text-white p-6 md:p-8 rounded-2xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="bg-primary-600 text-white p-6 md:p-8 rounded-2xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <span className="px-3 py-1 bg-white/20 text-white text-xs font-semibold rounded-full uppercase tracking-wider mb-2 inline-block">
               Reading Comprehension Analytics
             </span>
             <h1 className="text-2xl md:text-3xl font-extrabold">Student Comprehension Performance</h1>
-            <p className="text-blue-100 text-sm mt-1 max-w-xl">
+            <p className="mt-2 text-white/80 text-sm font-light">Track and analyze student reading performance</p>
+            <p className="text-white/60 text-sm mt-1 max-w-xl">
               Track, analyze, and support reading comprehension levels across all your assigned classes.
             </p>
           </div>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { Book, LogOut, Menu } from "lucide-react";
-import { useNavigate, Link } from "react-router-dom";
+import { Book, Users, FileText, ClipboardList, LogOut, Menu } from "lucide-react";
+import { useNavigate, NavLink } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 
@@ -25,59 +25,93 @@ export default function SideBarAdmin() {
 
   return (
     <aside
-      className={`sticky top-0 h-screen flex-shrink-0 overflow-y-auto bg-blue-50 p-4 shadow-md transition-all duration-300 z-30
+      className={`sticky top-0 h-screen flex flex-col flex-shrink-0 overflow-y-auto bg-slate-50 border-r border-slate-200/60 p-4 shadow-soft transition-all duration-300 z-30
       ${isOpen ? "w-64" : "w-20"}`}
     >
       {/* Top section with logo + hamburger */}
       <div className="flex items-center justify-between mb-8">
         {isOpen && (
-          <img src="../../assets/logo.png" alt="logo" className="w-20 block mx-auto" />
+          <img src="../../assets/logo.png" alt="logo" className="w-20 block mx-auto drop-shadow-md" />
         )}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="p-2 rounded-lg hover:bg-blue-100"
+          className="p-2 rounded-lg text-slate-500 hover:bg-slate-200 transition-colors"
         >
           <Menu size={20} />
         </button>
       </div>
 
       {/* Nav links */}
-      <nav className="space-y-4">
-        <Link
+      <nav className="flex-1 space-y-4">
+        <NavLink
           to="/pages/admin/account_management"
-          className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
+          className={({ isActive }) =>
+            `flex items-center gap-3 p-2 rounded-full font-semibold transition-all duration-200 group ${
+              isActive ? "bg-systemYellow-400 text-white shadow-md" : "text-brandNeutral-text hover:bg-slate-200/50"
+            }`
+          }
         >
-          <Book size={18} />
-          {isOpen && <span>Account Management</span>}
-        </Link>
+          {({ isActive }) => (
+            <>
+              <div className={`${isActive ? "bg-white text-systemYellow-400" : "text-brandNeutral-text"} p-2 rounded-full transition-colors`}>
+                <Users size={20} className={!isActive ? "group-hover:scale-110 transition-transform" : ""} />
+              </div>
+              {isOpen && <span>Account Management</span>}
+            </>
+          )}
+        </NavLink>
 
-        <Link
+        <NavLink
           to="/pages/admin/comprehension_test"
-          className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
+          className={({ isActive }) =>
+            `flex items-center gap-3 p-2 rounded-full font-semibold transition-all duration-200 group ${
+              isActive ? "bg-systemYellow-400 text-white shadow-md" : "text-brandNeutral-text hover:bg-slate-200/50"
+            }`
+          }
         >
-          <Book size={18} />
-          {isOpen && <span>GST Passages</span>}
-        </Link>
+          {({ isActive }) => (
+            <>
+              <div className={`${isActive ? "bg-white text-systemYellow-400" : "text-brandNeutral-text"} p-2 rounded-full transition-colors`}>
+                <FileText size={20} className={!isActive ? "group-hover:scale-110 transition-transform" : ""} />
+              </div>
+              {isOpen && <span>GST Passages</span>}
+            </>
+          )}
+        </NavLink>
 
-        <Link
+        <NavLink
           to="/pages/admin/individualized_assessment"
-          className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100"
+          className={({ isActive }) =>
+            `flex items-center gap-3 p-2 rounded-full font-semibold transition-all duration-200 group ${
+              isActive ? "bg-systemYellow-400 text-white shadow-md" : "text-brandNeutral-text hover:bg-slate-200/50"
+            }`
+          }
         >
-          <Book size={18} />
-          {isOpen && <span>Individualized Assessment</span>}
-        </Link>
+          {({ isActive }) => (
+            <>
+              <div className={`${isActive ? "bg-white text-systemYellow-400" : "text-brandNeutral-text"} p-2 rounded-full transition-colors`}>
+                <ClipboardList size={20} className={!isActive ? "group-hover:scale-110 transition-transform" : ""} />
+              </div>
+              {isOpen && <span>Individualized Assessment</span>}
+            </>
+          )}
+        </NavLink>
+      </nav>
 
+      <div className="mt-auto pt-4">
         <button
           disabled={loading}
           onClick={() => {
             setShowLogoutConfirmation(true);
           }}
-          className="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100 text-red-500 w-full text-left"
+          className="flex items-center gap-3 p-2 rounded-full text-brandNeutral-text hover:bg-red-50 hover:text-red-500 w-full text-left transition-all duration-200 font-semibold group"
         >
-          <LogOut size={18} />
-          {isOpen && <span>Logout</span>}
+          <div className="p-2 rounded-full transition-colors group-hover:bg-red-100 group-hover:text-red-500">
+            <LogOut size={20} className="group-hover:scale-110 transition-transform" />
+          </div>
+          {isOpen && <span>Log out</span>}
         </button>
-      </nav>
+      </div>
 
       {/* CONFIRM LOGOUT MODAL (Portaled to document.body for top-level stacking) */}
       {showLogoutConfirmation && createPortal(

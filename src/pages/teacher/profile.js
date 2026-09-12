@@ -112,9 +112,10 @@ export default function TeacherProfile() {
 
     return (
         <TeacherLayout>
-            <div className="bg-blue-600 text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-6">
+            <div className="bg-secondary text-white p-6 rounded-xl shadow-md flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-2xl font-bold">Teacher Profile</h1>
+            <p className="mt-2 text-white/80 text-sm font-light">Manage your account details and preferences</p>
                 </div>
                 <img
                     src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
