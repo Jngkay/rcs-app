@@ -386,7 +386,7 @@ export default function Assessment() {
               {currentQuestion.question_text}
             </p>
 
-            <ul className="space-y-4 flex-1 mb-8">
+            <ul className="space-y-4 mb-8">
               {currentQuestion.choices?.map((choice, idx) => {
                 if (!choice || !choice.text || choice.text.trim() === "") return null;
                 const isSelected = answers[currentQuestion.id] === idx;
@@ -405,7 +405,7 @@ export default function Assessment() {
               })}
             </ul>
 
-            <div className="flex justify-end mt-auto pt-6 border-t border-gray-100">
+            <div className="flex justify-end mt-8 pt-6 border-t border-gray-100">
               <button
                 onClick={handleNextQuestion}
                 disabled={!isAnswered}
