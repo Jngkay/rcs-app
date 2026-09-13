@@ -782,7 +782,7 @@ export default function App() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
       <div className={`bg-white p-8 rounded-3xl shadow-soft w-full ${view === 'registerForm' ? 'max-w-2xl' : 'max-w-md'} text-center border border-slate-100`}>
-        <img src="assets/logo.png" alt="logo" className="w-20 block mx-auto mb-2" />
+        <img src="assets/logo.png" alt="logo" className="w-32 block mx-auto mb-2" />
         <h2 className="text-3xl font-extrabold mb-4 text-slate-800">
           {view === "login" ? "Welcome back!" : "Welcome!"}
         </h2>

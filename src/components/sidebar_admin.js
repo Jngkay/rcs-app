@@ -31,7 +31,7 @@ export default function SideBarAdmin() {
       {/* Top section with logo + hamburger */}
       <div className="flex items-center justify-between mb-8">
         {isOpen && (
-          <img src="../../assets/logo.png" alt="logo" className="w-20 block mx-auto drop-shadow-md" />
+          <img src="../../assets/logo.png" alt="logo" className="w-32 block mx-auto drop-shadow-md" />
         )}
         <button
           onClick={() => setIsOpen(!isOpen)}
