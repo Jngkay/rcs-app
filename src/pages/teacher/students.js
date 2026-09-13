@@ -624,7 +624,7 @@ export default function Students() {
                                                 </div>
 
                                                 {/* History Tabs */}
-                                                {studentIndHistory.length > 1 && (
+                                                {studentIndHistory.length > 0 && (
                                                     <div className="flex gap-2 mb-4 bg-gray-100 p-1 rounded-md w-fit">
                                                         {studentIndHistory.map((_, idx) => (
                                                             <button
@@ -685,12 +685,30 @@ export default function Students() {
                                                             </span>
                                                         </div>
                                                     </div>
-                                                ) : selectedStudent.individualized_assessment_attempted ? (
+                                                ) : (selectedStudent.individualized_assessment_attempted || studentIndData) ? (
                                                     <div className="space-y-6 text-lg">
+                                                        {/* History Tabs */}
+                                                        {studentIndHistory.length > 0 && (
+                                                            <div className="flex gap-2 mb-4 bg-gray-100 p-1 rounded-md w-fit">
+                                                                {studentIndHistory.map((_, idx) => (
+                                                                    <button
+                                                                        key={idx}
+                                                                        onClick={() => {
+                                                                            setActiveIndAttemptIndex(idx);
+                                                                            setStudentIndData(studentIndHistory[idx]);
+                                                                        }}
+                                                                        className={`px-4 py-1.5 text-sm font-semibold rounded-md transition ${activeIndAttemptIndex === idx ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                                                                    >
+                                                                        Try {idx + 1}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        )}
+
                                                         <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg border">
                                                             <span className="font-semibold text-gray-700">Word Reading Level:</span>
                                                             <div className="text-right">
-                                                                <span className="font-medium mr-3">{studentIndData?.individualized_score || selectedStudent.individualized_score}%</span>
+                                                                <span className="font-medium mr-3">{studentIndData?.individualized_score ?? selectedStudent.individualized_score}%</span>
                                                                 <span className="text-blue-700 font-bold">{studentIndData?.word_reading_level || selectedStudent.word_reading_level || "N/A"}</span>
                                                             </div>
                                                         </div>
@@ -698,23 +716,23 @@ export default function Students() {
                                                         <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg border">
                                                             <span className="font-semibold text-gray-700">Comprehension Level:</span>
                                                             <div className="text-right">
-                                                                <span className="font-medium mr-3">{studentIndData?.individualized_comprehension_percentage || selectedStudent.individualized_comprehension_percentage || 0}%</span>
+                                                                <span className="font-medium mr-3">{studentIndData?.individualized_comprehension_percentage ?? selectedStudent.individualized_comprehension_percentage ?? 0}%</span>
                                                                 <span className="text-blue-700 font-bold">{studentIndData?.comprehension_level || selectedStudent.comprehension_level || "N/A"}</span>
                                                             </div>
                                                         </div>
 
                                                         <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg border">
                                                             <span className="font-semibold text-gray-700">Reading Rate:</span>
-                                                            <span className="font-medium text-gray-800">{selectedStudent.word_per_minute || 0} words per minute</span>
+                                                            <span className="font-medium text-gray-800">{studentIndData?.word_per_minute ?? selectedStudent.word_per_minute ?? 0} words per minute</span>
                                                         </div>
 
                                                         <div className="mt-8 pt-4 border-t">
                                                             <div className="flex items-center justify-between">
-                                                                <h3 className="text-xl font-bold text-gray-800">Final Oral Reading Profile:</h3>
-                                                                <span className={`text-2xl font-black ${selectedStudent.oral_reading_profile === 'Independent' ? 'text-green-600' :
-                                                                    selectedStudent.oral_reading_profile === 'Instructional' ? 'text-blue-600' : 'text-red-500'
+                                                                <h3 className="text-xl font-bold text-gray-800">Oral Reading Profile:</h3>
+                                                                <span className={`text-2xl font-black ${(studentIndData?.oral_reading_profile || selectedStudent.oral_reading_profile) === 'Independent' ? 'text-green-600' :
+                                                                    (studentIndData?.oral_reading_profile || selectedStudent.oral_reading_profile) === 'Instructional' ? 'text-blue-600' : 'text-red-500'
                                                                     }`}>
-                                                                    {selectedStudent.oral_reading_profile || "Pending"}
+                                                                    {studentIndData?.oral_reading_profile || selectedStudent.oral_reading_profile || "Pending"}
                                                                 </span>
                                                             </div>
                                                         </div>
