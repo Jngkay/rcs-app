@@ -333,8 +333,8 @@ export default function Dashboard() {
       {step === "quiz" && (
         <>
           {testFlow.length > 0 ? (
-            <div className="bg-white text-black p-8 rounded-xl shadow-2xl flex flex-col min-h-screen">
-              <div className="flex-1">
+            <div className="bg-white text-black p-8 rounded-xl shadow-2xl flex flex-col min-h-[500px]">
+              <div>
                 {/* STORY CARD */}
                 {currentCard.type === "story" && (
                   <div className="text-center">
