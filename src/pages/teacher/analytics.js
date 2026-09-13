@@ -99,6 +99,9 @@ export default function TeacherAnalytics() {
       let pend = 0;
       const gradeMap = {};
 
+      let aggregatedGstHistory = {};
+      let aggregatedIndHistory = {};
+
       const enrichedStudents = await Promise.all(
         myStudents.map(async (student) => {
           let gstData = null;
@@ -116,6 +119,41 @@ export default function TeacherAnalytics() {
             if (indSnap.exists()) {
               indData = indSnap.data();
             }
+
+            // Fetch GST attempts
+            const gstAttQuery = query(collection(db, "user_gst_attempts"), where("student_id", "==", student.id));
+            const gstAttSnap = await getDocs(gstAttQuery);
+            let stuGstAttempts = [];
+            gstAttSnap.forEach(d => stuGstAttempts.push(d.data()));
+            stuGstAttempts.sort((a, b) => {
+              const tA = a.timestamp?.toMillis ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
+              const tB = b.timestamp?.toMillis ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
+              return tA - tB;
+            });
+            stuGstAttempts.forEach((att, idx) => {
+              if (!aggregatedGstHistory[idx]) aggregatedGstHistory[idx] = { sumScore: 0, sumTotal: 0, count: 0 };
+              aggregatedGstHistory[idx].sumScore += att.score || 0;
+              aggregatedGstHistory[idx].sumTotal += att.total_questions || 20;
+              aggregatedGstHistory[idx].count++;
+            });
+
+            // Fetch IND attempts
+            const indAttQuery = query(collection(db, "user_ind_attempts"), where("student_id", "==", student.id));
+            const indAttSnap = await getDocs(indAttQuery);
+            let stuIndAttempts = [];
+            indAttSnap.forEach(d => stuIndAttempts.push(d.data()));
+            stuIndAttempts.sort((a, b) => {
+              const tA = a.timestamp?.toMillis ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
+              const tB = b.timestamp?.toMillis ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
+              return tA - tB;
+            });
+            stuIndAttempts.forEach((att, idx) => {
+              if (!aggregatedIndHistory[idx]) aggregatedIndHistory[idx] = { sumScore: 0, sumWpm: 0, count: 0 };
+              aggregatedIndHistory[idx].sumScore += att.individualized_score || 0;
+              aggregatedIndHistory[idx].sumWpm += att.word_per_minute || 0;
+              aggregatedIndHistory[idx].count++;
+            });
+
           } catch (e) {
             console.error("Error fetching student assessment documents:", e);
           }
@@ -269,6 +307,18 @@ export default function TeacherAnalytics() {
 
       const totalAssessed = passedGstCount + indep + instruct + frust;
 
+      const classGstProgression = Object.keys(aggregatedGstHistory).map(idx => ({
+        tryNumber: parseInt(idx) + 1,
+        score: Math.round(aggregatedGstHistory[idx].sumScore / aggregatedGstHistory[idx].count),
+        total_questions: Math.round(aggregatedGstHistory[idx].sumTotal / aggregatedGstHistory[idx].count)
+      }));
+
+      const classIndProgression = Object.keys(aggregatedIndHistory).map(idx => ({
+        tryNumber: parseInt(idx) + 1,
+        individualized_score: Math.round(aggregatedIndHistory[idx].sumScore / aggregatedIndHistory[idx].count),
+        word_per_minute: Math.round(aggregatedIndHistory[idx].sumWpm / aggregatedIndHistory[idx].count)
+      }));
+
       setMetrics({
         totalStudents: myStudents.length,
         assessedCount: totalAssessed,
@@ -287,7 +337,9 @@ export default function TeacherAnalytics() {
         compLevelIndepCount,
         compLevelInstructCount,
         compLevelFrustCount,
-        gradeBreakdown: gradeMap
+        gradeBreakdown: gradeMap,
+        classGstProgression,
+        classIndProgression
       });
     } catch (err) {
       console.error("Error generating analytics:", err);
@@ -836,73 +888,176 @@ export default function TeacherAnalytics() {
             })()}
           </div>
 
-          {/* Grade Level Comprehension Breakdown */}
+          {/* Student Progression Across Attempts */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-slate-900">Grade Level Comprehension Breakdown</h3>
-              <p className="text-xs text-slate-500">Visual comparison of reading levels across different grade levels</p>
+            <div className="mb-8">
+              <h3 className="text-lg font-bold text-slate-900">Student Progression Across Attempts</h3>
+              <p className="text-xs text-slate-500">Visual comparison of how well students perform over multiple assessment attempts (Class Average)</p>
             </div>
 
-            {Object.keys(metrics.gradeBreakdown).length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Object.entries(metrics.gradeBreakdown).map(([gradeName, data]) => {
-                  const assessedCount = data.passedGst + data.independent + data.instructional + data.frustration;
-                  const totalG = assessedCount > 0 ? assessedCount : 1;
-                  const pctP = Math.round((data.passedGst / totalG) * 100);
-                  const pctInd = Math.round((data.independent / totalG) * 100);
-                  const pctIns = Math.round((data.instructional / totalG) * 100);
-                  const pctFru = Math.round((data.frustration / totalG) * 100);
-
-                  return (
-                    <div key={gradeName} className="border border-slate-200 rounded-xl p-5 bg-slate-50 space-y-4">
-                      <div className="flex justify-between items-center border-b border-slate-200 pb-2">
-                        <h4 className="font-bold text-slate-900 text-base">{gradeName}</h4>
-                        <span className="text-xs font-bold bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full">
-                          {assessedCount} Student{assessedCount !== 1 ? "s" : ""} Assessed
-                        </span>
-                      </div>
-
-                      {/* Grade Stacked Bar Chart Visual */}
-                      <div className="w-full bg-slate-200 h-3 rounded-full overflow-hidden flex shadow-inner">
-                        <div style={{ width: `${pctP}%` }} className="bg-green-500 h-full transition-all" title={`Passed GST: ${data.passedGst} (${pctP}%)`}></div>
-                        <div style={{ width: `${pctInd}%` }} className="bg-blue-500 h-full transition-all" title={`Independent: ${data.independent} (${pctInd}%)`}></div>
-                        <div style={{ width: `${pctIns}%` }} className="bg-yellow-500 h-full transition-all" title={`Instructional: ${data.instructional} (${pctIns}%)`}></div>
-                        <div style={{ width: `${pctFru}%` }} className="bg-red-500 h-full transition-all" title={`Frustration: ${data.frustration} (${pctFru}%)`}></div>
-                      </div>
-
-                      <div className="space-y-2 text-xs">
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-600 flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-green-500"></span> Passed GST (No Rem.):
-                          </span>
-                          <span className="font-bold text-green-700">{data.passedGst} ({pctP}%)</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-600 flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-blue-500"></span> Independent:
-                          </span>
-                          <span className="font-bold text-blue-700">{data.independent} ({pctInd}%)</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-600 flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-yellow-500"></span> Instructional:
-                          </span>
-                          <span className="font-bold text-yellow-700">{data.instructional} ({pctIns}%)</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-600 flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-red-500"></span> Frustration:
-                          </span>
-                          <span className="font-bold text-red-600">{data.frustration} ({pctFru}%)</span>
-                        </div>
-                      </div>
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* GST Score Progression Chart */}
+              <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500">
+                <h2 className="text-lg font-bold text-gray-800 border-b pb-4 mb-6 text-center">
+                  GST Score Progression
+                </h2>
+                
+                {!metrics.classGstProgression || metrics.classGstProgression.length === 0 ? (
+                  <div className="text-center text-gray-500 italic py-8">
+                    No GST attempts data available.
+                  </div>
+                ) : (
+                  <div className="relative">
+                    {/* Y-axis labels */}
+                    <div className="absolute left-0 top-0 bottom-8 w-8 flex flex-col justify-between text-xs text-gray-400 font-semibold border-r border-gray-200">
+                      <span>20</span>
+                      <span>15</span>
+                      <span>10</span>
+                      <span>5</span>
+                      <span>0</span>
                     </div>
-                  );
-                })}
+
+                    {/* Chart Area */}
+                    <div className="ml-10 h-64 border-b border-gray-200 pb-2 relative mb-6">
+                      <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                        <div className="border-t border-gray-100 w-full h-0"></div>
+                        <div className="border-t border-gray-100 w-full h-0"></div>
+                        <div className="border-t border-gray-100 w-full h-0"></div>
+                        <div className="border-t border-gray-100 w-full h-0"></div>
+                        <div className="border-t border-gray-200 w-full h-0"></div>
+                      </div>
+
+                      {/* SVG Line */}
+                      <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <polyline 
+                          points={metrics.classGstProgression.map((attempt, idx) => {
+                            const maxScore = attempt.total_questions || 20;
+                            const p = Math.min((attempt.score / maxScore) * 100, 100);
+                            const x = metrics.classGstProgression.length > 1 ? 5 + (idx / (metrics.classGstProgression.length - 1)) * 90 : 50;
+                            return `${x},${100 - p}`;
+                          }).join(" ")}
+                          fill="none"
+                          stroke="#2563eb"
+                          strokeWidth="3"
+                          vectorEffect="non-scaling-stroke"
+                          strokeLinejoin="round"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+
+                      {/* Markers & Tooltips */}
+                      {metrics.classGstProgression.map((attempt, idx) => {
+                        const maxScore = attempt.total_questions || 20;
+                        const percentage = Math.min((attempt.score / maxScore) * 100, 100);
+                        const xPos = metrics.classGstProgression.length > 1 ? 5 + (idx / (metrics.classGstProgression.length - 1)) * 90 : 50;
+                        const isLatest = idx === metrics.classGstProgression.length - 1;
+
+                        return (
+                          <React.Fragment key={idx}>
+                            <div 
+                              className="absolute flex flex-col items-center group cursor-default z-10"
+                              style={{ left: `${xPos}%`, bottom: `${percentage}%`, transform: 'translate(-50%, 50%)' }}
+                            >
+                              <div className="opacity-0 group-hover:opacity-100 absolute bottom-4 bg-gray-800 text-white text-xs py-1 px-2 rounded transition-opacity whitespace-nowrap pointer-events-none z-20">
+                                Avg Score: {attempt.score}/{maxScore}
+                              </div>
+                              <div className={`w-4 h-4 rounded-full border-2 border-white shadow-md transition-transform group-hover:scale-125 ${isLatest ? 'bg-blue-600' : 'bg-blue-400'}`}>
+                              </div>
+                            </div>
+
+                            <span 
+                              className={`absolute -bottom-8 text-xs font-semibold whitespace-nowrap ${isLatest ? 'text-blue-600' : 'text-gray-500'}`}
+                              style={{ left: `${xPos}%`, transform: 'translateX(-50%)' }}
+                            >
+                              Try {attempt.tryNumber}
+                            </span>
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
-            ) : (
-              <p className="text-xs text-slate-400 italic">No grade breakdown data available.</p>
-            )}
+
+              {/* IND Score Progression Chart */}
+              <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-teal-500">
+                <h2 className="text-lg font-bold text-gray-800 border-b pb-4 mb-6 text-center">
+                  Word Reading Score (%)
+                </h2>
+                
+                {!metrics.classIndProgression || metrics.classIndProgression.length === 0 ? (
+                  <div className="text-center text-gray-500 italic py-8">
+                    No Individualized attempts data available.
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <div className="absolute left-0 top-0 bottom-8 w-8 flex flex-col justify-between text-xs text-gray-400 font-semibold border-r border-gray-200">
+                      <span>100</span>
+                      <span>75</span>
+                      <span>50</span>
+                      <span>25</span>
+                      <span>0</span>
+                    </div>
+
+                    <div className="ml-10 h-64 border-b border-gray-200 pb-2 relative mb-6">
+                      <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                        <div className="border-t border-gray-100 w-full h-0"></div>
+                        <div className="border-t border-gray-100 w-full h-0"></div>
+                        <div className="border-t border-gray-100 w-full h-0"></div>
+                        <div className="border-t border-gray-100 w-full h-0"></div>
+                        <div className="border-t border-gray-200 w-full h-0"></div>
+                      </div>
+
+                      <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <polyline 
+                          points={metrics.classIndProgression.map((attempt, idx) => {
+                            const score = attempt.individualized_score || 0;
+                            const p = Math.min(score, 100);
+                            const x = metrics.classIndProgression.length > 1 ? 5 + (idx / (metrics.classIndProgression.length - 1)) * 90 : 50;
+                            return `${x},${100 - p}`;
+                          }).join(" ")}
+                          fill="none"
+                          stroke="#14b8a6"
+                          strokeWidth="3"
+                          vectorEffect="non-scaling-stroke"
+                          strokeLinejoin="round"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+
+                      {metrics.classIndProgression.map((attempt, idx) => {
+                        const score = attempt.individualized_score || 0;
+                        const percentage = Math.min(score, 100);
+                        const xPos = metrics.classIndProgression.length > 1 ? 5 + (idx / (metrics.classIndProgression.length - 1)) * 90 : 50;
+                        const isLatest = idx === metrics.classIndProgression.length - 1;
+
+                        return (
+                          <React.Fragment key={idx}>
+                            <div 
+                              className="absolute flex flex-col items-center group cursor-default z-10"
+                              style={{ left: `${xPos}%`, bottom: `${percentage}%`, transform: 'translate(-50%, 50%)' }}
+                            >
+                              <div className="opacity-0 group-hover:opacity-100 absolute bottom-4 bg-gray-800 text-white text-xs py-1 px-2 rounded transition-opacity whitespace-nowrap pointer-events-none z-20">
+                                Avg Score: {score}%
+                              </div>
+                              <div className={`w-4 h-4 rounded-full border-2 border-white shadow-md transition-transform group-hover:scale-125 ${isLatest ? 'bg-teal-600' : 'bg-teal-400'}`}>
+                              </div>
+                            </div>
+
+                            <span 
+                              className={`absolute -bottom-8 text-xs font-semibold whitespace-nowrap ${isLatest ? 'text-teal-600' : 'text-gray-500'}`}
+                              style={{ left: `${xPos}%`, transform: 'translateX(-50%)' }}
+                            >
+                              Try {attempt.tryNumber}
+                            </span>
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </>
       )}
