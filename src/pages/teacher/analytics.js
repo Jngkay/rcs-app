@@ -80,19 +80,11 @@ export default function TeacherAnalytics() {
       }));
 
       // Filter students who belong to teacher's classes or assigned teacher_id
-      let myStudents = allStudents;
-      if (teacherClassCodes.length > 0) {
-        myStudents = allStudents.filter((student) =>
-          teacherClassCodes.includes(student.classCode) ||
-          student.teacher_id === teacher_id ||
-          student.assigned_teacher_id === teacher_id
-        );
-      }
-
-      // If no class match found, fall back to all students if teacher has no classes configured yet
-      if (myStudents.length === 0 && teacherClassCodes.length === 0) {
-        myStudents = allStudents;
-      }
+      let myStudents = allStudents.filter((student) =>
+        (teacherClassCodes.length > 0 && teacherClassCodes.includes(student.classCode)) ||
+        student.teacher_id === teacher_id ||
+        student.assigned_teacher_id === teacher_id
+      );
 
       // 3. Aggregate GST & Individualized Assessment metrics from Firestore
       let totalGstSum = 0;
