@@ -21,6 +21,7 @@ export default function Dashboard() {
 
   const [firstName, setFirstName] = useState("");
   const [profilePic, setProfilePic] = useState("");
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
 
   const auth = getAuth();
   const navigate = useNavigate();
@@ -284,9 +285,14 @@ export default function Dashboard() {
     if (currentIndex < testFlow.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      await calculateScore();
-      setStep("result");
+      setShowSubmitModal(true);
     }
+  };
+
+  const handleConfirmSubmit = async () => {
+    setShowSubmitModal(false);
+    await calculateScore();
+    setStep("result");
   };
 
   if (loading) {
@@ -312,9 +318,18 @@ export default function Dashboard() {
             {/* <p className="mt-2 text-white/80 text-sm font-light">View and manage student accounts and GST results</p> */}
             <p className="text-sm mt-1 text-blue-100">You are about to take the Phil- IRI Group Test Screening (GST) assessment.</p>
 
+            <div className="mt-6 bg-white/10 p-5 rounded-lg border border-white/20">
+              <h3 className="font-bold text-yellow-300 mb-2 uppercase tracking-wide text-xs">Instructions</h3>
+              <ul className="text-sm space-y-2 list-disc pl-4 text-blue-50">
+                <li>Read the passages carefully and understand them.</li>
+                <li>Choose the correct answer and click <span className="font-bold text-white">Next</span>.</li>
+                <li className="text-red-300 font-semibold">Note: Once you click Next, you cannot go back to the previous question.</li>
+              </ul>
+            </div>
+
             <button
               onClick={() => setStep("quiz")}
-              className="px-12 py-2 mt-10 bg-yellow-500 text-2xl rounded-full font-semibold hover:bg-yellow-600 transition"
+              className="px-12 py-3 mt-8 bg-yellow-500 text-2xl rounded-full font-semibold hover:bg-yellow-600 transition shadow-lg text-gray-900"
             >
               Take the GST Test
             </button>
@@ -524,6 +539,39 @@ export default function Dashboard() {
         </div>
 
 
+      )}
+
+      {/* ================= SUBMIT CONFIRMATION MODAL ================= */}
+      {showSubmitModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn p-4">
+          <div className="bg-white text-black p-8 rounded-2xl shadow-2xl max-w-md w-full border border-gray-100">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Submit Assessment?</h2>
+            <p className="text-gray-600 mb-8 text-center text-lg leading-relaxed">
+              Are you sure you want to submit your answers? You will not be able to change them once submitted.
+            </p>
+            <div className="flex justify-center gap-4">
+              <button 
+                onClick={() => setShowSubmitModal(false)} 
+                className="px-6 py-3 rounded-full font-semibold text-gray-600 hover:bg-gray-100 transition shadow-sm w-full border border-gray-200"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleConfirmSubmit} 
+                className="px-6 py-3 rounded-full font-semibold bg-blue-600 text-white hover:bg-blue-700 transition shadow-md w-full"
+              >
+                Yes, Submit
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
     </MainLayout>
