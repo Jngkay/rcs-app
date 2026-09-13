@@ -92,13 +92,13 @@ function LoginForm({ onRegister }) {
 
       <form onSubmit={handleLogin}>
         <div className="mb-4 text-left">
-          <label className="block mb-1 text-gray-700 text-sm">User name</label>
+          <label className="block mb-1 text-gray-700 text-sm">Email</label>
           <input
             type="email"
             className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your User name"
+            placeholder="Enter your Email"
           />
         </div>
 
@@ -173,11 +173,14 @@ function LoginForm({ onRegister }) {
 function ClassCodeForm({ onCodeValidated, onSwitchToLogin }) {
   const [classCode, setClassCode] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const checkClassCode = async (e) => {
     e.preventDefault();
+    setLoading(true);
     if (classCode.trim() === "") {
       setError("Please enter a class code.");
+      setLoading(false);
       return;
     }
 
@@ -194,6 +197,8 @@ function ClassCodeForm({ onCodeValidated, onSwitchToLogin }) {
     } catch (err) {
       setError(err.message);
       console.error("Error validating class code:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -221,8 +226,16 @@ function ClassCodeForm({ onCodeValidated, onSwitchToLogin }) {
         </div>
         <button
           type="submit"
-          className="w-full py-3.5 rounded-xl bg-secondary hover:bg-systemYellow-400 text-white text-lg font-bold shadow-sm hover:shadow transition-all mt-4">
-          Next
+          disabled={loading}
+          className="w-full py-3.5 rounded-xl bg-secondary hover:bg-systemYellow-400 text-white text-lg font-bold shadow-sm hover:shadow transition-all disabled:opacity-50 flex items-center justify-center mt-4">
+          {loading ? (
+            <svg className="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"></path>
+            </svg>
+          ) : (
+            "Next"
+          )}
         </button>
       </form>
 
@@ -252,19 +265,23 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [error, setError] = useState("");
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     // Validation
     if (!email || !password || !confirmPassword) {
       setError("All fields are required.");
+      setLoading(false);
       return;
     }
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      setLoading(false);
       return;
     }
 
@@ -307,6 +324,8 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
     } catch (err) {
       setError(err.message);
       console.error("Registration error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -473,8 +492,16 @@ function RegisterForm({ classCode, onSwitchToLogin }) {
         </div>
         <button
           type="submit"
-          className="w-full py-3.5 rounded-xl bg-secondary hover:bg-systemYellow-400 text-white text-lg font-bold shadow-sm hover:shadow transition-all mt-4">
-          Register
+          disabled={loading}
+          className="w-full py-3.5 rounded-xl bg-secondary hover:bg-systemYellow-400 text-white text-lg font-bold shadow-sm hover:shadow transition-all disabled:opacity-50 flex items-center justify-center mt-4">
+          {loading ? (
+            <svg className="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"></path>
+            </svg>
+          ) : (
+            "Register"
+          )}
         </button>
       </form>
 
@@ -507,17 +534,21 @@ function RegisterTeacherForm({ onSwitchToLogin }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleRegisterTeacher = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     if (!email || !password || !confirmPassword) {
       setError("All fields are required.");
+      setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      setLoading(false);
       return;
     }
 
@@ -546,6 +577,8 @@ function RegisterTeacherForm({ onSwitchToLogin }) {
     } catch (err) {
       setError(err.message);
       console.error("Teacher registration error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -655,9 +688,17 @@ function RegisterTeacherForm({ onSwitchToLogin }) {
 
         <button
           type="submit"
-          className="w-full py-3.5 rounded-xl bg-secondary hover:bg-systemYellow-400 text-white text-lg font-bold shadow-sm hover:shadow transition-all mt-4"
+          disabled={loading}
+          className="w-full py-3.5 rounded-xl bg-secondary hover:bg-systemYellow-400 text-white text-lg font-bold shadow-sm hover:shadow transition-all disabled:opacity-50 flex items-center justify-center mt-4"
         >
-          Register Teacher
+          {loading ? (
+            <svg className="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"></path>
+            </svg>
+          ) : (
+            "Register Teacher"
+          )}
         </button>
       </form>
 
