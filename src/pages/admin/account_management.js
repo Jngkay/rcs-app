@@ -576,9 +576,9 @@ export default function AccountManagement() {
             <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-100">
               <button
                 onClick={handleAdminResetPassword}
-                className="px-4 py-2 bg-systemYellow-400 hover:bg-yellow-500 text-white text-sm font-semibold rounded-lg shadow transition"
+                className="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline transition"
               >
-                Send Reset Password Email
+                Reset Password
               </button>
 
               <div className="flex gap-3">
