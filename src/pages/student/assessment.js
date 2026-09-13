@@ -20,7 +20,7 @@ export default function Assessment() {
     resetRecording,
   } = useRecorder();
 
-  const [testStep, setTestStep] = useState("reading"); // "reading" | "questions" | "analysis"
+  const [testStep, setTestStep] = useState("welcome"); // "welcome" | "reading" | "questions" | "analysis"
   const [paragraph, setParagraph] = useState("Loading...");
   const [storyTitle, setStoryTitle] = useState("");
   const [storyId, setStoryId] = useState("");
@@ -313,6 +313,37 @@ export default function Assessment() {
       </div>
 
       <div className="w-full bg-white shadow-lg rounded-lg p-8 mt-6 min-h-[500px] flex flex-col">
+        {testStep === "welcome" && (
+          <div className="flex flex-col items-center justify-center flex-1 animate-fadeIn py-10">
+            <h1 className="text-4xl font-bold text-center text-blue-800 mb-6">
+              Individualized Reading Assessment
+            </h1>
+            <p className="text-xl text-gray-700 text-center mb-8">
+              You are about to take the Individualized Reading Assessment.
+            </p>
+            <div className="bg-blue-50 p-8 rounded-xl border border-blue-100 w-full max-w-2xl text-left shadow-sm">
+              <h3 className="font-bold text-blue-700 mb-4 uppercase tracking-wider text-sm flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Instructions
+              </h3>
+              <ul className="text-lg space-y-4 list-disc pl-5 text-slate-700 font-medium">
+                <li>Read the passages carefully and understand them.</li>
+                <li>Choose the correct answer and click <span className="font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-gray-200">Next</span>.</li>
+                <li className="text-red-600 font-semibold bg-red-50 p-3 rounded-lg border border-red-100 -ml-5 list-none flex gap-3 mt-6">
+                  <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                  Note: Once you click Next, you cannot go back to the previous question.
+                </li>
+              </ul>
+            </div>
+            <button
+              onClick={() => setTestStep("reading")}
+              className="px-12 py-4 mt-12 bg-blue-600 text-xl text-white rounded-full font-bold hover:bg-blue-700 hover:shadow-lg transition-all transform hover:-translate-y-1"
+            >
+              Start Assessment
+            </button>
+          </div>
+        )}
+
         {testStep === "reading" && (
           <>
             {isUploading ? (
