@@ -26,6 +26,26 @@ export default function AccountManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  // Sorting state
+  const [studentSortConfig, setStudentSortConfig] = useState({ key: "name", direction: "asc" });
+  const [teacherSortConfig, setTeacherSortConfig] = useState({ key: "name", direction: "asc" });
+
+  const handleStudentSort = (key) => {
+    let direction = "asc";
+    if (studentSortConfig.key === key && studentSortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setStudentSortConfig({ key, direction });
+  };
+
+  const handleTeacherSort = (key) => {
+    let direction = "asc";
+    if (teacherSortConfig.key === key && teacherSortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setTeacherSortConfig({ key, direction });
+  };
+
   // Reset page when switching roles, searching, or filtering grade
   useEffect(() => {
     setCurrentPage(1);
@@ -159,17 +179,57 @@ export default function AccountManagement() {
     return name.includes(query) || email.includes(query) || empId.includes(query);
   });
 
+  // Sort Students
+  const sortedStudents = [...filteredStudents].sort((a, b) => {
+    let valA = "";
+    let valB = "";
+    if (studentSortConfig.key === "name") {
+      valA = `${a.first_name || ""} ${a.last_name || ""}`.toLowerCase();
+      valB = `${b.first_name || ""} ${b.last_name || ""}`.toLowerCase();
+    } else if (studentSortConfig.key === "email") {
+      valA = (a.email || "").toLowerCase();
+      valB = (b.email || "").toLowerCase();
+    } else if (studentSortConfig.key === "grade") {
+      valA = (a.grade_level || "").toString().toLowerCase();
+      valB = (b.grade_level || "").toString().toLowerCase();
+    }
+    
+    if (valA < valB) return studentSortConfig.direction === "asc" ? -1 : 1;
+    if (valA > valB) return studentSortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
+
   // Pagination calculations for Students
-  const totalStudents = filteredStudents.length;
+  const totalStudents = sortedStudents.length;
   const totalStudentPages = Math.ceil(totalStudents / rowsPerPage) || 1;
   const studentStartIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedStudents = filteredStudents.slice(studentStartIndex, studentStartIndex + rowsPerPage);
+  const paginatedStudents = sortedStudents.slice(studentStartIndex, studentStartIndex + rowsPerPage);
+
+  // Sort Teachers
+  const sortedTeachers = [...filteredTeachers].sort((a, b) => {
+    let valA = "";
+    let valB = "";
+    if (teacherSortConfig.key === "name") {
+      valA = `${a.first_name || ""} ${a.last_name || ""}`.toLowerCase();
+      valB = `${b.first_name || ""} ${b.last_name || ""}`.toLowerCase();
+    } else if (teacherSortConfig.key === "email") {
+      valA = (a.email || "").toLowerCase();
+      valB = (b.email || "").toLowerCase();
+    } else if (teacherSortConfig.key === "employee_id") {
+      valA = (a.employee_id || "").toString().toLowerCase();
+      valB = (b.employee_id || "").toString().toLowerCase();
+    }
+    
+    if (valA < valB) return teacherSortConfig.direction === "asc" ? -1 : 1;
+    if (valA > valB) return teacherSortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
 
   // Pagination calculations for Teachers
-  const totalTeachers = filteredTeachers.length;
+  const totalTeachers = sortedTeachers.length;
   const totalTeacherPages = Math.ceil(totalTeachers / rowsPerPage) || 1;
   const teacherStartIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedTeachers = filteredTeachers.slice(teacherStartIndex, teacherStartIndex + rowsPerPage);
+  const paginatedTeachers = sortedTeachers.slice(teacherStartIndex, teacherStartIndex + rowsPerPage);
 
   return (
     <AdminLayout>
@@ -275,9 +335,39 @@ export default function AccountManagement() {
             <table className="w-full mt-6 bg-white text-center text-black rounded-lg overflow-hidden">
               <thead className="border-b bg-blue-50 text-blue-900 font-semibold">
                 <tr>
-                  <th className="p-3">Name</th>
-                  <th className="p-3">Username</th>
-                  <th className="p-3">Grade Level</th>
+                  <th 
+                    className="p-3 cursor-pointer hover:bg-blue-100 transition select-none group"
+                    onClick={() => handleStudentSort("name")}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Name 
+                      <span className={`text-blue-500 group-hover:text-blue-700 ${studentSortConfig.key !== "name" ? "opacity-30" : ""}`}>
+                        {studentSortConfig.key === "name" && studentSortConfig.direction === "desc" ? "↓" : "↑"}
+                      </span>
+                    </div>
+                  </th>
+                  <th 
+                    className="p-3 cursor-pointer hover:bg-blue-100 transition select-none group"
+                    onClick={() => handleStudentSort("email")}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Username 
+                      <span className={`text-blue-500 group-hover:text-blue-700 ${studentSortConfig.key !== "email" ? "opacity-30" : ""}`}>
+                        {studentSortConfig.key === "email" && studentSortConfig.direction === "desc" ? "↓" : "↑"}
+                      </span>
+                    </div>
+                  </th>
+                  <th 
+                    className="p-3 cursor-pointer hover:bg-blue-100 transition select-none group"
+                    onClick={() => handleStudentSort("grade")}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Grade Level 
+                      <span className={`text-blue-500 group-hover:text-blue-700 ${studentSortConfig.key !== "grade" ? "opacity-30" : ""}`}>
+                        {studentSortConfig.key === "grade" && studentSortConfig.direction === "desc" ? "↓" : "↑"}
+                      </span>
+                    </div>
+                  </th>
                   <th className="p-3">Actions</th>
                 </tr>
               </thead>
@@ -387,9 +477,39 @@ export default function AccountManagement() {
             <table className="w-full mt-6 bg-white text-center text-black rounded-lg overflow-hidden">
               <thead className="border-b bg-blue-50 text-blue-900 font-semibold">
                 <tr>
-                  <th className="p-3">Name</th>
-                  <th className="p-3">Username</th>
-                  <th className="p-3">Employee No.</th>
+                  <th 
+                    className="p-3 cursor-pointer hover:bg-blue-100 transition select-none group"
+                    onClick={() => handleTeacherSort("name")}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Name 
+                      <span className={`text-blue-500 group-hover:text-blue-700 ${teacherSortConfig.key !== "name" ? "opacity-30" : ""}`}>
+                        {teacherSortConfig.key === "name" && teacherSortConfig.direction === "desc" ? "↓" : "↑"}
+                      </span>
+                    </div>
+                  </th>
+                  <th 
+                    className="p-3 cursor-pointer hover:bg-blue-100 transition select-none group"
+                    onClick={() => handleTeacherSort("email")}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Username 
+                      <span className={`text-blue-500 group-hover:text-blue-700 ${teacherSortConfig.key !== "email" ? "opacity-30" : ""}`}>
+                        {teacherSortConfig.key === "email" && teacherSortConfig.direction === "desc" ? "↓" : "↑"}
+                      </span>
+                    </div>
+                  </th>
+                  <th 
+                    className="p-3 cursor-pointer hover:bg-blue-100 transition select-none group"
+                    onClick={() => handleTeacherSort("employee_id")}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Employee No. 
+                      <span className={`text-blue-500 group-hover:text-blue-700 ${teacherSortConfig.key !== "employee_id" ? "opacity-30" : ""}`}>
+                        {teacherSortConfig.key === "employee_id" && teacherSortConfig.direction === "desc" ? "↓" : "↑"}
+                      </span>
+                    </div>
+                  </th>
                   <th className="p-3">Actions</th>
                 </tr>
               </thead>

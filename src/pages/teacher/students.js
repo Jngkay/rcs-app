@@ -112,15 +112,55 @@ export default function Students() {
     // Pagination state (default 10 rows)
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [studentSortConfig, setStudentSortConfig] = useState({ key: "name", direction: "asc" });
+
+    const handleStudentSort = (key) => {
+        let direction = "asc";
+        if (studentSortConfig.key === key && studentSortConfig.direction === "asc") {
+            direction = "desc";
+        }
+        setStudentSortConfig({ key, direction });
+    };
 
     useEffect(() => {
         setCurrentPage(1);
     }, [selectedClassCode, selectedStatus, searchTerm]);
 
-    const totalStudents = displayedStudents.length;
+    // Sort students
+    const sortedDisplayedStudents = [...displayedStudents].sort((a, b) => {
+        let valA, valB;
+        if (studentSortConfig.key === "name") {
+            valA = `${a.first_name || ""} ${a.last_name || ""}`.toLowerCase();
+            valB = `${b.first_name || ""} ${b.last_name || ""}`.toLowerCase();
+        } else if (studentSortConfig.key === "date_registered") {
+            valA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+            valB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+        } else if (studentSortConfig.key === "grade") {
+            valA = (a.grade_level || "").toString().toLowerCase();
+            valB = (b.grade_level || "").toString().toLowerCase();
+        } else if (studentSortConfig.key === "class_code") {
+            valA = (a.classCode || "").toString().toLowerCase();
+            valB = (b.classCode || "").toString().toLowerCase();
+        } else if (studentSortConfig.key === "gst_date") {
+            valA = a.assessment_date ? new Date(a.assessment_date).getTime() : 0;
+            valB = b.assessment_date ? new Date(b.assessment_date).getTime() : 0;
+        } else if (studentSortConfig.key === "gst_score") {
+            valA = a.gst_score || 0;
+            valB = b.gst_score || 0;
+        } else if (studentSortConfig.key === "status") {
+            valA = getStudentStatus(a).toLowerCase();
+            valB = getStudentStatus(b).toLowerCase();
+        }
+
+        if (valA < valB) return studentSortConfig.direction === "asc" ? -1 : 1;
+        if (valA > valB) return studentSortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+    });
+
+    const totalStudents = sortedDisplayedStudents.length;
     const totalPages = Math.ceil(totalStudents / rowsPerPage) || 1;
     const startIndex = (currentPage - 1) * rowsPerPage;
-    const paginatedStudents = displayedStudents.slice(startIndex, startIndex + rowsPerPage);
+    const paginatedStudents = sortedDisplayedStudents.slice(startIndex, startIndex + rowsPerPage);
 
     const getStatusBadge = (status) => {
         switch (status) {
@@ -143,7 +183,7 @@ export default function Students() {
         setSelectedStudent(student);
         setSelectedStudentName(`${student.first_name} ${student.last_name}`);
         setAssessmentModalOpen(true);
-        setActiveTab("gst");
+        setActiveTab("overview");
         setLoadingAssessment(true);
         setStudentGstData(null);
         setStudentGstHistory([]);
@@ -375,13 +415,19 @@ export default function Students() {
                         <table className="w-full text-left border-collapse whitespace-nowrap">
                             <thead>
                                 <tr className="bg-blue-100 text-blue-800">
-                                    <th className="p-3 border-b">Date Registered</th>
-                                    <th className="p-3 border-b">Name</th>
-                                    <th className="p-3 border-b">Grade Level</th>
-                                    <th className="p-3 border-b">Class Code</th>
-                                    <th className="p-3 border-b text-center">GST Date</th>
-                                    <th className="p-3 border-b text-center">GST Score</th>
-                                    <th className="p-3 border-b text-center">Status</th>
+                                    <th className="p-3 border-b cursor-pointer hover:bg-blue-200 transition select-none group" onClick={() => handleStudentSort("date_registered")}>
+                                        <div className="flex items-center gap-1">Date Registered <span className={`text-blue-500 group-hover:text-blue-700 ${studentSortConfig.key !== "date_registered" ? "opacity-30" : ""}`}>{studentSortConfig.key === "date_registered" && studentSortConfig.direction === "desc" ? "↓" : "↑"}</span></div>
+                                    </th>
+                                    <th className="p-3 border-b cursor-pointer hover:bg-blue-200 transition select-none group" onClick={() => handleStudentSort("name")}>
+                                        <div className="flex items-center gap-1">Name <span className={`text-blue-500 group-hover:text-blue-700 ${studentSortConfig.key !== "name" ? "opacity-30" : ""}`}>{studentSortConfig.key === "name" && studentSortConfig.direction === "desc" ? "↓" : "↑"}</span></div>
+                                    </th>
+                                    <th className="p-3 border-b cursor-pointer hover:bg-blue-200 transition select-none group" onClick={() => handleStudentSort("grade")}>
+                                        <div className="flex items-center gap-1">Grade Level <span className={`text-blue-500 group-hover:text-blue-700 ${studentSortConfig.key !== "grade" ? "opacity-30" : ""}`}>{studentSortConfig.key === "grade" && studentSortConfig.direction === "desc" ? "↓" : "↑"}</span></div>
+                                    </th>
+
+                                    <th className="p-3 border-b text-center cursor-pointer hover:bg-blue-200 transition select-none group" onClick={() => handleStudentSort("status")}>
+                                        <div className="flex items-center justify-center gap-1">Status <span className={`text-blue-500 group-hover:text-blue-700 ${studentSortConfig.key !== "status" ? "opacity-30" : ""}`}>{studentSortConfig.key === "status" && studentSortConfig.direction === "desc" ? "↓" : "↑"}</span></div>
+                                    </th>
                                     <th className="p-3 border-b text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -394,13 +440,7 @@ export default function Students() {
                                             </td>
                                             <td className="p-3 font-medium">{student.first_name} {student.last_name}</td>
                                             <td className="p-3">{student.grade_level}</td>
-                                            <td className="p-3 font-mono text-sm text-gray-600">{student.classCode}</td>
-                                            <td className="p-3 text-center text-sm text-gray-600">
-                                                {student.assessment_date ? new Date(student.assessment_date).toLocaleDateString() : 'N/A'}
-                                            </td>
-                                            <td className="p-3 text-center font-bold">
-                                                {student.gst_assessment_attempted ? `${student.gst_score} / ${student.gst_total_questions || '-'}` : '-'}
-                                            </td>
+
                                             <td className="p-3 text-center">
                                                 {getStatusBadge(getStudentStatus(student))}
                                             </td>
@@ -506,6 +546,12 @@ export default function Students() {
 
                             <div className="flex border-b bg-gray-100 sticky top-[80px] z-10">
                                 <button
+                                    className={`flex-1 py-3 font-semibold text-center transition ${activeTab === 'overview' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:bg-gray-200'}`}
+                                    onClick={() => setActiveTab('overview')}
+                                >
+                                    Overview
+                                </button>
+                                <button
                                     className={`flex-1 py-3 font-semibold text-center transition ${activeTab === 'gst' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:bg-gray-200'}`}
                                     onClick={() => setActiveTab('gst')}
                                 >
@@ -536,6 +582,37 @@ export default function Students() {
                                     <p className="text-center text-gray-500 py-10">Loading answers...</p>
                                 ) : (
                                     <div>
+                                        {/* Overview Section */}
+                                        {activeTab === 'overview' && (
+                                            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 animate-fadeIn">
+                                                <h3 className="text-xl font-bold text-gray-800 mb-6 border-b pb-2">Student Overview</h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm">
+                                                        <p className="text-sm text-gray-500 font-semibold mb-1">Class Code</p>
+                                                        <p className="text-lg font-mono font-bold text-blue-800">{selectedStudent?.classCode || 'N/A'}</p>
+                                                    </div>
+                                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm">
+                                                        <p className="text-sm text-gray-500 font-semibold mb-1">GST Date</p>
+                                                        <p className="text-lg font-bold text-gray-800">
+                                                            {selectedStudent?.assessment_date ? new Date(selectedStudent.assessment_date).toLocaleDateString() : 'N/A'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm">
+                                                        <p className="text-sm text-gray-500 font-semibold mb-1">GST Score</p>
+                                                        <p className="text-lg font-bold text-gray-800">
+                                                            {selectedStudent?.gst_assessment_attempted ? `${selectedStudent.gst_score} / ${selectedStudent.gst_total_questions || '-'}` : 'Not Attempted'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm">
+                                                        <p className="text-sm text-gray-500 font-semibold mb-1">Overall Status</p>
+                                                        <div className="mt-1">
+                                                            {selectedStudent ? getStatusBadge(getStudentStatus(selectedStudent)) : 'N/A'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {/* GST Section */}
                                         {activeTab === 'gst' && (
                                             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 animate-fadeIn">
@@ -578,9 +655,14 @@ export default function Students() {
 
                                                 {studentGstData ? (
                                                     <div>
-                                                        <p className="mb-4 font-semibold text-lg text-blue-700">
-                                                            Score: {studentGstData.score} / {studentGstData.total_questions}
-                                                        </p>
+                                                        <div className="flex justify-between items-center mb-4">
+                                                            <p className="font-semibold text-lg text-blue-700">
+                                                                Score: {studentGstData.score} / {studentGstData.total_questions}
+                                                            </p>
+                                                            <p className="text-sm text-gray-500 font-medium">
+                                                                Attempted on: {studentGstData.timestamp ? formatDateTime(studentGstData.timestamp) : 'N/A'}
+                                                            </p>
+                                                        </div>
                                                         <div className="space-y-4">
                                                             {studentGstData.answers?.map((ans, idx) => (
                                                                 <div key={idx} className={`p-4 rounded-md border-l-4 ${ans.is_correct ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'}`}>
@@ -642,7 +724,12 @@ export default function Students() {
                                                 )}
                                                 {studentIndData ? (
                                                     <div>
-                                                        <div className="space-y-4 mt-4">
+                                                        <div className="flex justify-end items-center mt-2">
+                                                            <p className="text-sm text-gray-500 font-medium">
+                                                                Attempted on: {studentIndData.timestamp ? formatDateTime(studentIndData.timestamp) : 'N/A'}
+                                                            </p>
+                                                        </div>
+                                                        <div className="space-y-4 mt-2">
                                                             {studentIndData.answers?.map((ans, idx) => (
                                                                 <div key={idx} className={`p-4 rounded-md border-l-4 ${ans.is_correct ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'}`}>
                                                                     <p className="font-medium text-gray-800"><span className="text-sm text-gray-500">Q{idx + 1}.</span> {ans.question_text}</p>
