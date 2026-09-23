@@ -6,6 +6,8 @@ import { collection, query, where, getDoc, doc, getDocs, setDoc } from "firebase
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 import { auth, db } from "./firebase";
+import studentLogo from "./assets/student-logo.png";
+import teacherLogo from "./assets/teacher-logo.png";
 // import { Link } from "lucide-react";
 
 
@@ -736,7 +738,7 @@ export default function App() {
                 onClick={() => setView("registerTeacher")} // for now
                 className="flex flex-col items-center p-6 bg-purple-100 rounded-2xl shadow-md cursor-pointer hover:bg-purple-200 transition-colors"
               >
-                <span className="text-6xl mb-4">👩‍🏫</span>
+                <img src={teacherLogo} alt="Teacher" className="w-16 h-16 mb-4 object-contain" />
                 <span className="font-semibold text-lg">Teacher</span>
               </div>
 
@@ -745,7 +747,7 @@ export default function App() {
                 onClick={() => setView("registerClassCode")}
                 className="flex flex-col items-center p-6 bg-orange-100 rounded-2xl shadow-md cursor-pointer hover:bg-orange-200 transition-colors"
               >
-                <span className="text-6xl mb-4">🧑‍🎓</span>
+                <img src={studentLogo} alt="Student" className="w-16 h-16 mb-4 object-contain" />
                 <span className="font-semibold text-lg">Student</span>
               </div>
             </div>
