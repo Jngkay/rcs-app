@@ -8,6 +8,8 @@ import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { auth, db } from "./firebase";
 import studentLogo from "./assets/student-logo.png";
 import teacherLogo from "./assets/teacher-logo.png";
+import LandingHeader from "./components/landing_header";
+import LandingFooter from "./components/landing_footer";
 // import { Link } from "lucide-react";
 
 
@@ -783,53 +785,58 @@ export default function App() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4 relative">
-      <div className="absolute top-6 left-6">
-        <button
-          onClick={() => navigate("/")}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-secondary transition-colors"
-        >
-          ← Back to Home
-        </button>
-      </div>
-      <div className={`bg-white p-8 rounded-3xl shadow-soft w-full ${view === 'registerForm' ? 'max-w-2xl' : 'max-w-md'} text-center border border-slate-100`}>
-        <img
-          src="/assets/logo.png"
-          alt="logo"
-          className="w-32 block mx-auto mb-2 cursor-pointer hover:opacity-90 transition-opacity"
-          onClick={() => navigate("/")}
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "assets/logo.png";
-          }}
-        />
-        <h2 className="text-3xl font-extrabold mb-4 text-slate-800">
-          {view === "login" ? "Welcome back!" : "Welcome!"}
-        </h2>
-        <div className="flex justify-center mb-8 space-x-3">
-          <button
-            type="button"
-            onClick={() => setView("login")}
-            className={`px-6 py-2.5 rounded-xl font-medium transition-all ${view === "login"
-              ? "text-white bg-secondary shadow-sm"
-              : "text-slate-500 bg-slate-100 hover:bg-slate-200"
-              }`}
-          >
-            Login
-          </button>
-          <button
-            type="button"
-            onClick={() => setView("registerUserType")}
-            className={`px-6 py-2.5 rounded-xl font-medium transition-all ${view !== "login"
-              ? "text-white bg-secondary shadow-sm"
-              : "text-slate-500 bg-slate-100 hover:bg-slate-200"
-              }`}
-          >
-            Register
-          </button>
+    <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-800 antialiased selection:bg-secondary/20 selection:text-secondary">
+      {/* Header same with landing page */}
+      <LandingHeader />
+
+      {/* Main Login / Register Area */}
+      <main className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+        {/* Subtle background decorative blurs matching landing page */}
+        <div className="absolute top-12 left-1/4 w-80 h-80 bg-blue-200/30 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+        <div className="absolute bottom-12 right-1/4 w-80 h-80 bg-purple-200/20 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+
+        <div className={`bg-white p-8 sm:p-10 rounded-3xl shadow-soft w-full ${view === 'registerForm' ? 'max-w-2xl' : 'max-w-md'} text-center border border-slate-100 relative z-10 my-4`}>
+          <img
+            src="/assets/logo.png"
+            alt="logo"
+            className="w-32 block mx-auto mb-2 cursor-pointer hover:opacity-90 transition-opacity"
+            onClick={() => navigate("/")}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "assets/logo.png";
+            }}
+          />
+          <h2 className="text-3xl font-extrabold mb-4 text-slate-800">
+            {view === "login" ? "Welcome back!" : "Welcome!"}
+          </h2>
+          <div className="flex justify-center mb-8 space-x-3">
+            <button
+              type="button"
+              onClick={() => setView("login")}
+              className={`px-6 py-2.5 rounded-xl font-medium transition-all ${view === "login"
+                ? "text-white bg-secondary shadow-sm"
+                : "text-slate-500 bg-slate-100 hover:bg-slate-200"
+                }`}
+            >
+              Login
+            </button>
+            <button
+              type="button"
+              onClick={() => setView("registerUserType")}
+              className={`px-6 py-2.5 rounded-xl font-medium transition-all ${view !== "login"
+                ? "text-white bg-secondary shadow-sm"
+                : "text-slate-500 bg-slate-100 hover:bg-slate-200"
+                }`}
+            >
+              Register
+            </button>
+          </div>
+          {renderContent()}
         </div>
-        {renderContent()}
-      </div>
+      </main>
+
+      {/* Footer same with landing page */}
+      <LandingFooter />
     </div>
   );
 }

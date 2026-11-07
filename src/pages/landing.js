@@ -1,5 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import LandingHeader from "../components/landing_header";
+import LandingFooter from "../components/landing_footer";
 import {
   BookOpen,
   Mic,
@@ -9,7 +11,6 @@ import {
   CheckCircle2,
   ArrowRight,
   Sparkles,
-  ShieldCheck,
   Volume2,
   Clock,
   LogIn,
@@ -35,70 +36,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased selection:bg-secondary/20 selection:text-secondary">
       {/* ================= TOP NAVIGATION BAR ================= */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          {/* Logo & Brand Name */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <img
-              src="/assets/logo.png"
-              alt="Readi Logo"
-              className="h-10 w-auto object-contain drop-shadow-sm"
-              onError={(e) => {
-                // Fallback to local source if public path differs
-                e.target.onerror = null;
-                e.target.src = require("../assets/logo.png");
-              }}
-            />
-            <div className="flex flex-col">
-              <span className="text-2xl font-black tracking-tight text-slate-900 leading-none">
-                Readi
-              </span>
-              <span className="text-[10px] tracking-wider uppercase font-semibold text-secondary">
-                Reading Comprehension System
-              </span>
-            </div>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <button
-              onClick={() => scrollToSection("about")}
-              className="hover:text-secondary transition-colors"
-            >
-              About Readi
-            </button>
-            <button
-              onClick={() => scrollToSection("how-it-works")}
-              className="hover:text-secondary transition-colors"
-            >
-              How It Works
-            </button>
-            <button
-              onClick={() => scrollToSection("features")}
-              className="hover:text-secondary transition-colors"
-            >
-              Features
-            </button>
-            <button
-              onClick={() => scrollToSection("phil-iri")}
-              className="hover:text-secondary transition-colors"
-            >
-              Phil-IRI Standards
-            </button>
-          </nav>
-
-          {/* Login Button */}
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleLoginClick}
-              className="group relative inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-secondary hover:bg-blue-600 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0"
-            >
-              <span>Log In</span>
-              <LogIn size={16} className="transition-transform group-hover:translate-x-0.5" />
-            </button>
-          </div>
-        </div>
-      </header>
+      <LandingHeader />
 
       {/* ================= HERO SECTION ================= */}
       <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28">
@@ -634,51 +572,7 @@ export default function LandingPage() {
       </section>
 
       {/* ================= FOOTER ================= */}
-      <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-slate-800">
-            {/* Logo in footer */}
-            <div className="flex items-center gap-3">
-              <img
-                src="/assets/logo.png"
-                alt="Readi Logo"
-                className="h-8 w-auto object-contain brightness-0 invert opacity-90"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = require("../assets/logo.png");
-                }}
-              />
-              <span className="text-xl font-bold text-white tracking-tight">Readi</span>
-            </div>
-
-            {/* Footer Navigation */}
-            <div className="flex items-center gap-6 text-sm">
-              <button onClick={() => scrollToSection("about")} className="hover:text-white transition-colors">
-                About
-              </button>
-              <button onClick={() => scrollToSection("how-it-works")} className="hover:text-white transition-colors">
-                How It Works
-              </button>
-              <button onClick={() => scrollToSection("phil-iri")} className="hover:text-white transition-colors">
-                Phil-IRI Standards
-              </button>
-              <button onClick={handleLoginClick} className="text-secondary font-semibold hover:underline">
-                Log In
-              </button>
-            </div>
-          </div>
-
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-            <p>
-              © {new Date().getFullYear()} Readi — Reading Comprehension System. All rights reserved.
-            </p>
-            <p className="flex items-center gap-2">
-              <ShieldCheck size={14} className="text-secondary" />
-              <span>Aligned with Philippine Department of Education (DepEd) Phil-IRI Framework</span>
-            </p>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter />
     </div>
   );
 }
