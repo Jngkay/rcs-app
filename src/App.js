@@ -1,6 +1,7 @@
 // // src/App.js
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LandingPage from "./pages/landing";
 import Login from "./login";
 import Dashboard from "./pages/student/dashboard";
 import Home from "./pages/student/home";
@@ -22,9 +23,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Login Page */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/landing" element={<LandingPage />} />
 
+        {/* Login Page */}
         <Route path="/login" element={<Login />} />
 
         {/* Dashboard (after login) */}

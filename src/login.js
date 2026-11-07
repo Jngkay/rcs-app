@@ -720,6 +720,7 @@ function RegisterTeacherForm({ onSwitchToLogin }) {
 
 // ----------------- Main App -----------------
 export default function App() {
+  const navigate = useNavigate();
   const [view, setView] = useState("login");
   const [validatedClassCode, setValidatedClassCode] = useState(null);
 
@@ -782,9 +783,26 @@ export default function App() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
+    <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4 relative">
+      <div className="absolute top-6 left-6">
+        <button
+          onClick={() => navigate("/")}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-secondary transition-colors"
+        >
+          ← Back to Home
+        </button>
+      </div>
       <div className={`bg-white p-8 rounded-3xl shadow-soft w-full ${view === 'registerForm' ? 'max-w-2xl' : 'max-w-md'} text-center border border-slate-100`}>
-        <img src="assets/logo.png" alt="logo" className="w-32 block mx-auto mb-2" />
+        <img
+          src="/assets/logo.png"
+          alt="logo"
+          className="w-32 block mx-auto mb-2 cursor-pointer hover:opacity-90 transition-opacity"
+          onClick={() => navigate("/")}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "assets/logo.png";
+          }}
+        />
         <h2 className="text-3xl font-extrabold mb-4 text-slate-800">
           {view === "login" ? "Welcome back!" : "Welcome!"}
         </h2>
